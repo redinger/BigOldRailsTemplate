@@ -23,6 +23,7 @@ end
 # Piston methods out of my own head
 # sudo gem install piston on your dev box before using these
 # Piston locking support with git requires Piston 2.0.3+
+# Piston branch management with git 1.6.3 requires Piston 2.0.5+
 
 # Use Piston to install and lock a plugin:
 # piston_plugin 'stuff', :git => 'git://github.com/whoever/stuff.git'
@@ -48,7 +49,7 @@ end
 # piston_rails
 # Use Piston to install but not lock current Rails edge (master):
 # piston_rails :lock => false
-# Use Piston to install and lock edge of a specific Rails branch (WARNING - hangs with Piston 2.0.3):
+# Use Piston to install and lock edge of a specific Rails branch:
 # piston_rails :branch => "2-3-stable"
 # Use Piston to install but not lock edge of a specific Rails branch:
 # piston_rails, :branch => "2-3-stable", :lock => false
@@ -58,9 +59,8 @@ def piston_rails(options={})
   log "rails installed #{'and locked ' if lock}with Piston", options[:branch]
 
   if options[:branch]
-    branch = options[:branch] =~ /^origin\// ? options[:branch] : "origin/#{options[:branch]}"
     in_root do
-      run("piston import --commit #{branch} git://github.com/rails/rails.git vendor/rails")
+      run("piston import --commit #{options[:branch]} git://github.com/rails/rails.git vendor/rails")
       run("piston lock vendor/rails") if lock
     end
   else
@@ -2385,7 +2385,7 @@ commit_state "metric_fu setup"
 
 # vendor rails
 # take the edge of 2.3 for now
-piston_rails :branch => '2-3-stable', :lock => false
+piston_rails :branch => '2-3-stable'
 commit_state("added rails 2-3-stable edge")
 
 # Success!
