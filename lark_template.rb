@@ -1776,7 +1776,10 @@ END
 
 file 'app/models/user.rb', <<-END
 class User < ActiveRecord::Base
-  acts_as_authentic
+  acts_as_authentic do |c|
+    c.merge_validates_format_of_login_field_options :live_validator => /^\w[\w\.+\-_@ ]+$/
+    c.merge_validates_format_of_email_field_options :live_validator => "/^[A-Z0-9_\.%\+\-]+@(?:[A-Z0-9\-]+\.)+(?:[A-Z]{2,4}|museum|travel)$/i"
+  end
   
   serialize :roles, Array
   
@@ -1865,7 +1868,7 @@ END
 file 'app/views/user_sessions/new.html.erb', <<-END
 <h1>Login</h1>
 
-<% form_for @user_session, :url => user_session_path, :live_validations => true do |f| %>
+<% form_for @user_session, :url => user_session_path do |f| %>
   <%= f.error_messages %>
   <%= f.label :login %><br />
   <%= f.text_field :login %><br />
