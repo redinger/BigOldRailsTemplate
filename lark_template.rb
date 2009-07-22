@@ -1235,7 +1235,7 @@ class UsersControllerTest < ActionController::TestCase
       should_assign_to(:user) { @the_user }
       should_respond_with :redirect
       should_set_the_flash_to "Account registered!"
-      should_redirect_to("the user's account") { account_url }
+      should_redirect_to("the root url") { root_url }
     end
     
     context "with failed creation" do
@@ -1417,7 +1417,7 @@ class UserSessionsControllerTest < ActionController::TestCase
       should_assign_to(:user_session) { @the_user_session }
       should_respond_with :redirect
       should_set_the_flash_to "Login successful!"
-      should_redirect_to("the user's account") { account_url }
+      should_redirect_to("the root url") { root_url }
     end
     
     context "with failed creation" do
@@ -1686,7 +1686,7 @@ class UserSessionsController < ApplicationController
     @user_session = UserSession.new(params[:user_session])
     if @user_session.save
       flash[:notice] = "Login successful!"
-      redirect_back_or_default account_url
+      redirect_back_or_default root_url
     else
       render :action => :new
     end
@@ -1720,7 +1720,7 @@ class UsersController < ApplicationController
     @user = User.new(params[:user])
     if @user.save
       flash[:notice] = "Account registered!"
-      redirect_back_or_default account_url
+      redirect_back_or_default root_url
     else
       render :action => :new
     end
