@@ -90,6 +90,24 @@ run "rm public/favicon.ico"
 # must do before running piston
 git :init
 
+# Set up gitignore and commit base state
+file '.gitignore', <<-END
+log/*.log
+tmp/**/*
+.DS\_Store
+.DS_Store
+db/test.sqlite3
+db/development.sqlite3
+/log/*.pid
+/coverage/*
+public/system/*
+.idea/*
+tmp/metric_fu/*
+tmp/sent_mails/*
+END
+
+commit "base application"
+
 # plugins
 piston_plugin 'admin_data', 
   :git => 'git://github.com/neerajdotname/admin_data.git'
@@ -144,23 +162,7 @@ gem "cwninja-inaction_mailer",
 # assume gems are already on dev box, so don't install    
 # rake("gems:install", :sudo => true)
 
-# Set up gitignore and commit base state
-file '.gitignore', <<-END
-log/*.log
-tmp/**/*
-.DS\_Store
-.DS_Store
-db/test.sqlite3
-db/development.sqlite3
-/log/*.pid
-/coverage/*
-public/system/*
-.idea/*
-tmp/metric_fu/*
-tmp/sent_mails/*
-END
-
-commit_state "Base application with plugins and gems"
+commit_state "Added plugins and gems"
 
 # some files for app
 download "http://livevalidation.com/javascripts/src/1.3/livevalidation_prototype.js", "public/javascripts/livevalidation.js"
