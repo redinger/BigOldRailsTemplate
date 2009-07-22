@@ -62,13 +62,19 @@ def piston_rails(options={})
     in_root do
       run("piston import --commit #{options[:branch]} git://github.com/rails/rails.git vendor/rails")
       commit_state("Added pistoned Rails using the edge of the #{options[:branch]} branch")
-      run("piston lock vendor/rails") if lock
+      if lock
+        run("piston lock vendor/rails")
+        commit_state("Locked pistoned rails")
+      end
     end
   else
     in_root do
       run("piston import git://github.com/rails/rails.git vendor/rails")
       commit_state("Added pistoned Rails edge")
-      run("piston lock vendor/rails") if lock
+      if lock
+        run("piston lock vendor/rails")
+        commit_state("Locked pistoned rails")
+      end
     end
   end
 end
