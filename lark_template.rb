@@ -2069,6 +2069,10 @@ class PagesController < ApplicationController
     @page_title = "CSS Test"
   end
   
+  def kaboom
+    User.first.kaboom!
+  end
+  
 end
 END
 
