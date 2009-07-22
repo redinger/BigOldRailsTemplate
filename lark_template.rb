@@ -61,11 +61,13 @@ def piston_rails(options={})
   if options[:branch]
     in_root do
       run("piston import --commit #{options[:branch]} git://github.com/rails/rails.git vendor/rails")
+      commit_state("Added pistoned Rails using the edge of the #{options[:branch]} branch")
       run("piston lock vendor/rails") if lock
     end
   else
     in_root do
       run("piston import git://github.com/rails/rails.git vendor/rails")
+      commit_state("Added pistoned Rails edge")
       run("piston lock vendor/rails") if lock
     end
   end
@@ -2386,7 +2388,6 @@ commit_state "metric_fu setup"
 # vendor rails
 # take the edge of 2.3 for now
 piston_rails :branch => '2-3-stable'
-commit_state("added rails 2-3-stable edge")
 
 # Success!
 puts "SUCCESS!"
