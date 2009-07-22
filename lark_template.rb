@@ -730,7 +730,7 @@ test:
 test2:
   adapter: postgresql
   encoding: unicode
-  database: #{current_app_name}_test
+  database: #{current_app_name}_test2
   pool: 5
   username: postgres
   password:
@@ -738,7 +738,7 @@ test2:
 test3:
   adapter: postgresql
   encoding: unicode
-  database: #{current_app_name}_test
+  database: #{current_app_name}_test3
   pool: 5
   username: postgres
   password:
@@ -746,7 +746,7 @@ test3:
 test4:
   adapter: postgresql
   encoding: unicode
-  database: #{current_app_name}_test
+  database: #{current_app_name}_test4
   pool: 5
   username: postgres
   password:
@@ -2340,6 +2340,12 @@ commit_state "routing"
 # databases
 rake('db:create')
 rake('db:migrate')
+rake('db:create', :env => "test")
+rake('db:create', :env => "test2")
+rake('db:create', :env => "test3")
+rake('db:create', :env => "test4")
+rake('test:parallel:prepare[4]')
+commit_state "databases set up"
 
 # rakefile for metric_fu
 file 'Rakefile', <<-END
@@ -2400,4 +2406,3 @@ puts '  Put real IP address and git repo URL in deployment files'
 puts '  Add app to gitosis config'
 puts "  git remote add origin git@gitosis_server:#{current_app_name}.git"
 puts '  git push origin master:refs/heads/master'
-puts '  create databases for parallel_test'
