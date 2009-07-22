@@ -1379,7 +1379,7 @@ class UsersControllerTest < ActionController::TestCase
 end
 END
 
-file 'test/controllers/user_sessions_controller.rb', <<-END
+file 'test/functional/user_sessions_controller.rb', <<-END
 require 'test_helper'
 
 class UserSessionsControllerTest < ActionController::TestCase
@@ -1448,7 +1448,7 @@ class UserSessionsControllerTest < ActionController::TestCase
 end
 END
 
-file 'test/controllers/pages_controller_test.rb', <<-END
+file 'test/functional/pages_controller_test.rb', <<-END
 require 'test_helper'
 
 class PagesControllerTest < ActionController::TestCase
@@ -1479,7 +1479,7 @@ class PagesControllerTest < ActionController::TestCase
 end
 END
 
-file 'test/controllers/password_reset_controller_tests.rb', <<-END
+file 'test/functional/password_reset_controller_tests.rb', <<-END
 require 'test_helper'
 
 class PasswordResetsControllerTest < ActionController::TestCase
