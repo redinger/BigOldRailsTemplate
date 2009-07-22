@@ -2079,6 +2079,7 @@ file 'app/views/pages/home.html.erb', <<-END
   <% end %>
   <% authenticated_only do %>
     <%= link_to "Logout", user_session_path, :method => :delete, :confirm => "Are you sure you want to logout?" %>
+    <%= link_to "Your Account", account_path %>
   <% end %>
 </div>
 
