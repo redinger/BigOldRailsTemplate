@@ -106,7 +106,7 @@ tmp/metric_fu/*
 tmp/sent_mails/*
 END
 
-commit "base application"
+commit_state "base application"
 
 # plugins
 piston_plugin 'admin_data', 
