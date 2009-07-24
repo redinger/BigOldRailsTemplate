@@ -179,7 +179,7 @@ gem "binarylogic-searchlogic",
   :source  => 'http://gems.github.com',
   :version => '~> 2.0'
 gem "iridesco-time-warp",
-  :lib     => 'time-warm',
+  :lib     => 'time-warp',
   :source  => 'http://gems.github.com',
   :version => '~> 1.0'
 # development only
@@ -2526,7 +2526,7 @@ rake('db:create', :env => "test")
 rake('db:create', :env => "test2")
 rake('db:create', :env => "test3")
 rake('db:create', :env => "test4")
-rake('test:parallel:prepare[4]')
+rake('spec:parallel:prepare[4]')
 commit_state "databases set up"
 
 # rakefile for metric_fu
