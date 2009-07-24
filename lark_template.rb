@@ -95,6 +95,8 @@ end
 
 database = template_options["database"].nil? ? ask("Which database? postgresql (default), mysql").downcase : template_options["database"]
 database = "postgresql" if database.nil?
+monitoring = template_options["monitoring"].nil? ? ask("Which monitoring new_relic (default), scout").downcase : template_options["monitoring"]
+monitoring = "new_relic" if monitoring.nil?
 
 # Actual application generation starts here
 
@@ -136,18 +138,24 @@ piston_plugin 'fast_remote_cache',
   :git => 'git://github.com/37signals/fast_remote_cache.git'
 piston_plugin 'live-validations',
   :git => 'git://github.com/augustl/live-validations.git'
-plugin 'newrelic_rpm',
-  :svn => 'http://newrelic.rubyforge.org/svn/newrelic_rpm'
+if monitoring == "new_relic"
+  plugin 'newrelic_rpm',
+    :svn => 'http://newrelic.rubyforge.org/svn/newrelic_rpm'
+end
 piston_plugin 'object_daddy',
   :git => 'git://github.com/flogic/object_daddy.git'
 piston_plugin 'paperclip',
   :git => 'git://github.com/thoughtbot/paperclip.git'
-piston_plugin 'parallel_test',
-  :git => 'git://github.com/jasonm/parallel_test.git'
+piston_plugin 'parallel_specs',
+  :git => 'git://github.com/jasonm/parallel_specs.git'
 piston_plugin 'rack-bug',
   :git => 'git://github.com/brynary/rack-bug.git'
 piston_plugin 'rubaidhstrano',
   :git => 'git://github.com/rubaidh/rubaidhstrano.git'
+if monitoring == "scout"
+  piston_plugin 'scout_rails_instrumentation',
+    :git => 'git://github.com/highgroove/scout_rails_instrumentation.git'
+end
 piston_plugin 'shmacros',
   :git => 'git://github.com/maxim/shmacros.git'
 piston_plugin 'stringex',
@@ -170,6 +178,10 @@ gem "binarylogic-searchlogic",
   :lib     => 'searchlogic',
   :source  => 'http://gems.github.com',
   :version => '~> 2.0'
+gem "iridesco-time-warp",
+  :lib     => 'time-warm',
+  :source  => 'http://gems.github.com',
+  :version => '~> 1.0'
 # development only
 gem "cwninja-inaction_mailer", 
   :lib => 'inaction_mailer/force_load', 
@@ -541,7 +553,8 @@ staging:
 END
 
 # performance
-file 'config/newrelic.yml', <<-END
+if monitoring == "new_relic"
+  file 'config/newrelic.yml', <<-END
 #
 # This file configures the NewRelic RPM Agent, NewRelic RPM monitors Rails 
 # applications with deep visibility and low overhead.  For more information, 
@@ -705,6 +718,39 @@ staging:
   enabled: true
   app_name: #{current_app_name} (Staging)
 END
+end
+
+if monitoring == "scout"
+  file 'config/scout.yml', <<-END
+  # This is where set your Rails Instrumentation plugin id, so the instrumentation plugin 
+  # can identify itself to the Scout agent.
+  #
+  # * You need to supply the Rails instrumentation plugin id from your account at http://scoutapp.com
+  # * Typically, you will provide the plugin id for production, but not development.
+  #   If you want to try out instrumentation in development, you may want to install a separate
+  #   Rails Instrumentation plugin and use that plugin id for development, so your development metrics are
+  #   clearly differentiated from you production metrics.
+
+  ##########################################################################
+  # Single-server setup (most common setup)
+  ###########################################################################
+  production: PLUGIN_ID # <-- REQUIRED: your Rails Instrumentation plugin id goes here
+  development: # <-- typically you'll leave this blank
+
+
+  ##########################################################################
+  # Multi-server setup (advanced)
+  ##########################################################################
+  #production:
+  #  server1.com: # <- your plugin id for server1 goes here
+  #  server2.com: # <- your plugin id for server2 goes here
+  #  
+  #  
+  #development: 
+  #  server1.com: # <- plugin id for first developer's box
+  #  server2.com: # <- plugin id for second developer's box
+END
+end
 
 # database
 if database == "mysql"
@@ -2381,7 +2427,9 @@ TODO after installing:
 
 - Set up new app at http://getexceptional.com/apps
 - Put the right API key in config/exceptional.yml
-- Put the right API key in config/new_relic.yml
+#{"- Put the right API key in config/new_relic.yml" if monitoring == 'new_relic'}
+#{"- Put the right plugin ID in config/scout.yml" if monitoring == 'scout'}
+#{"- Install the scout agent gem on the production server (sudo gem install scout_agent)" if monitoring == 'scout'}
 - Put the production database password in config/database.yml
 - Put mail server information in mail.rb
 - Put real IP address and git repo URL in deployment files
@@ -2429,7 +2477,8 @@ Deployment Tools
 External Services
 =================
 - Exceptional for error tracking. Go to /pages/kaboom to test after finishing Exceptional setup.
-- New Relic for performance tracking 
+#{"- New Relic for performance tracking" if monitoring == 'new_relic'} 
+#{"- Scout for performance tracking" if monitoring == 'scout'} 
 
 
 Testing Tools
@@ -2448,6 +2497,7 @@ Testing Tools
     should_have_before_filter, should_have_after_filter
 - metric-fu for static code analysis. rake metrics:all, configure in Rakefile
 - inaction-mailer is installed for development environment, so mails sent during dev will end up as files in /tmp/sent_mails
+- time-warp for forcing time in tests (use pretend_now_is)
 END
 
 commit_state "static pages"
@@ -2520,7 +2570,13 @@ piston_rails :branch => '2-3-stable'
 puts "SUCCESS!"
 puts '  Set up new app at http://getexceptional.com/apps'
 puts '  Put the right API key in config/exceptional.yml'
-puts '  Put the right API key in config/new_relic.yml'
+if monitoring == "new_relic"
+  puts '  Put the right API key in config/new_relic.yml'
+end
+if monitoring == "scout"
+  puts '  Put the right plugin ID in config/scout.yml'
+  puts '  Install the scout agent gem on the production server (sudo gem install scout_agent)'
+end
 puts '  Put the production database password in config/database.yml'
 puts '  Put mail server information in mail.rb'
 puts '  Put real IP address and git repo URL in deployment files'

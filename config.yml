@@ -1,3 +1,5 @@
 --- 
 # database options: mysql, postgresql
 database: postgresql
+# monitoring options: new_relic, scout
+monitoring: scout

@@ -37,7 +37,7 @@ Deployment Tools
 External Services
 
     * Exceptional for error tracking. Go to /pages/kaboom to test after finishing Exceptional setup.
-    * New Relic for performance tracking
+    * New Relic or Scout for performance tracking, depending on your configuration options.
 
 Testing Tools
 
