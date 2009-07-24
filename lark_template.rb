@@ -162,6 +162,8 @@ piston_plugin 'stringex',
   :git => 'git://github.com/rsl/stringex.git'
 piston_plugin 'superdeploy',
   :git => 'git://github.com/saizai/superdeploy.git'
+piston_plugin 'time-warp', 
+  :git => 'git://github.com/iridesco/time-warp.git'
   
 # gems
 gem 'authlogic',
@@ -178,10 +180,6 @@ gem "binarylogic-searchlogic",
   :lib     => 'searchlogic',
   :source  => 'http://gems.github.com',
   :version => '~> 2.0'
-gem "iridesco-time-warp",
-  :lib     => 'time-warp',
-  :source  => 'http://gems.github.com',
-  :version => '~> 1.0'
 # development only
 gem "cwninja-inaction_mailer", 
   :lib => 'inaction_mailer/force_load', 
