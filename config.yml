@@ -1,0 +1,3 @@
+--- 
+# database options: mysql, postgresql
+database: postgresql

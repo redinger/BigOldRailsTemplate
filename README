@@ -4,6 +4,9 @@ rails new_app_name -m lark_template.rb
 
 I should warn you of two things. First, it’s a pretty heavyweight template, sticking a lot of stuff into the new application. This suits me, because I have a lot of things I use in just about every application, but it may not suit you. Second, Rails templates are not one-size-fits-all; you’d be better off treating this as a starting point to steal from than a finished template to use (though if you want to use it, feel free).
 
+There is some configuration available for the template. See config.yml to set persistent configuration information. If you don't have a 
+config.yml, or it doesn't have an option that the template is looking for, you'll be prompted at runtime.
+
 Here’s a list of what this template sets up:
 
 Coding Tools
@@ -21,7 +24,7 @@ Coding Tools
 
 Database Tools
 
-    * Hooked up for PostgreSQL
+    * Hooked up for PostgreSQL or MySQL depending on your configuration options
     * admin-data plugin for administrative UI. http://localhost:3000/admin_data will get you to the application’s data. On production, only admin can view data, no one can edit (modify config/initializers/admin_data.rb to adjust this)
     * db-populate for seed data
 
@@ -48,3 +51,7 @@ Testing Tools
     * More extra shoulda macros: should_have_before_filter, should_have_after_filter
     * metric-fu for static code analysis. rake metrics:all, configure in Rakefile
     * inaction-mailer is installed for development environment, so mails sent during dev will end up as files in /tmp/sent_mails
+
+Thanks to:
+  - Rob Zolkos (typo fix)
+  - Jeraimee (MySQL translation of database.yml)

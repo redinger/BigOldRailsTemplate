@@ -1,7 +1,10 @@
+require 'open-uri'
+require 'yaml'
+
+# Utility Methods
+ 
 # download, from_repo, and commit_state methods swiped from 
 # http://github.com/Sutto/rails-template/blob/07b044072f3fb0b40aea27b713ca61515250f5ec/rails_template.rb
-
-require 'open-uri'
  
 def download(from, to = from.split("/").last)
   #run "curl -s -L #{from} > #{to}"
@@ -80,6 +83,20 @@ def piston_rails(options={})
 end
 
 current_app_name = File.basename(File.expand_path(root))
+
+# Option set-up
+begin
+  template_options = {}
+  open(File.join(File.dirname(template), "config.yml")) do |f|
+    template_options = YAML.load(f)
+  end
+rescue
+end
+
+database = template_options["database"].nil? ? ask("Which database? postgresql (default), mysql").downcase : template_options["database"]
+database = "postgresql" if database.nil?
+
+# Actual application generation starts here
 
 # Delete unnecessary files
 run "rm README"
@@ -690,7 +707,101 @@ staging:
 END
 
 # database
-file 'config/database.yml', <<-END
+if database == "mysql"
+  file 'config/database.yml', <<-END  
+# MySQL. Versions 4.1 and 5.0 are recommended.
+#
+# Install the MySQL driver:
+# gem install mysql
+# On Mac OS X:
+# sudo gem install mysql -- --with-mysql-dir=/usr/local/mysql
+# On Mac OS X Leopard:
+# sudo env ARCHFLAGS="-arch i386" gem install mysql -- --with-mysql-config=/usr/local/mysql/bin/mysql_config
+# This sets the ARCHFLAGS environment variable to your native architecture
+# On Windows:
+# gem install mysql
+# Choose the win32 build.
+# Install MySQL and put its /bin directory on your path.
+#
+# And be sure to use new-style password hashing:
+# http://dev.mysql.com/doc/refman/5.0/en/old-client.html
+
+development:
+  adapter: mysql
+  encoding: utf8
+  reconnect: false
+  database: #{current_app_name}_development
+  pool: 5
+  username: root
+  password:
+  socket: /tmp/mysql.sock
+
+# Warning: The database defined as "test" will be erased and
+# re-generated from your development database when you run "rake".
+# Do not set this db to the same as development or production.
+test: &TEST
+  adapter: mysql
+  encoding: utf8
+  reconnect: false
+  database: #{current_app_name}_test
+  pool: 5
+  username: root
+  password:
+  socket: /tmp/mysql.sock
+
+test2:
+  adapter: mysql
+  encoding: utf8
+  reconnect: false
+  database: #{current_app_name}_test2
+  pool: 5
+  username: root
+  password:
+  socket: /tmp/mysql.sock
+
+test3:
+  adapter: mysql
+  encoding: utf8
+  reconnect: false
+  database: #{current_app_name}_test3
+  pool: 5
+  username: root
+  password:
+  socket: /tmp/mysql.sock
+
+test4:
+  adapter: mysql
+  encoding: utf8
+  reconnect: false
+  database: #{current_app_name}_test4
+  pool: 5
+  username: root
+  password:
+  socket: /tmp/mysql.sock
+
+production:
+  adapter: mysql
+  encoding: utf8
+  database: #{current_app_name}_production
+  pool: 5
+  username: root
+  password:
+  socket: /tmp/mysql.sock
+
+staging:
+  adapter: mysql
+  encoding: utf8
+  database: #{current_app_name}_staging
+  pool: 5
+  username: root
+  password:
+  socket: /tmp/mysql.sock
+
+cucumber:
+ <<: *TEST
+END
+else # database defaults to postgresql
+  file 'config/database.yml', <<-END
 # PostgreSQL. Versions 7.4 and 8.x are supported.
 #
 # Install the ruby-postgres driver:
@@ -727,7 +838,7 @@ development:
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
 # Do not set this db to the same as development or production.
-test:
+test: &TEST
   adapter: postgresql
   encoding: unicode
   database: #{current_app_name}_test
@@ -765,7 +876,7 @@ production:
   database: #{current_app_name}_production
   pool: 5
   username: postgres
-  password: the_password
+  password: 99Schema@
 
 staging:
   adapter: postgresql
@@ -774,7 +885,11 @@ staging:
   pool: 5
   username: postgres
   password: 99Schema@
+
+cucumber:
+ <<: *TEST
 END
+end
 
 file 'db/populate/01_sample_seed.rb', <<-END
 # Model.create_or_update(:id => 1, :name => 'sample')
@@ -2297,7 +2412,7 @@ Coding Tools
 
 Database Tools
 ==============
-- Hooked up for PostgreSQL
+- Hooked up for #{"PostgreSQL" if database == 'postgresql'}#{"MySQL" if database == 'mysql'}
 - admin-data plugin for administrative UI. http://localhost:3000/admin_data will get you to the application's data. On production,
   only admin can view data, no one can edit (modify config/initializers/admin_data.rb to adjust this)
 - db-populate for seed data
