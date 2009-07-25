@@ -95,6 +95,8 @@ end
 
 database = template_options["database"].nil? ? ask("Which database? postgresql (default), mysql").downcase : template_options["database"]
 database = "postgresql" if database.nil?
+exception_handling = template_options["exception_handling"].nil? ? ask("Which exception reporting? exceptional (default), hoptoad").downcase : template_options["exception_handling"]
+exception_handling = "exceptional" if exception_handling.nil?
 monitoring = template_options["monitoring"].nil? ? ask("Which monitoring new_relic (default), scout").downcase : template_options["monitoring"]
 monitoring = "new_relic" if monitoring.nil?
 
@@ -132,10 +134,16 @@ piston_plugin 'admin_data',
   :git => 'git://github.com/neerajdotname/admin_data.git'
 piston_plugin 'db-populate',
   :git => 'git://github.com/ffmike/db-populate.git'
-piston_plugin 'exceptional',
-  :git => 'git://github.com/contrast/exceptional.git'
+if exception_handling == "exceptional"
+  piston_plugin 'exceptional',
+    :git => 'git://github.com/contrast/exceptional.git'
+end
 piston_plugin 'fast_remote_cache',
   :git => 'git://github.com/37signals/fast_remote_cache.git'
+if exception_handling == "hoptoad"
+  piston_plugin 'hoptoad_notifier',
+    :git => 'git://github.com/thoughtbot/hoptoad_notifier.git'
+end
 piston_plugin 'live-validations',
   :git => 'git://github.com/augustl/live-validations.git'
 if monitoring == "new_relic"
@@ -497,8 +505,9 @@ END
 
 commit_state "deployment files"
 
-# error tracking
-file 'config/exceptional.yml', <<-END
+# error handling
+if exception_handling == "exceptional"
+  file 'config/exceptional.yml', <<-END
 # here are the settings that are common to all environments
 common: &default_settings
   # You must specify your Exceptional API key here.
@@ -549,8 +558,17 @@ staging:
   <<: *default_settings
   enabled: true
 END
+end
 
-# performance
+if exception_handling == "hoptoad"
+  initializer 'hoptoad.rb', <<-END
+HoptoadNotifier.configure do |config|
+  config.api_key = '1234567890abcdef'
+end
+END
+end
+
+# performance monitoring
 if monitoring == "new_relic"
   file 'config/newrelic.yml', <<-END
 #
@@ -2423,8 +2441,10 @@ END
 file 'doc/README_FOR_APP', <<-END
 TODO after installing:
 
-- Set up new app at http://getexceptional.com/apps
-- Put the right API key in config/exceptional.yml
+#{"- Set up new app at http://getexceptional.com/apps" if exception_handling == 'exceptional'}
+#{"- Put the right API key in config/exceptional.yml" if exception_handling == 'exceptional'}
+#{"- Set up new app at http://www.hoptoadapp.com/" if exception_handling == 'hoptoad'}
+#{"- Put the right API key in config/initializers/hoptoad.rb" if exception_handling == 'hoptoad'}
 #{"- Put the right API key in config/new_relic.yml" if monitoring == 'new_relic'}
 #{"- Put the right plugin ID in config/scout.yml" if monitoring == 'scout'}
 #{"- Install the scout agent gem on the production server (sudo gem install scout_agent)" if monitoring == 'scout'}
@@ -2474,7 +2494,7 @@ Deployment Tools
 
 External Services
 =================
-- Exceptional for error tracking. Go to /pages/kaboom to test after finishing Exceptional setup.
+- #{"Exceptional" if exception_handling == "exceptional"}#{"Hoptoad" if exception_handling == "hoptoad"} for error tracking. Go to /pages/kaboom to test after finishing #{"Exceptional" if exception_handling == "exceptional"}#{"Hoptoad" if exception_handling == "hoptoad"} setup.
 #{"- New Relic for performance tracking" if monitoring == 'new_relic'} 
 #{"- Scout for performance tracking" if monitoring == 'scout'} 
 
@@ -2566,8 +2586,14 @@ piston_rails :branch => '2-3-stable'
 
 # Success!
 puts "SUCCESS!"
-puts '  Set up new app at http://getexceptional.com/apps'
-puts '  Put the right API key in config/exceptional.yml'
+if exception_handling == "exceptional"
+  puts '  Set up new app at http://getexceptional.com/apps'
+  puts '  Put the right API key in config/exceptional.yml'
+end
+if exception_handling == "hoptoad"
+  puts '  Set up new app at http://www.hoptoadapp/com'
+  puts '  Put the right API key in config/initializers/hoptoad.rb'
+end
 if monitoring == "new_relic"
   puts '  Put the right API key in config/new_relic.yml'
 end

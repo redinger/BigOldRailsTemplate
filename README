@@ -36,7 +36,7 @@ Deployment Tools
 
 External Services
 
-    * Exceptional for error tracking. Go to /pages/kaboom to test after finishing Exceptional setup.
+    * Exceptional or Hoptoad for error tracking. Go to /pages/kaboom to test after finishing setup.
     * New Relic or Scout for performance tracking, depending on your configuration options.
 
 Testing Tools
@@ -45,7 +45,7 @@ Testing Tools
     * Mocha for mocking
     * Object Daddy for factories
     * Generated code is already covered by tests
-    * parallel-test for faster testing. rake test:parallel:prepare[2] to set up two test databases. rake test:parallel[2] to distribute tests across two cores
+    * parallel-test for faster testing. rake spec:parallel:prepare[2] to set up two test databases. rake test:parallel[2] to distribute tests across two cores
     * rack-bug for request/response/perf analysis. http://localhost:3000/__rack_bug__/bookmarklet.html to add bookmarklet to browser.
     * shmacros for additional Shoulda macros: should_accept_nested_attributes_for, should_act_as_taggable_on, should_callback, should_delegate, more
     * More extra shoulda macros: should_have_before_filter, should_have_after_filter

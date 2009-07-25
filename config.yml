@@ -1,5 +1,7 @@
 --- 
-# database options: mysql, postgresql
+# database options: postgresql (default), mysql
 database: postgresql
-# monitoring options: new_relic, scout
-monitoring: scout
+# exception options: exceptional (default), hoptoad
+exception_handling: exceptional
+# monitoring options: new_relic (default), scout
+monitoring: new_relic
