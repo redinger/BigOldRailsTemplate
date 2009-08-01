@@ -93,6 +93,8 @@ begin
 rescue
 end
 
+rails_branch = template_options["rails_branch"]
+rails_branch = "2-3-stable" if rails_branch.nil?
 database = template_options["database"].nil? ? ask("Which database? postgresql (default), mysql").downcase : template_options["database"]
 database = "postgresql" if database.nil?
 exception_handling = template_options["exception_handling"].nil? ? ask("Which exception reporting? exceptional (default), hoptoad").downcase : template_options["exception_handling"]
@@ -2581,8 +2583,9 @@ END
 commit_state "metric_fu setup"
 
 # vendor rails
-# take the edge of 2.3 for now
-piston_rails :branch => '2-3-stable'
+# takes the edge of whatever branch is specified in the config file
+# defaults to 2-3-stable at the moment
+piston_rails :branch => rails_branch
 
 # set up branches
 branches = template_options["git_branches"]

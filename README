@@ -9,6 +9,10 @@ config.yml, or it doesn't have an option that the template is looking for, you'l
 
 Here’s a list of what this template sets up:
 
+Rails
+
+    * Uses the edge of the 2-3-stable branch in the Rails git repository. You can change the branch in config.yml, so you can use, for example, 2-2-stable or (if you're feeling brave) master
+    
 SCM
 
     * git repo

@@ -1,4 +1,6 @@
 --- 
+# rails options: any branch in the http://github.com/rails/rails/tree/master repo
+rails_branch: 2-3-stable
 # database options: postgresql (default), mysql
 database: postgresql
 # exception options: exceptional (default), hoptoad
