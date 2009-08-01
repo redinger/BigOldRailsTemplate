@@ -9,6 +9,11 @@ config.yml, or it doesn't have an option that the template is looking for, you'l
 
 Here’s a list of what this template sets up:
 
+SCM
+
+    * git repo
+    * master, staging, and development branches (you can adjust this in config.yml)
+  
 Coding Tools
 
     * Authlogic for user authentication, including password resets, anonymous_only, authenticated_only, admin_only application helpers

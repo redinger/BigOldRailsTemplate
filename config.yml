@@ -5,3 +5,9 @@ database: postgresql
 exception_handling: exceptional
 # monitoring options: new_relic (default), scout
 monitoring: new_relic
+# branches to create in the git repo. Default branch will be checked out.
+# if none specified, just leaves the single master branch.
+git_branches:
+  master:
+  development: default
+  staging:

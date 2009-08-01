@@ -2584,6 +2584,20 @@ commit_state "metric_fu setup"
 # take the edge of 2.3 for now
 piston_rails :branch => '2-3-stable'
 
+# set up branches
+branches = template_options["git_branches"]
+if !branches.nil?
+  default_branch = "master"
+  branches.each do |name, default|
+    if name != "master"
+      git :branch => name
+      default_branch = name if !default.nil?
+    end
+  end
+  git :checkout => default_branch if default_branch != "master"
+  log "set up branches #{branches.keys.join(', ')}"
+end
+
 # Success!
 puts "SUCCESS!"
 if exception_handling == "exceptional"
