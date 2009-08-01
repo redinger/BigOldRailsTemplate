@@ -58,8 +58,6 @@ end
 # piston_rails, :branch => "2-3-stable", :lock => false
 def piston_rails(options={})
   lock = options.fetch(:lock, true)
-  
-  log "rails installed #{'and locked ' if lock}with Piston", options[:branch]
 
   if options[:branch]
     in_root do
@@ -80,6 +78,8 @@ def piston_rails(options={})
       end
     end
   end
+  
+  log "rails installed #{'and locked ' if lock}with Piston", options[:branch]
 end
 
 current_app_name = File.basename(File.expand_path(root))
