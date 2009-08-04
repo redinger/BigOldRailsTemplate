@@ -35,14 +35,13 @@ end
 def piston_plugin(name, options={})
   lock = options.fetch(:lock, true)
   
-  log "plugin installed #{'and locked ' if lock}with Piston:", name
-
   if options[:git] || options[:svn]
     in_root do
       run("piston import #{options[:svn] || options[:git]} vendor/plugins/#{name}")
       run("piston lock vendor/plugins/#{name}") if lock
       commit_state("Added pistoned #{name}")
     end
+    log "plugin installed #{'and locked ' if lock}with Piston:", name
   else
     log "! no git or svn provided for #{name}.  skipping..."
   end
@@ -82,6 +81,55 @@ def piston_rails(options={})
   log "rails installed #{'and locked ' if lock}with Piston", options[:branch]
 end
 
+# braid support is experimental and largely untested
+def braid_plugin(name, options={})
+  if options[:git]
+    in_root do
+      run("braid add -p #{options[:git]}")
+      commit_state("Added braided #{name}")
+    end
+    log "plugin installed with Braid:", name
+  else
+    log "! no git provided for #{name}.  skipping..."
+  end
+end
+
+def braid_rails(options={})
+  if options[:branch]
+    log "! branch support for Braid is not yet implemented"
+  else
+    in_root do
+      run("braid add git://github.com/rails/rails.git vendor/rails")
+      log "rails installed with Braid"
+    end
+  end
+end
+
+# cloning rails is experimental and somewhat untested
+def clone_rails(options={})
+  if options[:submodule]
+    in_root do
+      if options[:branch]
+        git :submodule => "add git://github.com/rails/rails.git vendor/rails -b #{options[:branch]}"
+      else
+        git :submodule => "add git://github.com/rails/rails.git vendor/rails"
+      end
+    end
+  else
+    inside 'vendor' do
+      run('git clone git://github.com/rails/rails.git')
+    end
+    if options[:branch]
+      inside 'vendor/rails' do
+        run("git branch --track #{options[:branch]} origin/#{options[:branch]}")
+        run("git checkout #{options[:branch]}")
+      end
+    end
+  end
+  
+  log "rails installed #{'and submoduled ' if options[:submodule]}from GitHub", options[:branch]
+end
+
 current_app_name = File.basename(File.expand_path(root))
 
 # Option set-up
@@ -95,12 +143,44 @@ end
 
 rails_branch = template_options["rails_branch"]
 rails_branch = "2-3-stable" if rails_branch.nil?
+
 database = template_options["database"].nil? ? ask("Which database? postgresql (default), mysql").downcase : template_options["database"]
 database = "postgresql" if database.nil?
+
 exception_handling = template_options["exception_handling"].nil? ? ask("Which exception reporting? exceptional (default), hoptoad").downcase : template_options["exception_handling"]
 exception_handling = "exceptional" if exception_handling.nil?
-monitoring = template_options["monitoring"].nil? ? ask("Which monitoring new_relic (default), scout").downcase : template_options["monitoring"]
+
+monitoring = template_options["monitoring"].nil? ? ask("Which monitoring? new_relic (default), scout").downcase : template_options["monitoring"]
 monitoring = "new_relic" if monitoring.nil?
+
+@branch_management = template_options["branch_management"].nil? ? ask("Which branch management? piston (default), braid, git, none").downcase : template_options["branch_management"]
+@branch_management = "piston" if @branch_management.nil?
+
+def install_plugin (name, options)
+  case @branch_management
+  when 'none'
+    plugin name, options
+  when 'piston'
+    piston_plugin name, options
+  when 'braid'
+    # TODO
+  when 'git'
+    plugin name, options.merge(:submodule => true)
+  end
+end
+
+def install_rails (options)
+  case @branch_management
+  when 'none'
+    clone_rails options
+  when 'piston'
+    piston_rails options
+  when 'braid'
+    braid_rails options
+  when 'git'
+    clone_rails options.merge(:submodule => true)
+  end
+end
 
 # Actual application generation starts here
 
@@ -132,48 +212,36 @@ END
 commit_state "base application"
 
 # plugins
-piston_plugin 'admin_data', 
-  :git => 'git://github.com/neerajdotname/admin_data.git'
-piston_plugin 'db-populate',
-  :git => 'git://github.com/ffmike/db-populate.git'
-if exception_handling == "exceptional"
-  piston_plugin 'exceptional',
-    :git => 'git://github.com/contrast/exceptional.git'
+plugins = 
+  {
+    'admin_data' => {:options => {:git => 'git://github.com/neerajdotname/admin_data.git'}},
+    'db_populate' => {:options => {:git => 'git://github.com/ffmike/db-populate.git'}},
+    'exceptional' => {:options => {:git => 'git://github.com/contrast/exceptional.git'},
+                      :if => 'exception_handling == "exceptional"'},
+    'fast_remote_cache' => {:options => {:git => 'git://github.com/37signals/fast_remote_cache.git'}},
+    'hoptoad_notifier' => {:options => {:git => 'git://github.com/thoughtbot/hoptoad_notifier.git'},
+                           :if => 'exception_handling == "hoptoad"'},
+    'live_validations' => {:options => {:git => 'git://github.com/augustl/live-validations.git'}},
+    'new_relic' => {:options => {:git => 'git://github.com/newrelic/rpm.git'},
+                    :if => 'monitoring == "new_relic"'},
+    'object_daddy' => {:options => {:git => 'git://github.com/flogic/object_daddy.git'}},
+    'paperclip' => {:options => {:git => 'git://github.com/thoughtbot/paperclip.git'}},
+    'parallel_specs' => {:options => {:git => 'git://github.com/jasonm/parallel_specs.git'}},
+    'rack-bug' => {:options => {:git => 'git://github.com/brynary/rack-bug.git'}},
+    'rubaidhstrano' => {:options => {:git => 'git://github.com/rubaidh/rubaidhstrano.git'}},
+    'scout_rails_instrumentation' => {:options => {:git => 'git://github.com/highgroove/scout_rails_instrumentation.git'},
+                                      :if => 'monitoring == "scout"'},
+    'shmacros' => {:options => {:git => 'git://github.com/maxim/shmacros.git'}},
+    'stringex' => {:options => {:git => 'git://github.com/rsl/stringex.git'}},
+    'superdeploy' => {:options => {:git => 'git://github.com/saizai/superdeploy.git'}},
+    'time-warp' => {:options => {:git => 'git://github.com/iridesco/time-warp.git'}}    
+  }
+  
+plugins.each do |name, value|
+  if  value[:if].nil? || eval(value[:if])
+    install_plugin name, value[:options]
+  end
 end
-piston_plugin 'fast_remote_cache',
-  :git => 'git://github.com/37signals/fast_remote_cache.git'
-if exception_handling == "hoptoad"
-  piston_plugin 'hoptoad_notifier',
-    :git => 'git://github.com/thoughtbot/hoptoad_notifier.git'
-end
-piston_plugin 'live-validations',
-  :git => 'git://github.com/augustl/live-validations.git'
-if monitoring == "new_relic"
-  plugin 'newrelic_rpm',
-    :svn => 'http://newrelic.rubyforge.org/svn/newrelic_rpm'
-end
-piston_plugin 'object_daddy',
-  :git => 'git://github.com/flogic/object_daddy.git'
-piston_plugin 'paperclip',
-  :git => 'git://github.com/thoughtbot/paperclip.git'
-piston_plugin 'parallel_specs',
-  :git => 'git://github.com/jasonm/parallel_specs.git'
-piston_plugin 'rack-bug',
-  :git => 'git://github.com/brynary/rack-bug.git'
-piston_plugin 'rubaidhstrano',
-  :git => 'git://github.com/rubaidh/rubaidhstrano.git'
-if monitoring == "scout"
-  piston_plugin 'scout_rails_instrumentation',
-    :git => 'git://github.com/highgroove/scout_rails_instrumentation.git'
-end
-piston_plugin 'shmacros',
-  :git => 'git://github.com/maxim/shmacros.git'
-piston_plugin 'stringex',
-  :git => 'git://github.com/rsl/stringex.git'
-piston_plugin 'superdeploy',
-  :git => 'git://github.com/saizai/superdeploy.git'
-piston_plugin 'time-warp', 
-  :git => 'git://github.com/iridesco/time-warp.git'
   
 # gems
 gem 'authlogic',
@@ -2585,7 +2653,8 @@ commit_state "metric_fu setup"
 # vendor rails
 # takes the edge of whatever branch is specified in the config file
 # defaults to 2-3-stable at the moment
-piston_rails :branch => rails_branch
+install_rails :branch => rails_branch
+# TODO: rake("rails:update")
 
 # set up branches
 branches = template_options["git_branches"]
