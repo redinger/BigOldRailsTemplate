@@ -9,6 +9,8 @@ exception_handling: exceptional
 monitoring: new_relic
 # vendor branch management: piston (default), braid, git (submodules), none
 branch_management: piston
+# IE6 blocking: none, light (default), ie6nomore
+ie6_blocking: light
 # branches to create in the git repo. Default branch will be checked out.
 # if none specified, just leaves the single master branch.
 git_branches:

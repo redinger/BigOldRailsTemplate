@@ -62,6 +62,10 @@ Testing Tools
     * metric-fu for static code analysis. rake metrics:all, configure in Rakefile
     * inaction-mailer is installed for development environment, so mails sent during dev will end up as files in /tmp/sent_mails
 
+Miscellaneous
+
+    * Code to encourage IE6 users to get a real browser is included on the home page by default. You can adjust this in the configuration.
+    
 Thanks to:
   - Rob Zolkos (typo fix)
   - Jeraimee (MySQL translation of database.yml)

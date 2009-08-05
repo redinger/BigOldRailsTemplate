@@ -156,6 +156,9 @@ monitoring = "new_relic" if monitoring.nil?
 @branch_management = template_options["branch_management"].nil? ? ask("Which branch management? piston (default), braid, git, none").downcase : template_options["branch_management"]
 @branch_management = "piston" if @branch_management.nil?
 
+ie6_blocking = template_options["ie6_blocking"].nil? ? ask("Which IE 6 blocking? none, light (default), ie6nomore").downcase : template_options["ie6_blocking"]
+ie6_blocking = "light" if ie6_blocking.nil?
+
 def install_plugin (name, options)
   case @branch_management
   when 'none'
@@ -1697,13 +1700,17 @@ class UserSessionsControllerTest < ActionController::TestCase
 end
 END
 
+if ie6_blocking == 'light'
+  upgrade_test = ", :upgrade => 'Your Browser is Obsolete'"
+end
+
 file 'test/functional/pages_controller_test.rb', <<-END
 require 'test_helper'
 
 class PagesControllerTest < ActionController::TestCase
   
   {:home => '#{current_app_name}',
-   :css_test => 'CSS Test'}.each do | page, page_title |
+   :css_test => 'CSS Test'#{upgrade_test}}.each do | page, page_title |
     context "on GET to :\#{page.to_s}" do
       setup do
         get page
@@ -2307,6 +2314,14 @@ END
 commit_state "basic Authlogic setup"
 
 # static pages
+if ie6_blocking == "light"
+  ie6_method = <<-END
+  def upgrade
+    @page_title = "Your Browser is Obsolete"
+  end
+END
+end
+
 file 'app/controllers/pages_controller.rb', <<-END
 class PagesController < ApplicationController
   
@@ -2322,8 +2337,38 @@ class PagesController < ApplicationController
     User.first.kaboom!
   end
   
+#{ie6_method if ie6_blocking == 'light'}  
 end
 END
+
+if ie6_blocking == "light"
+  ie6_warning = <<-END
+  <!--[if lt IE 7]>
+	<p class="flash_error">
+		Your browser is obsolete. For best results in #{current_app_name}, please <%= link_to "Upgrade", pages_path(:action => 'upgrade'), :target => :blank %>
+	</p>
+  <![endif]-->
+END
+elsif ie6_blocking == "ie6nomore"
+  ie6_warning = <<-END
+  <!--[if lt IE 7]>
+  <div style='border: 1px solid #F7941D; background: #FEEFDA; text-align: center; clear: both; height: 75px; position: relative;'>
+    <div style='position: absolute; right: 3px; top: 3px; font-family: courier new; font-weight: bold;'><a href='#' onclick='javascript:this.parentNode.parentNode.style.display="none"; return false;'><img src='http://www.ie6nomore.com/files/theme/ie6nomore-cornerx.jpg' style='border: none;' alt='Close this notice'/></a></div>
+    <div style='width: 640px; margin: 0 auto; text-align: left; padding: 0; overflow: hidden; color: black;'>
+      <div style='width: 75px; float: left;'><img src='http://www.ie6nomore.com/files/theme/ie6nomore-warning.jpg' alt='Warning!'/></div>
+      <div style='width: 275px; float: left; font-family: Arial, sans-serif;'>
+        <div style='font-size: 14px; font-weight: bold; margin-top: 12px;'>You are using an outdated browser</div>
+        <div style='font-size: 12px; margin-top: 6px; line-height: 12px;'>For a better experience using this site, please upgrade to a modern web browser.</div>
+      </div>
+      <div style='width: 75px; float: left;'><a href='http://www.firefox.com' target='_blank'><img src='http://www.ie6nomore.com/files/theme/ie6nomore-firefox.jpg' style='border: none;' alt='Get Firefox 3.5'/></a></div>
+      <div style='width: 75px; float: left;'><a href='http://www.browserforthebetter.com/download.html' target='_blank'><img src='http://www.ie6nomore.com/files/theme/ie6nomore-ie8.jpg' style='border: none;' alt='Get Internet Explorer 8'/></a></div>
+      <div style='width: 73px; float: left;'><a href='http://www.apple.com/safari/download/' target='_blank'><img src='http://www.ie6nomore.com/files/theme/ie6nomore-safari.jpg' style='border: none;' alt='Get Safari 4'/></a></div>
+      <div style='float: left;'><a href='http://www.google.com/chrome' target='_blank'><img src='http://www.ie6nomore.com/files/theme/ie6nomore-chrome.jpg' style='border: none;' alt='Get Google Chrome'/></a></div>
+    </div>
+  </div>
+  <![endif]-->
+END
+end
 
 file 'app/views/pages/home.html.erb', <<-END
 <div id="top_menu">
@@ -2339,6 +2384,7 @@ file 'app/views/pages/home.html.erb', <<-END
 
 <div id="main">
   <h1>Welcome to #{current_app_name}</h1>
+  #{ie6_warning}
   <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 </div>
 
@@ -2507,6 +2553,16 @@ file 'app/views/pages/css_test.html.erb', <<-END
 <small><a href="#wrapper">[top]</a></small>
 <!-- End of Sample Content -->
 END
+
+if ie6_blocking == 'light'
+file 'app/views/pages/upgrade.html.erb', <<-END
+<div id="ie6msg">
+<h4>#{current_app_name} works best with a newer browser than you are using.</h4>
+<p>To get the best possible experience using #{current_app_name}, we recommend that you upgrade your browser to a newer version. The current version is <a href="http://www.microsoft.com/windows/downloads/ie/getitnow.mspx" target="_blank">Internet Explorer 7</a> or <a href="http://www.microsoft.com/windows/internet-explorer/default.aspx target="_blank"">Internet Explorer 8</a>. The upgrade is free. If you’re using a PC at work you should contact your IT-administrator. Either way, we'd like to encourage you to stop using IE6 and try a more secure and Web Standards-friendly browser.</p>
+<p>#{current_app_name} also supports other popular browsers like <strong><a href="http://getfirefox.com" target="_blank">Firefox</a></strong> or <strong><a href="http://www.opera.com" target="_blank">Opera</a></strong>.</p>
+</div>
+END
+end
 
 file 'doc/README_FOR_APP', <<-END
 TODO after installing:
