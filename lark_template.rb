@@ -272,6 +272,15 @@ gem "cwninja-inaction_mailer",
 
 commit_state "Added plugins and gems"
 
+# environment updates
+in_root do
+  run 'cp config/environments/production.rb config/environments/staging.rb'
+end
+environment 'config.middleware.use "Rack::Bug"', :env => 'development'
+environment 'config.middleware.use "Rack::Bug"', :env => 'staging'
+
+commit_state "Set up staging environment and hooked up Rack::Bug"
+
 # some files for app
 download "http://livevalidation.com/javascripts/src/1.3/livevalidation_prototype.js", "public/javascripts/livevalidation.js"
 
