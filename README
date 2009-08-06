@@ -17,7 +17,7 @@ SCM
 
     * git repo
     * master, staging, and development branches (you can adjust this in config.yml)
-    * Rails and plugins installed with Piston by default - you can change this to use Braid, git submodules, or just straight code in config.yml
+    * Rails and plugins installed with Piston by default - you can change this to use Braid, git submodules, or just straight code in config.yml. You can also choose to depend on gem rails instead of vendoring it to the project.
   
 Coding Tools
 

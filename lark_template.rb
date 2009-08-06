@@ -156,6 +156,9 @@ monitoring = "new_relic" if monitoring.nil?
 @branch_management = template_options["branch_management"].nil? ? ask("Which branch management? piston (default), braid, git, none").downcase : template_options["branch_management"]
 @branch_management = "piston" if @branch_management.nil?
 
+rails_strategy = template_options["rails_strategy"].nil? ? ask("Which Rails strategy? vendored (default), gem").downcase : template_options["rails_strategy"]
+rails_strategy = "vendored" if rails_strategy.nil?
+
 ie6_blocking = template_options["ie6_blocking"].nil? ? ask("Which IE 6 blocking? none, light (default), ie6nomore").downcase : template_options["ie6_blocking"]
 ie6_blocking = "light" if ie6_blocking.nil?
 
@@ -2715,11 +2718,13 @@ END
 
 commit_state "metric_fu setup"
 
-# vendor rails
+# vendor rails if desired
 # takes the edge of whatever branch is specified in the config file
 # defaults to 2-3-stable at the moment
-install_rails :branch => rails_branch
-# TODO: rake("rails:update")
+if rails_strategy == "vendored"
+  install_rails :branch => rails_branch
+  # TODO: rake("rails:update")
+end
 
 # set up branches
 branches = template_options["git_branches"]
