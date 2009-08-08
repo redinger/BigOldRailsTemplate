@@ -34,7 +34,7 @@ Coding Tools
 
 Database Tools
 
-    * Hooked up for PostgreSQL or MySQL depending on your configuration options
+    * Hooked up for PostgreSQL, MySQL, or sqlite depending on your configuration options
     * admin-data plugin for administrative UI. http://localhost:3000/admin_data will get you to the application’s data. On production, only admin can view data, no one can edit (modify config/initializers/admin_data.rb to adjust this)
     * db-populate for seed data
 

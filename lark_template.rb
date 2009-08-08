@@ -144,7 +144,7 @@ end
 rails_branch = template_options["rails_branch"]
 rails_branch = "2-3-stable" if rails_branch.nil?
 
-database = template_options["database"].nil? ? ask("Which database? postgresql (default), mysql").downcase : template_options["database"]
+database = template_options["database"].nil? ? ask("Which database? postgresql (default), mysql, sqlite").downcase : template_options["database"]
 database = "postgresql" if database.nil?
 
 exception_handling = template_options["exception_handling"].nil? ? ask("Which exception reporting? exceptional (default), hoptoad").downcase : template_options["exception_handling"]
@@ -949,6 +949,58 @@ staging:
   username: root
   password:
   socket: /tmp/mysql.sock
+
+cucumber:
+ <<: *TEST
+END
+elsif database == "sqlite"
+  file 'config/database.yml', <<-END
+# SQLite version 3.x
+#   gem install sqlite3-ruby (not necessary on OS X Leopard)
+development:
+  adapter: sqlite3
+  database: db/development.sqlite3
+  pool: 5
+  timeout: 5000
+
+# Warning: The database defined as "test" will be erased and
+# re-generated from your development database when you run "rake".
+# Do not set this db to the same as development or production.
+test: &TEST
+  adapter: sqlite3
+  database: db/test.sqlite3
+  pool: 5
+  timeout: 5000
+
+test2:
+  adapter: sqlite3
+  database: db/tes2t.sqlite3
+  pool: 5
+  timeout: 5000
+
+test3:
+  adapter: sqlite3
+  database: db/test3.sqlite3
+  pool: 5
+  timeout: 5000
+
+test4:
+  adapter: sqlite3
+  database: db/test4.sqlite3
+  pool: 5
+  timeout: 5000
+
+production:
+  adapter: sqlite3
+  database: db/production.sqlite3
+  pool: 5
+  timeout: 5000
+
+staging:
+  adapter: sqlite3
+  database: db/staging.sqlite3
+  pool: 5
+  timeout: 5000
 
 cucumber:
  <<: *TEST
@@ -2622,7 +2674,7 @@ Coding Tools
 
 Database Tools
 ==============
-- Hooked up for #{"PostgreSQL" if database == 'postgresql'}#{"MySQL" if database == 'mysql'}
+- Hooked up for #{"PostgreSQL" if database == 'postgresql'}#{"MySQL" if database == 'mysql'}#{"sqlite 3" if database == 'sqlite'}
 - admin-data plugin for administrative UI. http://localhost:3000/admin_data will get you to the application's data. On production,
   only admin can view data, no one can edit (modify config/initializers/admin_data.rb to adjust this)
 - db-populate for seed data
