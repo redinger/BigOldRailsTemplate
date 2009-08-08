@@ -213,6 +213,7 @@ public/system/*
 .idea/*
 tmp/metric_fu/*
 tmp/sent_mails/*
+.ackrc
 END
 
 commit_state "base application"
@@ -283,6 +284,11 @@ environment 'config.middleware.use "Rack::Bug"', :env => 'development'
 environment 'config.middleware.use "Rack::Bug"', :env => 'staging'
 
 commit_state "Set up staging environment and hooked up Rack::Bug"
+
+# make sure HAML files get searched if we go that route
+file '.ackrc', <<-END
+--type-set=haml=.haml
+END
 
 # some files for app
 download "http://livevalidation.com/javascripts/src/1.3/livevalidation_prototype.js", "public/javascripts/livevalidation.js"
