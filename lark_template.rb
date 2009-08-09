@@ -265,11 +265,18 @@ gem "binarylogic-searchlogic",
   :lib     => 'searchlogic',
   :source  => 'http://gems.github.com',
   :version => '~> 2.0'
+  
 # development only
 gem "cwninja-inaction_mailer", 
   :lib => 'inaction_mailer/force_load', 
   :source => 'http://gems.github.com', 
   :env => 'development'
+
+# test only
+config.gem "timocratic-test_benchmark", 
+  :lib => 'test_benchmark', 
+  :source => 'http://gems.github.com',
+  :env => 'test'
 
 # assume gems are already on dev box, so don't install    
 # rake("gems:install", :sudo => true)
@@ -2712,6 +2719,7 @@ Testing Tools
 - metric-fu for static code analysis. rake metrics:all, configure in Rakefile
 - inaction-mailer is installed for development environment, so mails sent during dev will end up as files in /tmp/sent_mails
 - time-warp for forcing time in tests (use pretend_now_is)
+- test_benchmark to identify slow tests (in test environment only)
 END
 
 commit_state "static pages"
