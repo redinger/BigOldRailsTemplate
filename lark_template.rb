@@ -273,7 +273,7 @@ gem "cwninja-inaction_mailer",
   :env => 'development'
 
 # test only
-config.gem "timocratic-test_benchmark", 
+gem "timocratic-test_benchmark", 
   :lib => 'test_benchmark', 
   :source => 'http://gems.github.com',
   :env => 'test'
