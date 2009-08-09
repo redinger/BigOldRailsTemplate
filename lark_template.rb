@@ -273,7 +273,8 @@ gem "cwninja-inaction_mailer",
   :env => 'development'
 gem "ffmike-query_trace",
   :lib => 'query_trace', 
-  :source => 'http://gems.github.com'
+  :source => 'http://gems.github.com',
+  :emv => 'development'
 
 # test only
 gem "timocratic-test_benchmark", 
