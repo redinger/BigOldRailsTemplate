@@ -271,6 +271,9 @@ gem "cwninja-inaction_mailer",
   :lib => 'inaction_mailer/force_load', 
   :source => 'http://gems.github.com', 
   :env => 'development'
+gem "ffmike-query_trace",
+  :lib => 'query_trace', 
+  :source => 'http://gems.github.com'
 
 # test only
 gem "timocratic-test_benchmark", 
@@ -558,6 +561,11 @@ ActiveSupport::CoreExtensions::Time::Conversions::DATE_FORMATS.merge!(
 )
 
 Date::DATE_FORMATS[:human] = "%B %e, %Y"
+END
+
+initializer 'query_trace.db', <<-END
+# Turn on query tracing output; requires server restart
+# QueryTrace.enable!
 END
 
 commit_state "application files and initializers"
@@ -2720,6 +2728,7 @@ Testing Tools
 - inaction-mailer is installed for development environment, so mails sent during dev will end up as files in /tmp/sent_mails
 - time-warp for forcing time in tests (use pretend_now_is)
 - test_benchmark to identify slow tests (in test environment only)
+- query-trace to locate source of queries in the log (development only - turn on via config/initializers/query_trace.rb)
 END
 
 commit_state "static pages"
