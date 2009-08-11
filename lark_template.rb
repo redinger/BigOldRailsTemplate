@@ -990,7 +990,7 @@ test: &TEST
 
 test2:
   adapter: sqlite3
-  database: db/tes2t.sqlite3
+  database: db/test2.sqlite3
   pool: 5
   timeout: 5000
 
