@@ -233,7 +233,7 @@ plugins =
                     :if => 'monitoring == "new_relic"'},
     'object_daddy' => {:options => {:git => 'git://github.com/flogic/object_daddy.git'}},
     'paperclip' => {:options => {:git => 'git://github.com/thoughtbot/paperclip.git'}},
-    'parallel_specs' => {:options => {:git => 'git://github.com/jasonm/parallel_specs.git'}},
+    'parallel_specs' => {:options => {:git => 'git://github.com/grosser/parallel_specs.git'}},
     'rack-bug' => {:options => {:git => 'git://github.com/brynary/rack-bug.git'}},
     'rubaidhstrano' => {:options => {:git => 'git://github.com/rubaidh/rubaidhstrano.git'}},
     'scout_rails_instrumentation' => {:options => {:git => 'git://github.com/highgroove/scout_rails_instrumentation.git'},
