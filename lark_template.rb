@@ -169,7 +169,7 @@ def install_plugin (name, options)
   when 'piston'
     piston_plugin name, options
   when 'braid'
-    # TODO
+    braid_plugin name, options
   when 'git'
     plugin name, options.merge(:submodule => true)
   end
@@ -196,7 +196,7 @@ run "rm public/index.html"
 run "rm public/favicon.ico"
 
 # Set up git repository
-# must do before running piston
+# must do before running piston or braid
 git :init
 
 # Set up gitignore and commit base state
@@ -226,6 +226,7 @@ plugins =
     'exceptional' => {:options => {:git => 'git://github.com/contrast/exceptional.git'},
                       :if => 'exception_handling == "exceptional"'},
     'fast_remote_cache' => {:options => {:git => 'git://github.com/37signals/fast_remote_cache.git'}},
+    'hashdown' => {:options => {:git => 'git://github.com/rubysolo/hashdown.git'}},
     'hoptoad_notifier' => {:options => {:git => 'git://github.com/thoughtbot/hoptoad_notifier.git'},
                            :if => 'exception_handling == "hoptoad"'},
     'live_validations' => {:options => {:git => 'git://github.com/augustl/live-validations.git'}},
@@ -274,7 +275,7 @@ gem "cwninja-inaction_mailer",
 gem "ffmike-query_trace",
   :lib => 'query_trace', 
   :source => 'http://gems.github.com',
-  :emv => 'development'
+  :env => 'development'
 
 # test only
 gem "timocratic-test_benchmark", 
@@ -564,9 +565,21 @@ ActiveSupport::CoreExtensions::Time::Conversions::DATE_FORMATS.merge!(
 Date::DATE_FORMATS[:human] = "%B %e, %Y"
 END
 
-initializer 'query_trace.db', <<-END
+initializer 'query_trace.rb', <<-END
 # Turn on query tracing output; requires server restart
 # QueryTrace.enable!
+END
+
+initializer 'backtrace_silencers.rb', <<-END
+# Be sure to restart your server when you modify this file.
+
+# You can add backtrace silencers for libraries that you're using but don't wish to see in your backtraces.
+# Rails.backtrace_cleaner.add_silencer { |line| line =~ /my_noisy_library/ }
+
+# You can also remove all the silencers if you're trying do debug a problem that might steem from framework code.
+# Rails.backtrace_cleaner.remove_silencers!
+
+Rails.backtrace_cleaner.add_silencer { |line| line =~ /haml/ }
 END
 
 commit_state "application files and initializers"
@@ -1399,6 +1412,149 @@ class ApplicationHelperTest < ActionView::TestCase
 end
 END
 
+file 'test/functional/accounts_controller_test.rb', <<-END
+require 'test_helper'
+
+class AccountsControllerTest < ActionController::TestCase
+  
+  should_have_before_filter :require_no_user, :only => [:new, :create]
+  should_have_before_filter :require_user, :only => [:show, :edit, :update]
+  
+  context "routing" do
+    should_route :get, "/account/new", :controller => "accounts", :action => "new"
+    should_route :get, "/account/edit", :action=>"edit", :controller=>"accounts"
+    should_route :get, "/account", :action=>"show", :controller=>"accounts"
+    should_route :put, "/account", :action=>"update", :controller=>"accounts"
+    should_route :post, "/account", :action=>"create", :controller=>"accounts"
+    # TODO: Figure out what to do about this
+    # should_route :get, "/register", :action=>"new", :controller=>"accounts"
+    
+    context "named routes" do
+      setup do
+        get :show
+      end
+      
+      should "generate account_path" do
+        assert_equal "/account", account_path
+      end
+      should "generate new_account_path" do
+        assert_equal "/account/new", new_account_path
+      end
+      should "generate edit_account_path" do
+        assert_equal "/account/edit", edit_account_path
+      end
+      should "generate register_path" do
+        assert_equal "/register", register_path
+      end
+    end
+  end
+    
+  context "on GET to :new" do
+    setup do
+      controller.stubs(:require_no_user).returns(true)
+      @the_user = User.generate!
+      User.stubs(:new).returns(@the_user)
+      get :new
+    end
+    
+    should_assign_to(:user) { @the_user }
+    should_assign_to(:page_title) { "Create Account" }
+    should_respond_with :success
+    should_render_template "users/new"
+    should_not_set_the_flash
+  end
+
+  context "on POST to :create" do
+    setup do
+      controller.stubs(:require_no_user).returns(true)
+      @the_user = User.generate!
+      User.stubs(:new).returns(@the_user)
+    end
+    
+    context "with successful creation" do
+      setup do
+        @the_user.stubs(:save).returns(true)
+        post :create, :user => { :login => "bobby", :password => "bobby", :password_confirmation => "bobby" }
+      end
+
+      should_assign_to(:user) { @the_user }
+      should_respond_with :redirect
+      should_set_the_flash_to "Account registered!"
+      should_redirect_to("the root url") { root_url }
+    end
+    
+    context "with failed creation" do
+      setup do
+        @the_user.stubs(:save).returns(false)
+        post :create, :user => { :login => "bobby", :password => "bobby", :password_confirmation => "bobby" }
+      end
+      
+      should_assign_to(:user) { @the_user }
+      should_respond_with :success
+      should_not_set_the_flash
+      should_render_template "users/new"
+    end
+  end
+  
+  context "with a regular user" do
+    setup do
+      @the_user = User.generate!
+      UserSession.create(@the_user)
+    end
+
+    context "on GET to :show" do
+      setup do
+        get :show
+      end
+    
+      should_assign_to(:user) { @the_user }
+      should_assign_to(:page_title) { "\#{@the_user.login} details" }
+      should_respond_with :success
+      should_not_set_the_flash
+      should_render_template "users/show"
+    end
+
+    context "on GET to :edit" do
+      setup do
+        get :edit
+      end
+    
+      should_assign_to(:user) { @the_user }
+      should_assign_to(:page_title) { "Edit \#{@the_user.login}" }
+      should_respond_with :success
+      should_not_set_the_flash
+      should_render_template "users/edit"
+    end
+
+    context "on PUT to :update" do
+      context "with successful update" do
+        setup do
+          User.any_instance.stubs(:update_attributes).returns(true)
+          put :update, :user => {:login => "bill" }
+        end
+      
+        should_assign_to(:user) { @the_user }
+        should_respond_with :redirect
+        should_set_the_flash_to "Account updated!"
+        should_redirect_to("the user's account") { account_url }
+      end
+    
+      context "with failed update" do
+        setup do
+          User.any_instance.stubs(:update_attributes).returns(false)
+          put :update, :user => {:login => "bill" }
+        end
+      
+        should_assign_to(:user) { @the_user }
+        should_respond_with :success
+        should_not_set_the_flash
+        should_render_template "users/edit"
+      end
+    end
+  end
+end
+END
+
 file 'test/functional/application_controller_test.rb', <<-END
 require 'test_helper'
 
@@ -1446,7 +1602,7 @@ class ApplicationControllerTest < ActionController::TestCase
 end
 END
 
-file 'test/functional/user_controller_test.rb', <<-END
+file 'test/functional/users_controller_test.rb', <<-END
 require 'test_helper'
 
 class UsersControllerTest < ActionController::TestCase
@@ -1454,7 +1610,37 @@ class UsersControllerTest < ActionController::TestCase
   should_have_before_filter :require_no_user, :only => [:new, :create]
   should_have_before_filter :require_user, :only => [:show, :edit, :update]
   should_have_before_filter :admin_required, :only => [:index, :destroy]
-   
+  
+  
+  context "routing" do
+    should_route :get, "/users", :action=>"index", :controller=>"users"
+    should_route :post, "/users", :action=>"create", :controller=>"users"
+    should_route :get, "/users/new", :action=>"new", :controller=>"users"
+    should_route :get, "/users/1/edit", :action=>"edit", :controller=>"users", :id => 1
+    should_route :get, "/users/1", :action=>"show", :controller=>"users", :id => 1
+    should_route :put, "/users/1", :action=>"update", :controller=>"users", :id => 1
+    should_route :delete, "/users/1", :action=>"destroy", :controller=>"users", :id => 1
+    
+    context "named routes" do
+      setup do
+        get :index
+      end
+      
+      should "generate users_path" do
+        assert_equal "/users", users_path
+      end
+      should "generate user_path" do
+        assert_equal "/users/1", user_path(1)
+      end
+      should "generate new_user_path" do
+        assert_equal "/users/new", new_user_path
+      end
+      should "generate edit_user_path" do
+        assert_equal "/users/1/edit", edit_user_path(1)
+      end
+    end
+  end
+    
   context "on GET to :index" do
     setup do
       controller.stubs(:admin_required).returns(true)
@@ -1518,62 +1704,9 @@ class UsersControllerTest < ActionController::TestCase
   end
   
   context "with a regular user" do
-    setup do
-      @the_user = User.generate!
-      UserSession.create(@the_user)
-    end
-
-    context "on GET to :show" do
-      setup do
-        get :show
-      end
-    
-      should_assign_to(:user) { @the_user }
-      should_assign_to(:page_title) { "\#{@the_user.login} details" }
-      should_respond_with :success
-      should_not_set_the_flash
-      should_render_template :show
-    end
-
-    context "on GET to :edit" do
-      setup do
-        get :edit
-      end
-    
-      should_assign_to(:user) { @the_user }
-      should_assign_to(:page_title) { "Edit \#{@the_user.login}" }
-      should_respond_with :success
-      should_not_set_the_flash
-      should_render_template :edit
-    end
-
-    context "on PUT to :update" do
-      context "with successful update" do
-        setup do
-          User.any_instance.stubs(:update_attributes).returns(true)
-          put :update, :user => { :login => "bill" }
-        end
-      
-        should_assign_to(:user) { @the_user }
-        should_respond_with :redirect
-        should_set_the_flash_to "Account updated!"
-        should_redirect_to("the user's account") { account_url }
-      end
-    
-      context "with failed update" do
-        setup do
-          User.any_instance.stubs(:update_attributes).returns(false)
-          put :update, :user => { :login => "bill" }
-        end
-      
-        should_assign_to(:user) { @the_user }
-        should_respond_with :success
-        should_not_set_the_flash
-        should_render_template :edit
-      end
-    end
+    # TODO: insert checks that user can only get to their own stuff, even with spoofed URLs
   end
-
+  
   context "with an admin user" do
     setup do
       @admin_user = User.generate!
@@ -1645,12 +1778,40 @@ class UsersControllerTest < ActionController::TestCase
 end
 END
 
-file 'test/functional/user_sessions_controller.rb', <<-END
+file 'test/functional/user_sessions_controller_test.rb', <<-END
 require 'test_helper'
 
 class UserSessionsControllerTest < ActionController::TestCase
   should_have_before_filter :require_no_user, :only => [:new, :create]
   should_have_before_filter :require_user, :only => :destroy
+
+  context "routing" do
+    should_route :get, "/account/new", :controller => "accounts", :action => "new"
+    should_route :post, "/account", :action=>"create", :controller=>"accounts"
+    should_route :delete, "/user_session", :action=>"destroy", :controller=>"user_sessions"
+    # TODO: Figure out what to do about these
+    # should_route :get, "/login", :action=>"new", :controller=>"user_sessions"
+    # should_route :get, "/logout", :action=>"destroy", :controller=>"user_sessions"
+    
+    context "named routes" do
+      setup do
+        get :new
+      end
+      
+      should "generate user_session_path" do
+        assert_equal "/user_session", user_session_path
+      end
+      should "generate new_user_session_path" do
+        assert_equal "/user_session/new", new_user_session_path
+      end
+      should "generate login_path" do
+        assert_equal "/login", login_path
+      end
+      should "generate logout_path" do
+        assert_equal "/logout", logout_path
+      end
+    end
+  end
 
   context "on GET to :new" do
     setup do
@@ -1722,6 +1883,21 @@ file 'test/functional/pages_controller_test.rb', <<-END
 require 'test_helper'
 
 class PagesControllerTest < ActionController::TestCase
+
+  context "routing" do
+    should_route :get, "/", :action=>"home", :controller=>"pages"
+    should_route :get, "/pages/foo", :controller=>"pages", :action => "foo"
+    
+    context "named routes" do
+      setup do
+        get :home
+      end
+      
+      should "generate root_path" do
+        assert_equal "/", root_path
+      end
+    end
+  end
   
   {:home => '#{current_app_name}',
    :css_test => 'CSS Test'#{upgrade_test}}.each do | page, page_title |
@@ -1756,7 +1932,30 @@ class PasswordResetsControllerTest < ActionController::TestCase
 
   should_have_before_filter :load_user_using_perishable_token, :only => [:edit, :update]
   should_have_before_filter :require_no_user
-
+  
+  context "routing" do
+    should_route :post, "/password_resets", :action=>"create", :controller=>"password_resets"
+    should_route :get, "/password_resets/new", :action=>"new", :controller=>"password_resets"
+    should_route :get, "/password_resets/1/edit", :action=>"edit", :controller=>"password_resets", :id => 1
+    should_route :put, "/password_resets/1", :action=>"update", :controller=>"password_resets", :id => 1
+    
+    context "named routes" do
+      setup do
+        get :new
+      end
+      
+      should "generate new_password_reset_path" do
+        assert_equal "/password_resets/new", new_password_reset_path
+      end
+      should "generate edit_password_reset_path" do
+        assert_equal "/password_resets/1/edit", edit_password_reset_path(1)
+      end
+      should "generate password_reset_path" do
+        assert_equal "/password_resets/1", password_reset_path(1)
+      end
+    end
+  end
+    
   context "on GET to :new" do
     setup do
       controller.stubs(:require_no_user).returns(true)
@@ -1845,52 +2044,61 @@ class PasswordResetsControllerTest < ActionController::TestCase
 end
 END
 
-file 'test/integration/routing_test.rb', <<-END
-require 'test_helper'
-
-class RoutingTest < ActionController::IntegrationTest
-  context "routing" do
-  
-    should_route :get, "/account/new", :controller => "users", :action => "new"
-    should_route :get, "/account/edit", :action=>"edit", :controller=>"users"
-    should_route :get, "/account", :action=>"show", :controller=>"users"
-    should_route :put, "/account", :action=>"update", :controller=>"users"
-    should_route :delete, "/account", :action=>"destroy", :controller=>"users"
-    should_route :post, "/account", :action=>"create", :controller=>"users"
-    should_route :get, "/password_resets", :action=>"index", :controller=>"password_resets"
-    should_route :post, "/password_resets", :action=>"create", :controller=>"password_resets"
-    should_route :get, "/password_resets/new", :action=>"new", :controller=>"password_resets"
-    should_route :get, "/password_resets/1/edit", :action=>"edit", :controller=>"password_resets", :id => 1
-    should_route :get, "/password_resets/1", :action=>"show", :controller=>"password_resets", :id => 1
-    should_route :put, "/password_resets/1", :action=>"update", :controller=>"password_resets", :id => 1
-    should_route :delete, "/password_resets/1", :action=>"destroy", :controller=>"password_resets", :id => 1
-    should_route :get, "/users", :action=>"index", :controller=>"users"
-    should route(:post, "/users").to(:action=>"create", :controller=>"users")
-    should route(:get, "/users/new").to(:action=>"new", :controller=>"users")
-    should_route :get, "/users/1/edit", :action=>"edit", :controller=>"users", :id => 1
-    should_route :get, "/users/1", :action=>"show", :controller=>"users", :id => 1
-    should_route :put, "/users/1", :action=>"update", :controller=>"users", :id => 1
-    should_route :delete, "/users/1", :action=>"destroy", :controller=>"users", :id => 1
-    should_route :get, "/user_session/new", :action=>"new", :controller=>"user_sessions"
-    should_route :get, "/user_session/edit", :action=>"edit", :controller=>"user_sessions"
-    should_route :get, "/user_session", :action=>"show", :controller=>"user_sessions"
-    should_route :put, "/user_session", :action=>"update", :controller=>"user_sessions"
-    should_route :delete, "/user_session", :action=>"destroy", :controller=>"user_sessions"
-    should_route :post, "/user_session", :action=>"create", :controller=>"user_sessions"
-    should_route :get, "/", :action=>"home", :controller=>"pages"
-    should route(:get, "/home").to(:action=>"home", :controller=>"pages")
-    should route(:get, "/login").to(:action=>"new", :controller=>"user_sessions")
-    should route(:get, "/logout").to(:action=>"destroy", :controller=>"user_sessions")
-    should route(:get, "/register").to(:action=>"new", :controller=>"users")
-    should_route :get, "/pages/foo", :controller=>"pages", :action => "foo"
-
-  end
-end
-END
-
 commit_state "basic tests"
 
 # authlogic setup
+file 'app/controllers/accounts_controller.rb', <<-END
+class AccountsController < ApplicationController
+  before_filter :require_no_user, :only => [:new, :create]
+  before_filter :require_user, :only => [:show, :edit, :update]
+  
+  def new
+    @user = User.new
+    @page_title = "Create Account"
+    render :template => "users/new"
+  end
+  
+  def create
+    @user = User.new(params[:user])
+    if @user.save
+      flash[:notice] = "Account registered!"
+      redirect_back_or_default root_url
+    else
+      render :template => "users/new"
+    end
+  end
+  
+  def show
+    find_user
+    @page_title = "\#{@user.login} details"
+    render :template => "users/show"
+  end
+
+  def edit
+    find_user
+    @page_title = "Edit \#{@user.login}"
+    render :template => "users/edit"
+  end
+  
+  def update
+    find_user
+    if @user.update_attributes(params[:user])
+      flash[:notice] = "Account updated!"
+      redirect_to account_url
+    else
+      render :template => "users/edit"
+    end
+  end
+
+private
+
+  def find_user
+    @user = @current_user
+  end
+  
+end
+END
+
 file 'app/controllers/password_resets_controller.rb', <<-END
 class PasswordResetsController < ApplicationController
   before_filter :load_user_using_perishable_token, :only => [:edit, :update]
@@ -2208,7 +2416,7 @@ file 'app/views/users/edit.html.erb', <<-END
 
 <% form_for @user, :url => account_path, :live_validations => true do |f| %>
   <%= f.error_messages %>
-  <%= render :partial => "form", :object => f %>
+  <%= render :partial => "users/form", :object => f %>
   <%= f.submit "Update" %>
 <% end %>
 
@@ -2220,7 +2428,7 @@ file 'app/views/users/new.html.erb', <<-END
 
 <% form_for @user, :url => account_path, :live_validations => true do |f| %>
   <%= f.error_messages %>
-  <%= render :partial => "form", :object => f %>
+  <%= render :partial => "users/form", :object => f %>
   <%= f.submit "Register" %>
 <% end %>
 END
@@ -2665,13 +2873,13 @@ commit_state "static pages"
 # simple default routing
 file 'config/routes.rb', <<-END
 ActionController::Routing::Routes.draw do |map|
-  map.resource :account, :controller => "users"
-  map.resources :password_resets
+  map.resource :account, :except => :destroy
+  map.resources :password_resets, :only => [:new, :create, :edit, :update]
   map.resources :users
-  map.resource :user_session
+  map.resource :user_session, :only => [:new, :create, :destroy]
   map.login 'login', :controller => "user_sessions", :action => "new"
   map.logout 'logout', :controller => "user_sessions", :action => "destroy"
-  map.register 'register', :controller => "users", :action => "new"
+  map.register 'register', :controller => "accounts", :action => "new"
   map.root :controller => "pages", :action => "home"
   map.pages 'pages/:action', :controller => "pages"
 end
