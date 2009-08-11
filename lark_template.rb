@@ -912,37 +912,7 @@ test: &TEST
   adapter: mysql
   encoding: utf8
   reconnect: false
-  database: #{current_app_name}_test
-  pool: 5
-  username: root
-  password:
-  socket: /tmp/mysql.sock
-
-test2:
-  adapter: mysql
-  encoding: utf8
-  reconnect: false
-  database: #{current_app_name}_test2
-  pool: 5
-  username: root
-  password:
-  socket: /tmp/mysql.sock
-
-test3:
-  adapter: mysql
-  encoding: utf8
-  reconnect: false
-  database: #{current_app_name}_test3
-  pool: 5
-  username: root
-  password:
-  socket: /tmp/mysql.sock
-
-test4:
-  adapter: mysql
-  encoding: utf8
-  reconnect: false
-  database: #{current_app_name}_test4
+  database: #{current_app_name}_test<%= ENV['TEST_ENV_NUMBER'] %>
   pool: 5
   username: root
   password:
@@ -984,25 +954,7 @@ development:
 # Do not set this db to the same as development or production.
 test: &TEST
   adapter: sqlite3
-  database: db/test.sqlite3
-  pool: 5
-  timeout: 5000
-
-test2:
-  adapter: sqlite3
-  database: db/test2.sqlite3
-  pool: 5
-  timeout: 5000
-
-test3:
-  adapter: sqlite3
-  database: db/test3.sqlite3
-  pool: 5
-  timeout: 5000
-
-test4:
-  adapter: sqlite3
-  database: db/test4.sqlite3
+  database: db/test<%= ENV['TEST_ENV_NUMBER'] %>.sqlite3
   pool: 5
   timeout: 5000
 
@@ -1062,31 +1014,7 @@ development:
 test: &TEST
   adapter: postgresql
   encoding: unicode
-  database: #{current_app_name}_test
-  pool: 5
-  username: postgres
-  password:
-
-test2:
-  adapter: postgresql
-  encoding: unicode
-  database: #{current_app_name}_test2
-  pool: 5
-  username: postgres
-  password:
-
-test3:
-  adapter: postgresql
-  encoding: unicode
-  database: #{current_app_name}_test3
-  pool: 5
-  username: postgres
-  password:
-
-test4:
-  adapter: postgresql
-  encoding: unicode
-  database: #{current_app_name}_test4
+  database: #{current_app_name}_test<%= ENV['TEST_ENV_NUMBER'] %>
   pool: 5
   username: postgres
   password:
@@ -2754,10 +2682,6 @@ commit_state "routing"
 # databases
 rake('db:create')
 rake('db:migrate')
-rake('db:create', :env => "test")
-rake('db:create', :env => "test2")
-rake('db:create', :env => "test3")
-rake('db:create', :env => "test4")
 rake('parallel:prepare[4]')
 commit_state "databases set up"
 
