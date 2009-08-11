@@ -2666,7 +2666,6 @@ TODO after installing:
 - Add app to gitosis config
 - git remote add origin git@gitosis server:#{current_app_name}.git
 - git push origin master:refs/heads/master
-- create databases for parallel_test (rake db:create:all)
 
 This application includes:
 
@@ -2717,9 +2716,10 @@ Testing Tools
 - Mocha for mocking
 - Object Daddy for factories
 - Generated code is already covered by tests
-- parallel-test for faster testing. 
-    rake test:parallel:prepare[2] to set up two test databases
+- parallel-specs for faster testing. 
+    rake parallel:prepare[2] to set up two test databases (already done)
     rake test:parallel[2] to distribute tests across two cores
+    rake -T parallel to see more - RSpec and Cucumber are also supported
 - rack-bug for request/response/perf analysis. http://localhost:3000/__rack_bug__/bookmarklet.html to add bookmarklet to browser.
 - shmacros for additional Shoulda macros
     should_accept_nested_attributes_for, should_act_as_taggable_on, should_callback, should_delegate, more
@@ -2758,7 +2758,7 @@ rake('db:create', :env => "test")
 rake('db:create', :env => "test2")
 rake('db:create', :env => "test3")
 rake('db:create', :env => "test4")
-rake('spec:parallel:prepare[4]')
+rake('parallel:prepare[4]')
 commit_state "databases set up"
 
 # rakefile for metric_fu
