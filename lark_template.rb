@@ -23,7 +23,7 @@ def commit_state(comment)
   git :commit => "-am '#{comment}'"
 end
 
-# Piston methods out of my own head
+# Piston and braid methods out of my own head
 # sudo gem install piston on your dev box before using these
 # Piston locking support with git requires Piston 2.0.3+
 # Piston branch management with git 1.6.3 requires Piston 2.0.5+
@@ -1091,7 +1091,7 @@ require 'mocha'
 require 'authlogic/test_case'
 
 # skip after_create callback during testing
-# class Company < ActiveRecord::Base; def setup_default_categories; end; end
+class User < ActiveRecord::Base; def send_welcome_email; end; end
 
 class ActiveSupport::TestCase
   
@@ -1117,6 +1117,17 @@ require 'test_helper'
 
 class NotifierTest < ActionMailer::TestCase
   
+  should "send welcome email" do
+    user = User.generate!
+    Notifier.deliver_welcome_email(user)
+    assert_sent_email do |email|
+      email.subject = "Welcome to #{current_app_name}!"
+      email.from.include?('Lark Group <noreply@larkfarm.com>')
+      email.to.include?(user.email)
+      email.body =~ Regexp.new(user.login)
+    end
+  end
+
   should "send password reset instructions" do
     user = User.generate!
     Notifier.deliver_password_reset_instructions(user)
@@ -1931,7 +1942,6 @@ require 'test_helper'
 class PasswordResetsControllerTest < ActionController::TestCase
 
   should_have_before_filter :load_user_using_perishable_token, :only => [:edit, :update]
-  should_have_before_filter :require_no_user
   
   context "routing" do
     should_route :post, "/password_resets", :action=>"create", :controller=>"password_resets"
@@ -2102,7 +2112,6 @@ END
 file 'app/controllers/password_resets_controller.rb', <<-END
 class PasswordResetsController < ApplicationController
   before_filter :load_user_using_perishable_token, :only => [:edit, :update]
-  before_filter :require_no_user
   
   def new
     @page_title = "Forgot Password?"
@@ -2249,12 +2258,25 @@ class Notifier < ActionMailer::Base
   default_url_options[:host] = "larkfarm.com"
   
   def password_reset_instructions(user)
-    subject       "Password Reset Instructions"
-    from          "Administrator <noreply@example.com>"
-    recipients    user.email
-    sent_on       Time.now
-    body          :edit_password_reset_url => edit_password_reset_url(user.perishable_token)
+    setup(user)
+    subject "Password Reset Instructions"
+    body :edit_password_reset_url => edit_password_reset_url(user.perishable_token)
   end
+
+  def welcome_email(user)
+    setup(user)
+    subject "Welcome to #{current_app_name}!"
+    body :user => user
+  end
+  
+private
+
+  def setup(user)
+    from "Lark Group <noreply@larkfarm.com>"
+    sent_on Time.now
+    recipients user.email
+  end
+  
 end
 END
 
@@ -2268,6 +2290,7 @@ class User < ActiveRecord::Base
   serialize :roles, Array
   
   before_validation_on_create :make_default_roles
+  after_create :send_welcome_email
   
   attr_accessible :login, :password, :password_confirmation, :email, :first_name, :last_name
   
@@ -2312,12 +2335,22 @@ class UserSession < Authlogic::Session::Base
 end
 END
 
-file 'app/views/notifier/password_reset_instructions.erb', <<-END
+file 'app/views/notifier/password_reset_instructions.html.erb', <<-END
 A request to reset your password has been made. If you did not make this request, simply ignore this email. If you did make this request just click the link below:
 
 <%= @edit_password_reset_url %>
 
 If the above URL does not work try copying and pasting it into your browser. If you continue to have problem please feel free to contact us.
+END
+
+file 'app/views/notifier/welcome_email.html.erb', <<-END
+Welcome to #{current_app_name}!
+
+Thank you for creating an account at #{current_app_name}.
+
+Your login is <%= @user.login %>. You can log in to the site at <%= login_url %> .
+
+If you forget your password, you can visit <%= new_password_reset_url %> to reset it.
 END
 
 file 'app/views/password_resets/edit.html.erb', <<-END
@@ -2336,7 +2369,7 @@ file 'app/views/password_resets/edit.html.erb', <<-END
 END
 
 file 'app/views/password_resets/new.html.erb', <<-END
-<h1>Forgot Password</h1>
+<h1>Reset Password</h1>
 
 Fill out the form below and instructions to reset your password will be emailed to you:<br />
 <br />
@@ -2364,6 +2397,7 @@ file 'app/views/user_sessions/new.html.erb', <<-END
   <br />
   <%= f.submit "Login" %>
 <% end %>
+<%= link_to "Register", register_path %>
 END
 
 file 'app/views/users/index.html.erb', <<-END
@@ -2400,11 +2434,13 @@ file 'app/views/users/_form.html.erb', <<-END
 <%= form.label :login %><br />
 <%= form.text_field :login %><br />
 <br />
-<%= form.label :password, form.object.new_record? ? nil : "Change password" %><br />
-<%= form.password_field :password %><br />
-<br />
-<%= form.label :password_confirmation %><br />
-<%= form.password_field :password_confirmation %><br />
+<% if form.object.new_record? %>
+  <%= form.label :password %><br />
+  <%= form.password_field :password %><br />
+  <br />
+  <%= form.label :password_confirmation %><br />
+  <%= form.password_field :password_confirmation %><br />
+<% end %>
 <br />
 <%= form.label :email %><br />
 <%= form.text_field :email %><br />
