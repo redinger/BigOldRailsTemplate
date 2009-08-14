@@ -293,7 +293,7 @@ gem "ffmike-query_trace",
   :env => 'development'
 
 # test only
-gem "timocratic-test_benchmark", 
+gem "ffmike-test_benchmark", 
   :lib => 'test_benchmark', 
   :source => 'http://gems.github.com',
   :env => 'test'
@@ -1111,6 +1111,10 @@ require 'test_help'
 require 'shoulda'
 require 'mocha'
 require 'authlogic/test_case'
+
+# show less output on test benchmarks
+# use (0,0) to suppress benchmark output entirely
+Test::Unit::UI::Console::TestRunner.set_test_benchmark_limits(1,5)
 
 # skip after_create callback during testing
 class User < ActiveRecord::Base; def send_welcome_email; end; end
