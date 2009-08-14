@@ -346,6 +346,18 @@ file 'app/views/layouts/application.html.erb', <<-END
 </html>
 END
 
+# rakefile for use with inaction_mailer
+rakefile 'mail.rake', <<-END
+namespace :mail do
+  desc "Remove all files from tmp/sent_mails"
+  task :clear do
+    FileList["tmp/sent_mails/*"].each do |mail_file|
+      File.delete(mail_file)
+    end
+  end
+end
+END
+
 file 'public/stylesheets/application.css', <<-END
 /* @group Browser Reset */
 
@@ -2930,6 +2942,7 @@ Testing Tools
     should_have_before_filter, should_have_after_filter
 - metric-fu for static code analysis. rake metrics:all, configure in Rakefile
 - inaction-mailer is installed for development environment, so mails sent during dev will end up as files in /tmp/sent_mails
+  Get rid of all sent mail files with rake mail:clear
 - time-warp for forcing time in tests (use pretend_now_is)
 - test_benchmark to identify slow tests (in test environment only)
 - query-trace to locate source of queries in the log (development only - turn on via config/initializers/query_trace.rb)
