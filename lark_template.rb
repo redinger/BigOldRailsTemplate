@@ -1206,6 +1206,7 @@ class UserTest < ActiveSupport::TestCase
     end
   
     should_callback :make_default_roles, :before_validation_on_create
+    should_callback :send_welcome_email, :after_create
   
     should_allow_mass_assignment_of :login, :password, :password_confirmation, :first_name, :last_name, :email
     should_not_allow_mass_assignment_of :crypted_password, :password_salt, :persistence_token, :login_count, :last_request_at, :last_login_at,
@@ -2352,6 +2353,10 @@ class User < ActiveRecord::Base
 private
   def make_default_roles
     clear_roles if roles.nil?
+  end
+  
+  def send_welcome_email
+    Notifier.deliver_welcome_email(self)
   end
 end
 END
