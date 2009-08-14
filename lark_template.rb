@@ -1,5 +1,6 @@
 require 'open-uri'
 require 'yaml'
+require 'Base64'
 
 # Utility Methods
  
@@ -161,6 +162,20 @@ rails_strategy = "vendored" if rails_strategy.nil?
 
 ie6_blocking = template_options["ie6_blocking"].nil? ? ask("Which IE 6 blocking? none, light (default), ie6nomore").downcase : template_options["ie6_blocking"]
 ie6_blocking = "light" if ie6_blocking.nil?
+
+smtp_address = template_options["smtp_address"]
+smtp_domain = template_options["smtp_domain"]
+smtp_username = template_options["smtp_username"]
+smtp_password = template_options["smtp_password"]
+capistrano_user = template_options["capistrano_user"]
+capistrano_repo_host = template_options["capistrano_repo_host"]
+capistrano_production_host = template_options["capistrano_production_host"]
+capistrano_staging_host = template_options["capistrano_staging_host"]
+exceptional_api_key = template_options["exceptional_api_key"]
+hoptoad_api_key = template_options["hoptoad_api_key"]
+newrelic_api_key = template_options["newrelic_api_key"]
+notifier_email_from = template_options["notifier_email_from"]
+default_url_options_host = template_options["default_url_options_host"]
 
 def install_plugin (name, options)
   case @branch_management
@@ -542,16 +557,23 @@ initializer 'live_validations.rb', <<-END
 LiveValidations.use :livevalidation_dot_com, :default_valid_message => "", :validate_on_blur => true
 END
 
+base64_user_name = Base64.encode64(smtp_username)
+base64_password = Base64.encode64(smtp_password)
+
 initializer 'mail.rb', <<-END
 ActionMailer::Base.delivery_method = :smtp
 ActionMailer::Base.smtp_settings = {
-  :address => "111.111.111.111",
+  :address => "#{smtp_address}",
   :port => 25,
-  :domain => "example.com",
+  :domain => "#{smtp_domain}",
   :authentication => :login,
-  :user_name => "mikeg1@example.com",
-  :password => "password"  
+  :user_name => "#{smtp_username}",
+  :password => "#{smtp_password}"  
 }
+
+# base64 encodings - useful for manual SMTP testing:
+# username => #{base64_user_name}
+# password => #{base64_password}
 END
 
 initializer 'date_time_formats.rb', <<-END
@@ -589,8 +611,8 @@ capify!
 
 file 'config/deploy.rb', <<-END
 set :application, "#{current_app_name}"
-set :repository,  "git@gitosis_sever:#{current_app_name}.git"
-set :user, "webadmin"
+set :repository,  "git@#{capistrano_repo_host}:#{current_app_name}.git"
+set :user, "#{capistrano_user}"
 set :deploy_via, :fast_remote_cache
 set :scm, :git
 
@@ -614,12 +636,12 @@ end
 END
 
 file 'config/deploy/production.rb', <<-END
-set :host, "111.111.111.111"
+set :host, "#{capistrano_production_host}"
 set :branch, "master"
 END
 
 file 'config/deploy/staging.rb', <<-END
-set :host, "111.111.111.111"
+set :host, "#{capistrano_staging_host}"
 set :branch, "staging"
 END
 
@@ -631,7 +653,7 @@ if exception_handling == "exceptional"
 # here are the settings that are common to all environments
 common: &default_settings
   # You must specify your Exceptional API key here.
-  api-key: PASTE_YOUR_API_KEY_HERE
+  api-key: #{exceptional_api_key}
   # Exceptional creates a separate log file from your application's logs
   # available levels are debug, info, warn, error, fatal
   log-level: info
@@ -683,7 +705,7 @@ end
 if exception_handling == "hoptoad"
   initializer 'hoptoad.rb', <<-END
 HoptoadNotifier.configure do |config|
-  config.api_key = '1234567890abcdef'
+  config.api_key = '#{hoptoad_api_key}'
 end
 END
 end
@@ -703,7 +725,7 @@ common: &default_settings
   # ============================== LICENSE KEY ===============================
   # You must specify the licence key associated with your New Relic account.
   # This key binds your Agent's data to your account in the New Relic RPM service.
-  license_key: 'LICENSE_KEY_HERE'
+  license_key: '#{newrelic_api_key}'
   
   # Application Name
   # Set this to be the name of your application as you'd like it show up in RPM.
@@ -1122,7 +1144,7 @@ class NotifierTest < ActionMailer::TestCase
     Notifier.deliver_welcome_email(user)
     assert_sent_email do |email|
       email.subject = "Welcome to #{current_app_name}!"
-      email.from.include?('Lark Group <noreply@larkfarm.com>')
+      email.from.include?('#{notifier_email_from}')
       email.to.include?(user.email)
       email.body =~ Regexp.new(user.login)
     end
@@ -1133,7 +1155,7 @@ class NotifierTest < ActionMailer::TestCase
     Notifier.deliver_password_reset_instructions(user)
     assert_sent_email do |email|
       email.subject = "Password Reset Instructions"
-      email.from.include?('Lark Group <noreply@larkfarm.com>')
+      email.from.include?('#{notifier_email_from}')
       email.to.include?(user.email)
       email.body =~ Regexp.new(user.perishable_token)
     end
@@ -2255,7 +2277,7 @@ END
 
 file 'app/models/notifier.rb', <<-END
 class Notifier < ActionMailer::Base
-  default_url_options[:host] = "larkfarm.com"
+  default_url_options[:host] = "#{default_url_options_host}"
   
   def password_reset_instructions(user)
     setup(user)
@@ -2272,7 +2294,7 @@ class Notifier < ActionMailer::Base
 private
 
   def setup(user)
-    from "Lark Group <noreply@larkfarm.com>"
+    from "#{notifier_email_from}"
     sent_on Time.now
     recipients user.email
   end
@@ -2991,7 +3013,7 @@ if exception_handling == "exceptional"
   puts '  Put the right API key in config/exceptional.yml'
 end
 if exception_handling == "hoptoad"
-  puts '  Set up new app at http://www.hoptoadapp/com'
+  puts '  Set up new app at https://<your subdomain>.hoptoadapp.com/projects/new'
   puts '  Put the right API key in config/initializers/hoptoad.rb'
 end
 if monitoring == "new_relic"
@@ -3005,5 +3027,5 @@ puts '  Put the production database password in config/database.yml'
 puts '  Put mail server information in mail.rb'
 puts '  Put real IP address and git repo URL in deployment files'
 puts '  Add app to gitosis config'
-puts "  git remote add origin git@gitosis_server:#{current_app_name}.git"
+puts "  git remote add origin git@#{capistrano_repo_host}:#{current_app_name}.git"
 puts '  git push origin master:refs/heads/master'

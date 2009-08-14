@@ -5,7 +5,8 @@ rails new_app_name -m lark_template.rb
 I should warn you of two things. First, it’s a pretty heavyweight template, sticking a lot of stuff into the new application. This suits me, because I have a lot of things I use in just about every application, but it may not suit you. Second, Rails templates are not one-size-fits-all; you’d be better off treating this as a starting point to steal from than a finished template to use (though if you want to use it, feel free).
 
 There is some configuration available for the template. See config.yml to set persistent configuration information. If you don't have a 
-config.yml, or it doesn't have an option that the template is looking for, you'll be prompted at runtime.
+config.yml, or it doesn't have an option that the template is looking for, you'll be prompted at runtime for some of the information, and
+reasonably sensible defaults will be used for the rest. You should review config.yml before you first run the template.
 
 Here’s a list of what this template sets up:
 
