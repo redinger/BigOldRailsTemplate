@@ -17,6 +17,8 @@ branch_management: piston
 rails_strategy: vendored
 # IE6 blocking: none, light (default), ie6nomore
 ie6_blocking: light
+# javascript library: prototype (default), jquery
+javascript_library: jquery
 #
 # These options can be omitted, and the template will default to sensible behavior
 #

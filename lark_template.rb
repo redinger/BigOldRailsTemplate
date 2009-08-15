@@ -188,7 +188,7 @@ ie6_blocking = template_options["ie6_blocking"].nil? ? ask("Which IE 6 blocking?
 ie6_blocking = "light" if ie6_blocking.nil?
 
 @javascript_library = template_options["javascript_library"].nil? ? ask("Which javascript library? prototype (default), jquery").downcase : template_options["javascript_library"]
-@javascript_library = "light" if @javascript_library.nil?
+@javascript_library = "prototype" if @javascript_library.nil?
 
 smtp_address = template_options["smtp_address"]
 smtp_domain = template_options["smtp_domain"]
