@@ -24,6 +24,11 @@ def commit_state(comment)
   git :commit => "-am '#{comment}'"
 end
 
+# grab an arbitrary file from github
+def file_from_repo(github_user, repo, sha, filename, to = filename)
+  download("http://github.com/#{github_user}/#{repo}/raw/#{sha}/#{filename}", to)
+end
+
 # Piston and braid methods out of my own head
 # sudo gem install piston on your dev box before using these
 # Piston locking support with git requires Piston 2.0.3+
@@ -140,6 +145,13 @@ def update_app
     run("echo 'a' | rake rails:update:javascripts")
     run("echo 'a' | rake rails:update:configs")
     run("echo 'a' | rake rails:update:application_controller")
+
+    if @javascript_library != "prototype"
+      run "rm public/javascripts/controls.js"
+      run "rm public/javascripts/dragdrop.js"
+      run "rm public/javascripts/effects.js"
+      run "rm public/javascripts/prototype.js"
+    end
   end
 end
 
@@ -174,6 +186,9 @@ rails_strategy = "vendored" if rails_strategy.nil?
 
 ie6_blocking = template_options["ie6_blocking"].nil? ? ask("Which IE 6 blocking? none, light (default), ie6nomore").downcase : template_options["ie6_blocking"]
 ie6_blocking = "light" if ie6_blocking.nil?
+
+@javascript_library = template_options["javascript_library"].nil? ? ask("Which javascript library? prototype (default), jquery").downcase : template_options["javascript_library"]
+@javascript_library = "light" if @javascript_library.nil?
 
 smtp_address = template_options["smtp_address"]
 smtp_domain = template_options["smtp_domain"]
@@ -330,7 +345,11 @@ file '.ackrc', <<-END
 END
 
 # some files for app
-download "http://livevalidation.com/javascripts/src/1.3/livevalidation_prototype.js", "public/javascripts/livevalidation.js"
+if @javascript_library == "prototype"
+  download "http://livevalidation.com/javascripts/src/1.3/livevalidation_prototype.js", "public/javascripts/livevalidation.js"
+elsif @javascript_library == "jquery"
+  file_from_repo "ffmike", "jquery-validate", "master", "jquery.validate.min.js", "public/javascripts/jquery.validate.min.js"
+end
 
 file 'app/views/layouts/_flashes.html.erb', <<-END
 <div id="flash">
@@ -340,6 +359,12 @@ file 'app/views/layouts/_flashes.html.erb', <<-END
 </div>
 END
 
+if @javascript_library == "prototype"
+  javascript_include_tags = '<%= javascript_include_tag :defaults, "livevalidation", :cache => true %>'
+elsif @javascript_library == "jquery"
+  javascript_include_tags = '<%= javascript_include_tag "http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js", "http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js" %><%= javascript_include_tag "jquery.validate.min.js", "application", :cache => true  %>'
+end
+
 file 'app/views/layouts/application.html.erb', <<-END
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -348,7 +373,7 @@ file 'app/views/layouts/application.html.erb', <<-END
     <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
     <title><%= @page_title || controller.action_name %></title>
     <%= stylesheet_link_tag 'application', :media => 'all', :cache => true %>
-    <%= javascript_include_tag :defaults, "livevalidation", :cache => true %>
+    #{javascript_include_tags}
     <%= yield :head %>
   </head>
   <body>
@@ -577,9 +602,15 @@ ADMIN_DATA_VIEW_AUTHORIZATION = Proc.new { |controller| controller.send("admin_l
 ADMIN_DATA_UPDATE_AUTHORIZATION = Proc.new { |controller| return false }
 END
 
-initializer 'live_validations.rb', <<-END
+if @javascript_library == "prototype"
+  initializer 'live_validations.rb', <<-END
+LiveValidations.use :jquery_validations, :default_valid_message => "", :validate_on_blur => true
+END
+elsif @javascript_library == "jquery"
+  initializer 'live_validations.rb', <<-END
 LiveValidations.use :livevalidation_dot_com, :default_valid_message => "", :validate_on_blur => true
 END
+end
 
 base64_user_name = Base64.encode64(smtp_username)
 base64_password = Base64.encode64(smtp_password)
@@ -2891,7 +2922,7 @@ TODO after installing:
 - Put mail server information in mail.rb
 - Put real IP address and git repo URL in deployment files
 - Add app to gitosis config
-- git remote add origin git@gitosis server:#{current_app_name}.git
+- git remote add origin git@#{capistrano_repo_host}:#{current_app_name}.git
 - git push origin master:refs/heads/master
 
 This application includes:
@@ -2912,6 +2943,7 @@ Coding Tools
     acts_as_url, String#to_ascii, String#to_html, String#to_url, String#remove_formatting, String.random
 - US State application helpers
 - will-paginate for pagination
+#{"- jQuery and jQueryUI from Google APIs" if @javascript_library == "jquery"}
 
 
 Database Tools
