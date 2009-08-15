@@ -110,7 +110,7 @@ end
 def clone_rails(options={})
   if options[:submodule]
     in_root do
-      if options[:branch]
+      if options[:branch] && options[:branch] != "master"
         git :submodule => "add git://github.com/rails/rails.git vendor/rails -b #{options[:branch]}"
       else
         git :submodule => "add git://github.com/rails/rails.git vendor/rails"
@@ -120,7 +120,7 @@ def clone_rails(options={})
     inside 'vendor' do
       run('git clone git://github.com/rails/rails.git')
     end
-    if options[:branch]
+    if options[:branch] && options[:branch] != "master"
       inside 'vendor/rails' do
         run("git branch --track #{options[:branch]} origin/#{options[:branch]}")
         run("git checkout #{options[:branch]}")
@@ -129,6 +129,18 @@ def clone_rails(options={})
   end
   
   log "rails installed #{'and submoduled ' if options[:submodule]}from GitHub", options[:branch]
+end
+
+# update rails bits in application after vendoring a new copy of rails
+# we need to do this the hard way because we want to overwrite without warning
+# TODO: Can we introspect the actual rake:update task to get a current list of subtasks?
+def update_app
+  in_root do
+    run("echo 'a' | rake rails:update:scripts")
+    run("echo 'a' | rake rails:update:javascripts")
+    run("echo 'a' | rake rails:update:configs")
+    run("echo 'a' | rake rails:update:application_controller")
+  end
 end
 
 current_app_name = File.basename(File.expand_path(root))
@@ -3011,7 +3023,9 @@ commit_state "metric_fu setup"
 # defaults to 2-3-stable at the moment
 if rails_strategy == "vendored"
   install_rails :branch => rails_branch
-  # TODO: rake("rails:update")
+  commit_state "vendored rails"
+  update_app
+  commit_state "updated rails files from vendored copy"
 end
 
 # set up branches
