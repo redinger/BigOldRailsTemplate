@@ -160,7 +160,8 @@ current_app_name = File.basename(File.expand_path(root))
 # Option set-up
 begin
   template_options = {}
-  open(File.join(File.dirname(template), "config.yml")) do |f|
+  template_path = File.expand_path(File.dirname(template), File.join(root,'..'))
+  open(File.join(template_path, "config.yml")) do |f|
     template_options = YAML.load(f)
   end
 rescue
