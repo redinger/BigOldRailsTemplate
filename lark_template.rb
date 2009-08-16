@@ -1,6 +1,6 @@
 require 'open-uri'
 require 'yaml'
-require 'Base64'
+require 'base64'
 
 # Utility Methods
  
