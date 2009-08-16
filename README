@@ -6,7 +6,8 @@ I should warn you of two things. First, it’s a pretty heavyweight template, st
 
 There is some configuration available for the template. See config.yml to set persistent configuration information. If you don't have a 
 config.yml, or it doesn't have an option that the template is looking for, you'll be prompted at runtime for some of the information, and
-reasonably sensible defaults will be used for the rest. You should review config.yml before you first run the template.
+reasonably sensible defaults will be used for the rest. You should review config.yml before you first run the template.  If you would like
+to setup some personal options, copy the config.yml to ~/.big_old_rails_template/ and it will be used instead.
 
 Here’s a list of what this template sets up:
 

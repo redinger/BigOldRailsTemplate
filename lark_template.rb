@@ -160,9 +160,19 @@ current_app_name = File.basename(File.expand_path(root))
 # Option set-up
 begin
   template_options = {}
-  template_path = File.expand_path(File.dirname(template), File.join(root,'..'))
-  open(File.join(template_path, "config.yml")) do |f|
-    template_options = YAML.load(f)
+  template_paths = [
+                    File.expand_path(File.join(ENV['HOME'],'.big_old_rails_template')),
+                    File.expand_path(File.dirname(template), File.join(root,'..'))
+                   ]
+
+  template_paths.each do |template_path|
+    template = File.join(template_path, "config.yml")
+    next unless File.exists? template
+
+    open(template) do |f|
+      template_options = YAML.load(f)
+      break
+    end
   end
 rescue
 end
