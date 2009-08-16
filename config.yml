@@ -13,8 +13,10 @@ exception_handling: exceptional
 monitoring: new_relic
 # vendor branch management: piston (default), braid, git (submodules), none
 branch_management: piston
-# rails strategy: vendored (default), gem
+# rails strategy: vendored (default), gem, symlinked
 rails_strategy: vendored
+# link_rails_root is only used if rails_strategy == symlinked
+link_rails_root: ~/rails
 # IE6 blocking: none, light (default), ie6nomore
 ie6_blocking: light
 # javascript library: prototype (default), jquery
