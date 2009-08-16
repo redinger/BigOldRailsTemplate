@@ -171,8 +171,9 @@ begin
 
     open(template) do |f|
       template_options = YAML.load(f)
-      break
     end
+    # Config loaded, stop searching
+    break if template_options
   end
 rescue
 end
