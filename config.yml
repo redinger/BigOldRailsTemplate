@@ -5,7 +5,7 @@
 #
 # rails branch options: any branch in the http://github.com/rails/rails/tree/master repo
 rails_branch: 2-3-stable
-# rails vendoring options: true (default) or false (to depend on gem rails)
+# database options: postgresql (default), mysql, sqlite
 database: postgresql
 # exception options: exceptional (default), hoptoad
 exception_handling: exceptional
@@ -18,7 +18,7 @@ rails_strategy: vendored
 # IE6 blocking: none, light (default), ie6nomore
 ie6_blocking: light
 # javascript library: prototype (default), jquery
-javascript_library: jquery
+javascript_library: prototype
 #
 # These options can be omitted, and the template will default to sensible behavior
 #
