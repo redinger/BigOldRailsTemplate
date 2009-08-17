@@ -339,6 +339,8 @@ gem "ffmike-test_benchmark",
   :lib => 'test_benchmark', 
   :source => 'http://gems.github.com',
   :env => 'test'
+gem "webrat",
+  :env => "test"
 
 # assume gems are already on dev box, so don't install    
 # rake("gems:install", :sudo => true)
@@ -1181,6 +1183,12 @@ require 'test_help'
 require 'shoulda'
 require 'mocha'
 require 'authlogic/test_case'
+require 'webrat'
+
+Webrat.configure do |config|
+  config.mode = :rails
+  config.open_error_files = false
+end
 
 # show less output on test benchmarks
 # use (0,0) to suppress benchmark output entirely
@@ -2146,6 +2154,85 @@ class PasswordResetsControllerTest < ActionController::TestCase
       should_respond_with :success
       should_not_set_the_flash
       should_render_template :edit
+    end
+  end
+end
+END
+
+file 'test/integration/new_user_can_register_test.rb', <<-END
+require File.join(File.dirname(__FILE__), '..', 'test_helper')
+
+class NewUserCanRegisterTest < ActionController::IntegrationTest
+  context 'a site visitor' do
+    
+    should 'be able to create a new account' do
+      visit root_path
+      click_link 'Register'
+      
+      assert_equal new_account_path, path
+      assert_contain 'Register'
+      
+      fill_in 'First Name', :with => "Francis"
+      fill_in 'Last Name', :with => "Ferdinand"
+      fill_in 'Login', :with => 'francis'
+      fill_in 'Email', :with => 'francis@example.com'
+      fill_in 'Password', :with => 'spambot'
+      fill_in 'Password Confirmation', :with => 'spambot'
+      click_button 'Register'
+      
+      assert_equal root_path, path
+      assert_contain 'Account registered!'
+    end
+  end
+end
+END
+
+file 'test/integration/user_can_login_test.rb', <<-END
+require File.join(File.dirname(__FILE__), '..', 'test_helper')
+
+class UserCanLoginTest < ActionController::IntegrationTest
+
+  context 'an existing user' do
+    setup do
+      @user = User.generate!
+    end
+    
+    should 'be able to login with valid id and password' do
+      visit login_path
+      
+      fill_in 'Login', :with => @user.login
+      fill_in 'Password', :with => @user.password
+
+      click_button 'Login'
+
+      assert_equal '/', path
+      assert_contain "Login successful!"
+    end
+  end
+end
+END
+
+file 'test/integration/user_can_logout_test.rb', <<-END
+require File.join(File.dirname(__FILE__), '..', 'test_helper')
+
+class UserCanLogoutTest < ActionController::IntegrationTest
+
+  context 'a logged-in user' do
+    setup do
+      @user = User.generate!
+      visit login_path
+      fill_in 'Login', :with => @user.login
+      fill_in 'Password', :with => @user.password
+      click_button 'Login'
+    end
+    
+    should 'be able to log out' do
+      visit root_path
+      
+      click_link "Logout"
+
+      assert_equal new_user_session_path, path
+      assert_contain "Logout successful!"
     end
   end
 end
