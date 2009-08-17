@@ -629,8 +629,8 @@ LiveValidations.use :livevalidation_dot_com, :default_valid_message => "", :vali
 END
 end
 
-base64_user_name = Base64.encode64(smtp_username)
-base64_password = Base64.encode64(smtp_password)
+base64_user_name = Base64.encode64(smtp_username) unless smtp_username.blank? 
+base64_password = Base64.encode64(smtp_password) unless smtp_username.blank? 
 
 initializer 'mail.rb', <<-END
 ActionMailer::Base.delivery_method = :smtp
