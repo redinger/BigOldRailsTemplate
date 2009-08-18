@@ -393,7 +393,7 @@ file 'app/views/layouts/application.html.erb', <<-END
   <head>
     <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
     <title><%= @page_title || controller.action_name %></title>
-    <%= stylesheet_link_tag 'application', :media => 'all', :cache => true %>
+    <%= stylesheet_link_tag 'application', 'formtastic', 'formtastic-changes', :media => 'all', :cache => true %>
     #{javascript_include_tags}
     <%= yield :head %>
   </head>
@@ -481,6 +481,8 @@ ul {
 
   /* @end */
 END
+
+generate(:formtastic_stylesheets)
 
 file 'app/controllers/application_controller.rb', <<-END
 # Filters added to this controller apply to all controllers in the application.
@@ -2548,15 +2550,10 @@ END
 file 'app/views/password_resets/edit.html.erb', <<-END
 <h1>Change My Password</h1>
 
-<% form_for @user, :url => password_reset_path, :method => :put, :live_validations => true do |f| %>
+<% semantic_form_for @user, :url => password_reset_path, :method => :put, :live_validations => true do |f| %>
   <%= f.error_messages %>
-  <%= f.label :password %><br />
-  <%= f.password_field :password %><br />
-  <br />
-  <%= f.label :password_confirmation %><br />
-  <%= f.password_field :password_confirmation %><br />
-  <br />
-  <%= f.submit "Update my password and log me in" %>
+  <%= f.input :password, :password_confirmation %>
+  <%= f.commit_button "Update my password and log me in" %>
 <% end %>
 END
 
@@ -2577,17 +2574,11 @@ END
 file 'app/views/user_sessions/new.html.erb', <<-END
 <h1>Login</h1>
 
-<% form_for @user_session, :url => user_session_path do |f| %>
+<% semantic_form_for @user_session, :url => user_session_path do |f| %>
   <%= f.error_messages %>
-  <%= f.label :login %><br />
-  <%= f.text_field :login %><br />
-  <br />
-  <%= f.label :password %><br />
-  <%= f.password_field :password %><br />
-  <br />
-  <%= f.check_box :remember_me %><%= f.label :remember_me %><br />
-  <br />
-  <%= f.submit "Login" %>
+  <%= f.inputs :login, :password %>
+  <%= f.check_box :remember_me %>
+  Remember Me <%= f.commit_button "Login" %>
 <% end %>
 <%= link_to "Register", register_path %>
 END
@@ -2617,35 +2608,20 @@ file 'app/views/users/index.html.erb', <<-END
 END
 
 file 'app/views/users/_form.html.erb', <<-END
-<%= form.label :first_name %><br />
-<%= form.text_field :first_name %><br />
-<br />
-<%= form.label :last_name %><br />
-<%= form.text_field :last_name %><br />
-<br />
-<%= form.label :login %><br />
-<%= form.text_field :login %><br />
+<%= form.inputs :first_name, :last_name, :login, :email %>
 <br />
 <% if form.object.new_record? %>
-  <%= form.label :password %><br />
-  <%= form.password_field :password %><br />
-  <br />
-  <%= form.label :password_confirmation %><br />
-  <%= form.password_field :password_confirmation %><br />
+  <%= form.inputs :password, :password_confirmation %>
 <% end %>
-<br />
-<%= form.label :email %><br />
-<%= form.text_field :email %><br />
-<br />
 END
 
 file 'app/views/users/edit.html.erb', <<-END
 <h1>Edit My Account</h1>
 
-<% form_for @user, :url => account_path, :live_validations => true do |f| %>
+<% semantic_form_for @user, :url => account_path, :live_validations => true do |f| %>
   <%= f.error_messages %>
   <%= render :partial => "users/form", :object => f %>
-  <%= f.submit "Update" %>
+  <%= f.commit_button "Update"%>
 <% end %>
 
 <br /><%= link_to "My Profile", account_path %>
@@ -2654,10 +2630,10 @@ END
 file 'app/views/users/new.html.erb', <<-END
 <h1>Register</h1>
 
-<% form_for @user, :url => account_path, :live_validations => true do |f| %>
+<% semantic_form_for @user, :url => account_path, :live_validations => true do |f| %>
   <%= f.error_messages %>
   <%= render :partial => "users/form", :object => f %>
-  <%= f.submit "Register" %>
+  <%= f.commit_button "Register" %>
 <% end %>
 END
 

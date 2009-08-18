@@ -33,6 +33,7 @@ Coding Tools
     * Stringex for extra string functionality – acts_as_url, String#to_ascii, String#to_html, String#to_url, String#remove_formatting, String.random
     * US State application helpers
     * will-paginate for pagination
+    * formtastic for views
 
 Database Tools
 
