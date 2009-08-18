@@ -299,7 +299,8 @@ plugins =
     'shmacros' => {:options => {:git => 'git://github.com/maxim/shmacros.git'}},
     'stringex' => {:options => {:git => 'git://github.com/rsl/stringex.git'}},
     'superdeploy' => {:options => {:git => 'git://github.com/saizai/superdeploy.git'}},
-    'time-warp' => {:options => {:git => 'git://github.com/iridesco/time-warp.git'}}    
+    'time-warp' => {:options => {:git => 'git://github.com/iridesco/time-warp.git'}},    
+    'validation_reflection' => {:options => {:git => 'git://github.com/redinger/validation_reflection.git'}}    
   }
   
 plugins.each do |name, value|
@@ -323,6 +324,9 @@ gem "binarylogic-searchlogic",
   :lib     => 'searchlogic',
   :source  => 'http://gems.github.com',
   :version => '~> 2.0'
+gem "justinfrench-formtastic", 
+  :lib     => 'formtastic', 
+  :source  => 'http://gems.github.com'
   
 # development only
 gem "cwninja-inaction_mailer", 
