@@ -393,7 +393,7 @@ file 'app/views/layouts/application.html.erb', <<-END
   <head>
     <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
     <title><%= @page_title || controller.action_name %></title>
-    <%= stylesheet_link_tag 'application', 'formtastic', 'formtastic-changes', :media => 'all', :cache => true %>
+    <%= stylesheet_link_tag 'application', 'formtastic', 'formtastic_changes', :media => 'all', :cache => true %>
     #{javascript_include_tags}
     <%= yield :head %>
   </head>
