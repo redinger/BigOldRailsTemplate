@@ -625,11 +625,11 @@ ADMIN_DATA_VIEW_AUTHORIZATION = Proc.new { |controller| controller.send("admin_l
 ADMIN_DATA_UPDATE_AUTHORIZATION = Proc.new { |controller| return false }
 END
 
-if @javascript_library == "prototype"
+if @javascript_library == "jquery"
   initializer 'live_validations.rb', <<-END
 LiveValidations.use :jquery_validations, :default_valid_message => "", :validate_on_blur => true
 END
-elsif @javascript_library == "jquery"
+elsif @javascript_library == "prototype"
   initializer 'live_validations.rb', <<-END
 LiveValidations.use :livevalidation_dot_com, :default_valid_message => "", :validate_on_blur => true
 END
