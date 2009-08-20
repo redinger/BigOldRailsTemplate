@@ -21,6 +21,8 @@ link_rails_root: ~/rails
 ie6_blocking: light
 # javascript library: prototype (default), jquery
 javascript_library: prototype
+# Design: none (default), bluetrip
+design: none
 #
 # These options can be omitted, and the template will default to sensible behavior
 #

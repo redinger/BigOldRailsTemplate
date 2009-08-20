@@ -205,6 +205,9 @@ ie6_blocking = "light" if ie6_blocking.nil?
 @javascript_library = template_options["javascript_library"].nil? ? ask("Which javascript library? prototype (default), jquery").downcase : template_options["javascript_library"]
 @javascript_library = "prototype" if @javascript_library.nil?
 
+design = template_options["design"].nil? ? ask("Which design? none (default), bluetrip").downcase : template_options["design"]
+design = "none" if design.nil?
+
 smtp_address = template_options["smtp_address"]
 smtp_domain = template_options["smtp_domain"]
 smtp_username = template_options["smtp_username"]
@@ -372,10 +375,31 @@ elsif @javascript_library == "jquery"
   file_from_repo "ffmike", "jquery-validate", "master", "jquery.validate.min.js", "public/javascripts/jquery.validate.min.js"
 end
 
+if design == "bluetrip"
+  inside('public') do
+    run('mkdir img')
+  end
+  inside('public/img') do
+    run('mkdir icons')
+  end
+  file_from_repo "mikecrittenden", "bluetrip-css-framework", "master", "css/ie.css", "public/stylesheets/ie.css"
+  file_from_repo "mikecrittenden", "bluetrip-css-framework", "master", "css/print.css", "public/stylesheets/print.css"
+  file_from_repo "mikecrittenden", "bluetrip-css-framework", "master", "css/screen.css", "public/stylesheets/screen.css"
+  file_from_repo "mikecrittenden", "bluetrip-css-framework", "master", "css/style.css", "public/stylesheets/style.css"
+  file_from_repo "mikecrittenden", "bluetrip-css-framework", "master", "img/grid.png", "public/img/grid.png"
+  %w(cross doc email external feed im information key pdf tick visited xls).each do |icon|
+    file_from_repo "mikecrittenden", "bluetrip-css-framework", "master", "img/icons/#{icon}.png", "public/img/icons/#{icon}.png"
+  end
+end
+
+if design == "bluetrip"
+  flash_class = "span-22 prefix-1 suffix-1 last"
+end
+
 file 'app/views/layouts/_flashes.html.erb', <<-END
-<div id="flash">
+<div id="flash" class="#{flash_class}">
   <% flash.each do |key, value| -%>
-    <div id="flash_<%= key %>"><%=h value %></div>
+    <div id="flash_<%= key %>" class="<%= key %>"><%=h value %></div>
   <% end -%>
 </div>
 END
@@ -386,6 +410,18 @@ elsif @javascript_library == "jquery"
   javascript_include_tags = '<%= javascript_include_tag "http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js", "http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js" %><%= javascript_include_tag "jquery.validate.min.js", "application", :cache => true  %>'
 end
 
+if design == "bluetrip"
+  extra_stylesheet_tags = <<-END
+  <%= stylesheet_link_tag 'screen', :media => 'screen, projection', :cache => true %>
+  <%= stylesheet_link_tag 'print', :media => 'print', :cache => true %>
+  <!--[if IE]>
+    <%= stylesheet_link_tag 'ie', :media => 'screen, projection', :cache => true %>
+  <![endif]-->
+  <%= stylesheet_link_tag 'style', :media => 'screen, projection', :cache => true %>
+END
+  footer_class = "span-24 small quiet"
+end
+
 file 'app/views/layouts/application.html.erb', <<-END
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -393,13 +429,21 @@ file 'app/views/layouts/application.html.erb', <<-END
   <head>
     <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
     <title><%= @page_title || controller.action_name %></title>
-    <%= stylesheet_link_tag 'application', 'formtastic', 'formtastic_changes', :media => 'all', :cache => true %>
+    #{extra_stylesheet_tags}
+    <%= stylesheet_link_tag 'formtastic', 'formtastic_changes', 'application', :media => 'all', :cache => true %>
     #{javascript_include_tags}
     <%= yield :head %>
   </head>
   <body>
-    <%= render :partial => 'layouts/flashes' -%>
-    <%= yield %>
+    <div class="container">
+      <%= yield :top_menu %>
+      <%= render :partial => 'layouts/flashes' -%>
+      <%= yield %>
+
+      <div id="footer" class="#{footer_class}">
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      </div>    
+    </div>
   </body>
 </html>
 END
@@ -415,6 +459,51 @@ namespace :mail do
   end
 end
 END
+
+if design == "bluetrip"
+  application_styles = <<-END
+
+  /* @group Application Styles */
+
+  body {
+  	background-color: #ccff99;
+  }
+
+  .container {
+  	background-color: white;
+  }
+
+  #top_menu {
+  	text-align: right;
+  }
+
+  #left_menu ul {
+  	margin: 0;
+  	padding: 0;
+  	list-style-type: none;
+  }
+
+  #left_menu ul a {
+  	display: block;
+  	width: 150px;
+  	height: 20px;
+  	line-height: 40px;
+  	text-decoration: none;	
+  }
+
+  #left_menu li {
+
+  }
+
+  #footer {
+  	margin-top: 15px;
+  	margin-bottom: 10px;
+  	text-align: center;
+  }
+
+  /* @end */
+END
+end
 
 file 'public/stylesheets/application.css', <<-END
 /* @group Browser Reset */
@@ -480,6 +569,7 @@ ul {
 }
 
   /* @end */
+#{application_styles}
 END
 
 generate(:formtastic_stylesheets)
@@ -2362,7 +2452,7 @@ class UserSessionsController < ApplicationController
   def create
     @user_session = UserSession.new(params[:user_session])
     if @user_session.save
-      flash[:notice] = "Login successful!"
+      flash[:success] = "Login successful!"
       redirect_back_or_default root_url
     else
       render :action => :new
@@ -2371,7 +2461,7 @@ class UserSessionsController < ApplicationController
   
   def destroy
     current_user_session.destroy
-    flash[:notice] = "Logout successful!"
+    flash[:success] = "Logout successful!"
     redirect_back_or_default new_user_session_url
   end
 end
@@ -2571,7 +2661,23 @@ Fill out the form below and instructions to reset your password will be emailed 
 <% end %>
 END
 
-file 'app/views/user_sessions/new.html.erb', <<-END
+if design == "bluetrip"
+  file 'app/views/user_sessions/new.html.erb', <<-END
+<div id="main_without_left_menu" class="span-22 prefix-1 suffix-1 last">
+
+  <h1>Login</h1>
+
+  <% semantic_form_for @user_session, :url => user_session_path do |f| %>
+    <%= f.error_messages %>
+    <%= f.inputs :login, :password %>
+    <%= f.check_box :remember_me %>
+    Remember Me <%= f.commit_button "Login" %>
+  <% end %>
+  <%= link_to "Register", register_path %>
+</div>
+END
+else
+  file 'app/views/user_sessions/new.html.erb', <<-END
 <h1>Login</h1>
 
 <% semantic_form_for @user_session, :url => user_session_path do |f| %>
@@ -2582,6 +2688,7 @@ file 'app/views/user_sessions/new.html.erb', <<-END
 <% end %>
 <%= link_to "Register", register_path %>
 END
+end
 
 file 'app/views/users/index.html.erb', <<-END
 <h1>Listing users</h1>
@@ -2615,19 +2722,53 @@ file 'app/views/users/_form.html.erb', <<-END
 <% end %>
 END
 
-file 'app/views/users/edit.html.erb', <<-END
-<h1>Edit My Account</h1>
+if design == "bluetrip" 
+  file 'app/views/users/edit.html.erb', <<-END
+  <div id="main_without_left_menu" class="span-22 prefix-1 suffix-1 last">
 
-<% semantic_form_for @user, :url => account_path, :live_validations => true do |f| %>
-  <%= f.error_messages %>
-  <%= render :partial => "users/form", :object => f %>
-  <%= f.commit_button "Update"%>
-<% end %>
+    <h1>Edit My Account</h1>
 
-<br /><%= link_to "My Profile", account_path %>
+    <% semantic_form_for @user, :url => account_path, :live_validations => true do |f| %>
+      <%= f.error_messages %>
+      <%= render :partial => "users/form", :object => f %>
+      <%= f.commit_button "Update"%>
+    <% end %>
+
+    <br /><%= link_to "My Profile", account_path %>
+  </div>
 END
+else
+  file 'app/views/users/edit.html.erb', <<-END
+  <h1>Edit My Account</h1>
 
-file 'app/views/users/new.html.erb', <<-END
+  <% semantic_form_for @user, :url => account_path, :live_validations => true do |f| %>
+    <%= f.error_messages %>
+    <%= render :partial => "users/form", :object => f %>
+    <%= f.commit_button "Update"%>
+  <% end %>
+
+  <br /><%= link_to "My Profile", account_path %>
+  END
+end
+
+if design == "bluetrip"
+  file 'app/views/users/new.html.erb', <<-END
+<div id="main_without_left_menu" class="span-22 prefix-1 suffix-1 last">
+
+  <h1>Register</h1>
+
+  <% semantic_form_for @user, :url => account_path, :live_validations => true do |f| %>
+    <%= f.error_messages %>
+    <%= render :partial => "users/form", :object => f %>
+    <% f.buttons do %>
+    <%= f.commit_button "Register" %>
+    <% end %>
+  <% end %>
+
+</div>
+END
+else
+  file 'app/views/users/new.html.erb', <<-END
 <h1>Register</h1>
 
 <% semantic_form_for @user, :url => account_path, :live_validations => true do |f| %>
@@ -2636,6 +2777,7 @@ file 'app/views/users/new.html.erb', <<-END
   <%= f.commit_button "Register" %>
 <% end %>
 END
+end
 
 file 'app/views/users/show.html.erb', <<-END
 <p>
@@ -2796,31 +2938,51 @@ elsif ie6_blocking == "ie6nomore"
 END
 end
 
+if design == "bluetrip"
+  top_menu_class = "span-24"
+  left_menu_class = "span-5 suffix-1"
+  main_with_left_menu_class = "span-17 suffix-1 last"
+end
+
 file 'app/views/pages/home.html.erb', <<-END
-<div id="top_menu">
-  <% anonymous_only do %>
-    <%= link_to "Register", new_account_path %>
-    <%= link_to "Login", new_user_session_path %>
-  <% end %>
-  <% authenticated_only do %>
-    <%= link_to "Logout", user_session_path, :method => :delete, :confirm => "Are you sure you want to logout?" %>
-    <%= link_to "Your Account", account_path %>
-  <% end %>
-</div>
+<% content_for :top_menu do %>
+  <div id="top_menu" class="#{top_menu_class}">
+    <% anonymous_only do %>
+      <%= link_to "Register", new_account_path %>
+      <%= link_to "Login", new_user_session_path %>
+    <% end %>
+    <% authenticated_only do %>
+      <%= link_to "Logout", user_session_path, :method => :delete, :confirm => "Are you sure you want to logout?" %>
+      <%= link_to "Your Account", account_path %>
+    <% end %>
+  </div>
+<% end %>
 
-<div id="main">
-  <h1>Welcome to #{current_app_name}</h1>
-  #{ie6_warning}
-  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-</div>
+<div id="main_wrapper">
+  <div id="left_menu" class="#{left_menu_class}">
+    <ul>
+    <% anonymous_only do %>
+      <li><%= link_to "Register", new_account_path %></li>
+      <li><%= link_to "Login", new_user_session_path %></li>
+    <% end %>
+    <% authenticated_only do %>
+      <li><%= link_to "App menu item", "#" %></li>
+      <li><%= link_to "App menu item", "#" %></li>
+      <li><%= link_to "App menu item", "#" %></li>
+    <% end %>
+    </ul>
+  </div>
 
-<div id="left_menu">
-  <% anonymous_only do %>
-    <%= link_to "Register", new_account_path %>
-    <%= link_to "Login", new_user_session_path %>
-  <% end %>
-  <% authenticated_only do %>
-  <% end %>
+  <div id="main_with_left_menu" class="#{main_with_left_menu_class}">
+    <h1>Welcome to #{current_app_name}</h1>
+      <!--[if lt IE 7]>
+  	<p class="flash_error">
+  		Your browser is obsolete. For best results in #{current_app_name}, please <%= link_to "Upgrade", pages_path(:action => 'upgrade'), :target => :blank %>
+  	</p>
+    <![endif]-->
+
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+  </div>
 </div>
 END
 
@@ -3009,13 +3171,18 @@ TODO after installing:
 
 This application includes:
 
+Design Tools
+============
+- Forms are built using formtastic for added DRYness
+#{" - Bluetrip CSS for visual design" if design == 'bluetrip'}
+- live-validations for client-side JavaScript data entry validation. Add :live_validations => true to form_for declarations to hook this up.
+
 Coding Tools
 ============
 - Authlogic for user authentication, including password resets, 
     anonymous_only, authenticated_only, admin_only application helpers
 - World's simplest authorization system: manage multiple string roles on users with User#add_role, User#remove_role, User#clear_roles, and User#has_role?
 - Date formats: :us, :us_with_time, :short_day, :long_day
-- live-validations for client-side JavaScript data entry validation. Add :live_validations => true to form_for declarations to hook this up.
 - Paperclip for attachment management
 - /pages/css_test will show most CSS styles in action
 - Searchlogic for magic named scopes and search forms - http://rdoc.info/projects/binarylogic/searchlogic
