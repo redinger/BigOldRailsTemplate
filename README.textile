@@ -1,0 +1,96 @@
+h1. Big Old Rails Template
+
+This template assists in spinning up new Rails applications quickly using Rails 2.3. To use it, just specify the -m switch when creating a Rails application:
+
+<pre><code>
+rails new_app_name -m lark_template.rb
+</code></pre>
+
+bq. This template has not been tested with the new architecture of the Rails 3.0 master branch. That is, it can _create_ Rails 3 applications, but it may not _run_ under Rails 3.
+
+Two things you should take note of:
+
+# It’s a pretty heavyweight template, sticking a lot of stuff into the new application. This suits me, because I have a lot of things I use in just about every application, but it may not suit you.
+# Rails templates are not one-size-fits-all; you should understand what the template does before blindly using it. Unlike most other Rails templates though, it allows you to configure the application that it builds.
+
+h2. Configuration
+
+You can configure this template to control the application that it generates. See @config.yml@ to set persistent configuration information. The template will use a configuration file located at @~/.big_old_rails_template/config.yml@ if it finds one; otherwise, it will use the copy embedded in the template directory. If you don't have a @config.yml@, or it doesn't have an option that the template is looking for, you'll be prompted at runtime for some of the information, and reasonably sensible defaults will be used for the rest. You should review config.yml before you first run the template.
+
+h2. Generated Application
+
+Here’s a list of what this template sets up:
+
+h3. Rails
+
+* Uses the edge of the 2-3-stable branch in the Rails git repository. You can change the branch in config.yml, so you can use, for example, 2-2-stable or (if you're feeling brave) master.
+* Uses formtastic for forms.
+* Optionally uses Bluetrip CSS for design.
+* Choice of prototype or jquery
+    
+h3. SCM
+
+* git repo
+* master, staging, and development branches (you can adjust this in config.yml)
+* Rails and plugins installed with Piston by default - you can change this to use Braid, git submodules, or just straight code in config.yml. 
+* Vendored Rails. You can also choose to depend on gem rails, or to symlink to a local copy of Rails, instead of vendoring it to the project.
+  
+h3. Coding Tools
+
+* Authlogic for user authentication, including password resets, @anonymous_only@, @authenticated_only@, and @admin_only@ application helpers
+* World’s simplest authorization system: manage multiple string roles on users with @User#add_role@, @User#remove_role@, @User#clear_roles@, and @User#has_role?@
+* Date formats: @:us@, @:us_with_time@, @:short_day@, @:long_day@
+* live-validations for client-side JavaScript data entry validation. Add @:live_validations => true@ to @form_for@ declarations to hook this up.
+* Paperclip for attachment management
+* /pages/css_test will show most CSS styles in action
+* "Searchlogic":http://rdoc.info/projects/binarylogic/searchlogic for magic named scopes and search forms. Includes @attribute_equals@, @attribute_does_not_equal@, @attribute_begins_with@, @attribute_like@, @attribute_ends_with@, @attribute_greater_than@, @attribute_null@, @attribute_blank@, etc., etc.
+* Stringex for extra string functionality – @acts_as_url@, @String#to_ascii@, @String#to_html@, @String#to_url@, @String#remove_formatting@, @String.random@
+* US State application helpers
+* will-paginate for pagination
+
+h3. Database Tools
+
+* Hooked up for PostgreSQL, MySQL, or sqlite depending on your configuration options
+* admin-data plugin for administrative UI. http://localhost:3000/admin_data will get you to the application’s data. On production, only admin can view data, no one can edit (modify config/initializers/admin_data.rb to adjust this)
+* db-populate for seed data
+
+h3. Deployment Tools
+
+* fast_remote_cache strategy for deployment
+* rubiadhstrano for deployment recipes; automatically uses multiple targets, so: cap production deploy for deployment to production
+* superdeploy for additional Capistrano tasks. cap -T for full list.
+
+h3. External Services
+
+* Exceptional or Hoptoad for error tracking. Go to /pages/kaboom to test after finishing setup.
+* New Relic or Scout for performance tracking, depending on your configuration options.
+
+h3. Testing Tools
+
+* Shoulda and Test::Unit for testing
+* Mocha for mocking
+* Object Daddy for factories
+* Generated code is already covered by tests
+* parallel-test for faster testing. rake spec:parallel:prepare[2] to set up two test databases. rake test:parallel[2] to distribute tests across two cores
+* rack-bug for request/response/perf analysis. http://localhost:3000/__rack_bug__/bookmarklet.html to add bookmarklet to browser.
+* shmacros for additional Shoulda macros: should_accept_nested_attributes_for, should_act_as_taggable_on, should_callback, should_delegate, more
+* More extra shoulda macros: @should_have_before_filter@, @should_have_after_filter@
+* metric-fu for static code analysis. rake metrics:all, configure in Rakefile
+* inaction-mailer is installed for development environment, so mails sent during dev will end up as files in /tmp/sent_mails. @rake mail:clear@ will clean out this directory.
+
+h3. Miscellaneous
+
+* Code to encourage IE6 users to get a real browser is included on the home page by default. You can adjust this in the configuration.
+
+h2. Contributing
+
+* I welcome suggestions and contributions. See the "project's wiki":http://wiki.github.com/ffmike/BigOldRailsTemplate to contribute to the wishlist, or fork the project on GitHub and submit a pull request when you've got something to add.
+    
+Thanks to:
+
+* Eric Davis (bug fixes, better architecture for config)
+* Paco Guzman (bug fixes)
+* Jeraimee (MySQL translation of database.yml)
+* Maran Hidskes (fix to allow running with no config)
+* Wynst (bug fixes)
+* Rob Zolkos (typo fix)
