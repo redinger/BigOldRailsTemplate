@@ -799,7 +799,7 @@ after "deploy:update", "deploy:cleanup"
 #   task :link_config, :roles => :app do
 #     run "ln -nsf \#{shared_path}/config/database.yml \#{current_path}/config/database.yml"
 #   end
-end
+# end
     
 END
 
