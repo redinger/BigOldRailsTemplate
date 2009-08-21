@@ -51,7 +51,7 @@ capistrano_staging_host: 111.111.111.111
 exceptional_api_key: PASTE_YOUR_API_KEY_HERE
 # Note that Hoptoad generates a new API key for each application
 hoptoad_api_key: PASTE_YOUR_API_KEY_HERE
-newrelic_api_key: 550dc8e7e1f3dbb996b00be91a41f7ab96b1b1df
+newrelic_api_key: PASTE_YOUR_API_KEY_HERE
 # Return address info for app/models/notifier.rb
 notifier_email_from: Lark Group <noreply@example.com>
 default_url_options_host: example.com
