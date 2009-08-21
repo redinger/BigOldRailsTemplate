@@ -84,7 +84,7 @@ h3. Miscellaneous
 
 h2. Contributing
 
-* I welcome suggestions and contributions. See the "project's wiki":http://wiki.github.com/ffmike/BigOldRailsTemplate to contribute to the wishlist, or fork the project on GitHub and submit a pull request when you've got something to add.
+I welcome suggestions and contributions. See the "project's wiki":http://wiki.github.com/ffmike/BigOldRailsTemplate to contribute to the wishlist, or fork the project on GitHub and submit a pull request when you've got something to add.
     
 Thanks to:
 
