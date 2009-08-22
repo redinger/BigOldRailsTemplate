@@ -24,59 +24,59 @@ Here’s a list of what this template sets up:
 h3. Rails
 
 * Uses the edge of the 2-3-stable branch in the Rails git repository. You can change the branch in config.yml, so you can use, for example, 2-2-stable or (if you're feeling brave) master.
-* Uses formtastic for forms.
-* Optionally uses Bluetrip CSS for design.
+* Uses "formtastic":http://github.com/justinfrench/formtastic/tree/master for forms.
+* Optionally uses "Bluetrip":http://bluetrip.org/ CSS for design.
 * Choice of prototype or jquery
     
 h3. SCM
 
 * git repo
 * master, staging, and development branches (you can adjust this in config.yml)
-* Rails and plugins installed with Piston by default - you can change this to use Braid, git submodules, or just straight code in config.yml. 
+* Rails and plugins installed with "Piston":http://piston.rubyforge.org/ by default - you can change this to use "Braid":http://github.com/evilchelu/braid/tree/master, git submodules, or just straight code in config.yml. 
 * Vendored Rails. You can also choose to depend on gem rails, or to symlink to a local copy of Rails, instead of vendoring it to the project.
   
 h3. Coding Tools
 
-* Authlogic for user authentication, including password resets, @anonymous_only@, @authenticated_only@, and @admin_only@ application helpers
+* "Authlogic":http://github.com/binarylogic/authlogic/tree/master for user authentication, including password resets, @anonymous_only@, @authenticated_only@, and @admin_only@ application helpers
 * World’s simplest authorization system: manage multiple string roles on users with @User#add_role@, @User#remove_role@, @User#clear_roles@, and @User#has_role?@
 * Date formats: @:us@, @:us_with_time@, @:short_day@, @:long_day@
-* live-validations for client-side JavaScript data entry validation. Add @:live_validations => true@ to @form_for@ declarations to hook this up.
-* Paperclip for attachment management
+* "live-validations":http://wiki.github.com/augustl/live-validations for client-side JavaScript data entry validation. Add @:live_validations => true@ to @form_for@ declarations to hook this up.
+* "Paperclip":http://github.com/thoughtbot/paperclip/tree/master for attachment management
 * /pages/css_test will show most CSS styles in action
 * "Searchlogic":http://rdoc.info/projects/binarylogic/searchlogic for magic named scopes and search forms. Includes @attribute_equals@, @attribute_does_not_equal@, @attribute_begins_with@, @attribute_like@, @attribute_ends_with@, @attribute_greater_than@, @attribute_null@, @attribute_blank@, etc., etc.
-* Stringex for extra string functionality – @acts_as_url@, @String#to_ascii@, @String#to_html@, @String#to_url@, @String#remove_formatting@, @String.random@
+* "Stringex":http://github.com/rsl/stringex/tree/master for extra string functionality – @acts_as_url@, @String#to_ascii@, @String#to_html@, @String#to_url@, @String#remove_formatting@, @String.random@
 * US State application helpers
-* will-paginate for pagination
+* "will-paginate":http://wiki.github.com/mislav/will_paginate for pagination
 
 h3. Database Tools
 
 * Hooked up for PostgreSQL, MySQL, or sqlite depending on your configuration options
-* admin-data plugin for administrative UI. http://localhost:3000/admin_data will get you to the application’s data. On production, only admin can view data, no one can edit (modify config/initializers/admin_data.rb to adjust this)
-* db-populate for seed data
+* "admin-data":http://github.com/neerajdotname/admin_data/tree/master plugin for administrative UI. http://localhost:3000/admin_data will get you to the application’s data. On production, only admin can view data, no one can edit (modify config/initializers/admin_data.rb to adjust this)
+* "db-populate":http://github.com/ffmike/db-populate/tree/master for seed data
 
 h3. Deployment Tools
 
-* fast_remote_cache strategy for deployment
-* rubiadhstrano for deployment recipes; automatically uses multiple targets, so: cap production deploy for deployment to production
-* superdeploy for additional Capistrano tasks. cap -T for full list.
+* "fast_remote_cache":http://github.com/37signals/fast_remote_cache/tree/master strategy for deployment
+* "rubiadhstrano":http://github.com/rubaidh/rubaidhstrano/tree/master for deployment recipes; automatically uses multiple targets, so: cap production deploy for deployment to production
+* "superdeploy":http://github.com/saizai/superdeploy/tree/master for additional Capistrano tasks. cap -T for full list.
 
 h3. External Services
 
-* Exceptional or Hoptoad for error tracking. Go to /pages/kaboom to test after finishing setup.
-* New Relic or Scout for performance tracking, depending on your configuration options.
+* "Exceptional":http://getexceptional.com/ or "Hoptoad":http://www.hoptoadapp.com/ for error tracking. Go to /pages/kaboom to test after finishing setup.
+* "New Relic":http://newrelic.com/ or "Scout":https://scoutapp.com/ for performance tracking, depending on your configuration options.
 
 h3. Testing Tools
 
-* Shoulda and Test::Unit for testing
+* "Shoulda":http://thoughtbot.com/projects/shoulda and Test::Unit for testing
 * Mocha for mocking
-* Object Daddy for factories
+* "Object Daddy":http://github.com/flogic/object_daddy/tree/master for factories
 * Generated code is already covered by tests
-* parallel-test for faster testing. rake spec:parallel:prepare[2] to set up two test databases. rake test:parallel[2] to distribute tests across two cores
-* rack-bug for request/response/perf analysis. http://localhost:3000/__rack_bug__/bookmarklet.html to add bookmarklet to browser.
-* shmacros for additional Shoulda macros: should_accept_nested_attributes_for, should_act_as_taggable_on, should_callback, should_delegate, more
-* More extra shoulda macros: @should_have_before_filter@, @should_have_after_filter@
-* metric-fu for static code analysis. rake metrics:all, configure in Rakefile
-* inaction-mailer is installed for development environment, so mails sent during dev will end up as files in /tmp/sent_mails. @rake mail:clear@ will clean out this directory.
+* "parallel-specs":http://github.com/grosser/parallel_specs/tree/master for faster testing. rake spec:parallel:prepare[2] to set up two test databases. rake test:parallel[2] to distribute tests across two cores
+* "rack-bug":http://github.com/brynary/rack-bug/tree/master for request/response/perf analysis. http://localhost:3000/__rack_bug__/bookmarklet.html to add bookmarklet to browser.
+* "shmacros":http://github.com/brynary/rack-bug/tree/master for additional Shoulda macros: @should_accept_nested_attributes_for@, @should_act_as_taggable_on@, @should_callback@, @should_delegate@, more
+* More extra shoulda macros: @should_have_before_filter@, @should_have_after_filter@, @should_protect_from_forgery@, @should_have_helper_method@
+* "metric-fu":http://metric-fu.rubyforge.org/ for static code analysis. rake metrics:all, configure in Rakefile
+* "inaction-mailer":http://github.com/cwninja/inaction_mailer/tree/master is installed for development environment, so mails sent during dev will end up as files in /tmp/sent_mails. @rake mail:clear@ will clean out this directory.
 
 h3. Miscellaneous
 
