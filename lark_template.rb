@@ -1514,6 +1514,29 @@ class ActionController::TestCase
       }.size
     end
   end
+  
+  def self.should_protect_from_forgery(options = {})
+    klass = described_type
+    should "protect_from_forgery" do
+      assert !klass.request_forgery_protection_token.nil?
+    end
+    should_have_before_filter(:verify_authenticity_token, {:only=>nil, :except=>nil}.merge(options))
+  end
+
+end
+END
+
+file 'test/shoulda_macros/helpers.rb', <<-END
+class ActionController::TestCase
+  def self.should_have_helper_method(*helper_methods)
+    klass = described_type
+    klass_methods = klass.master_helper_module.instance_methods.map(&:to_s)
+    helper_methods.each do |helper_method|
+      should "make \#{helper_method} available to views" do
+        assert klass_methods.include?(helper_method.to_s)
+      end
+    end
+  end
 end
 END
 
@@ -1773,8 +1796,8 @@ require 'test_helper'
 class ApplicationControllerTest < ActionController::TestCase
   
   # should_helper :all
-  # should_have_helper_method :logged_in?, :admin_logged_in?, :current_user_session, :current_user
-  # should_protect_from_forgery
+  should_have_helper_method :logged_in?, :admin_logged_in?, :current_user_session, :current_user
+  should_protect_from_forgery
 
   should_filter_params :password, :confirm_password, :password_confirmation, :creditcard
   
