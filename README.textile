@@ -94,3 +94,5 @@ Thanks to:
 * Maran Hidskes (fix to allow running with no config)
 * Wynst (bug fixes)
 * Rob Zolkos (typo fix)
+* Matt Hooks (inspiration for Authlogic activation code)
+* Joey Geiger (typo fix)
