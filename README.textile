@@ -37,7 +37,7 @@ h3. SCM
   
 h3. Coding Tools
 
-* "Authlogic":http://github.com/binarylogic/authlogic/tree/master for user authentication, including password resets, @anonymous_only@, @authenticated_only@, and @admin_only@ application helpers
+* "Authlogic":http://github.com/binarylogic/authlogic/tree/master for user authentication, including password resets, @anonymous_only@, @authenticated_only@, and @admin_only@ application helpers. Optionally installs user activation support.
 * World’s simplest authorization system: manage multiple string roles on users with @User#add_role@, @User#remove_role@, @User#clear_roles@, and @User#has_role?@
 * Date formats: @:us@, @:us_with_time@, @:short_day@, @:long_day@
 * "live-validations":http://wiki.github.com/augustl/live-validations for client-side JavaScript data entry validation. Add @:live_validations => true@ to @form_for@ declarations to hook this up.

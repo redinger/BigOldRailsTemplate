@@ -208,6 +208,8 @@ ie6_blocking = "light" if ie6_blocking.nil?
 design = template_options["design"].nil? ? ask("Which design? none (default), bluetrip").downcase : template_options["design"]
 design = "none" if design.nil?
 
+require_activation = (template_options["require_activation"] == "true")
+
 smtp_address = template_options["smtp_address"]
 smtp_domain = template_options["smtp_domain"]
 smtp_username = template_options["smtp_username"]
@@ -1312,6 +1314,23 @@ class ActionController::TestCase
 end
 END
 
+extra_test = ""
+if require_activation
+  extra_test = <<-END
+  should "send activation instructions" do
+    user = User.generate!
+    Notifier.deliver_activation_instructions(user)
+    assert_sent_email do |email|
+      email.subject = "Activation Instructions"
+      email.from.include?('Lark Group <noreply@larkfarm.com>')
+      email.to.include?(user.email)
+      email.body =~ Regexp.new(user.perishable_token)
+    end
+  end
+  
+END
+end
+
 file 'test/unit/notifier_test.rb', <<-END
 require 'test_helper'
 
@@ -1339,8 +1358,131 @@ class NotifierTest < ActionMailer::TestCase
     end
   end
   
+#{extra_test}  
 end
 END
+
+welcome_callback = ""
+extra_tests = ""
+if require_activation
+  extra_tests = <<-END
+    context "#deliver_activation_instructions!" do
+      setup do
+        @user = User.generate!
+        Notifier.stubs(:deliver_activation_instructions)
+      end
+
+      should "reset the perishable token" do
+        @user.expects(:reset_perishable_token!)
+        @user.deliver_activation_instructions!
+      end
+
+      should "send the reset mail" do
+        Notifier.expects(:deliver_activation_instructions).with(@user)
+        @user.deliver_activation_instructions!
+      end
+    end
+
+    context "#deliver_welcome_email!" do
+      setup do
+        @user = User.generate!
+        Notifier.stubs(:deliver_welcome_email)
+      end
+
+      should "reset the perishable token" do
+        @user.expects(:reset_perishable_token!)
+        @user.deliver_welcome_email!
+      end
+
+      should "send the reset mail" do
+        Notifier.expects(:deliver_welcome_email).with(@user)
+        @user.deliver_welcome_email!
+      end
+    end
+
+    context "#has_no_credentials?" do
+      setup do
+        @user = User.generate
+      end
+    
+      should "return true if password has not been set" do
+        @user.crypted_password = nil
+        assert @user.has_no_credentials?
+      end
+    
+      should "return false if password has been set" do
+        @user.crypted_password = "ABCD"
+        assert !@user.has_no_credentials?
+      end
+    end
+  
+    context "#signup!" do
+      setup do
+        @user = User.generate
+        @user.stubs(:save_without_session_maintenance).returns(true)
+      end
+    
+      should "set the login" do
+        @user.signup!(:user => {:login => "joe", :email => "joe@example.com"})
+        assert_equal "joe", @user.login
+      end
+
+      should "set the email" do
+        @user.signup!(:user => {:login => "joe", :email => "joe@example.com"})
+        assert_equal "joe@example.com", @user.email
+      end
+
+      should "save the user without session maintenance" do
+        @user.expects(:save_without_session_maintenance).once
+        @user.signup!(:user => {:login => "joe", :email => "joe@example.com"})
+      end
+    end
+  
+    context "#activate!" do
+      setup do
+        @user = User.generate
+        @user.stubs(:save).returns(true)
+      end
+    
+      context "without parameters" do
+        should "activate the user" do
+          @user.activate!
+          assert @user.active
+        end
+      
+        should "save the user" do
+          @user.expects(:save).once
+          @user.activate!
+        end
+      end
+    
+      context "with parameters" do
+        should "activate the user" do
+          @user.activate!(:user => {:password => "sekrit", :password_confirmation => "sekrit"})
+          assert @user.active
+        end
+      
+        should "set the password" do
+          @user.activate!(:user => {:password => "sekrit", :password_confirmation => "sekrit"})
+          assert_equal "sekrit", @user.password
+        end
+
+        should "set the password confirmation" do
+          @user.activate!(:user => {:password => "sekrit", :password_confirmation => "sekrit"})
+          assert_equal "sekrit", @user.password_confirmation
+        end
+
+        should "save the user" do
+          @user.expects(:save).once
+          @user.activate!(:user => {:password => "sekrit", :password_confirmation => "sekrit"})
+        end
+      end
+    end
+  
+END
+else
+  welcome_callback = "should_callback :send_welcome_email, :after_create"
+end
 
 file 'test/unit/user_test.rb', <<-END
 require 'test_helper'
@@ -1380,7 +1522,7 @@ class UserTest < ActiveSupport::TestCase
     end
   
     should_callback :make_default_roles, :before_validation_on_create
-    should_callback :send_welcome_email, :after_create
+    #{welcome_callback}
   
     should_allow_mass_assignment_of :login, :password, :password_confirmation, :first_name, :last_name, :email
     should_not_allow_mass_assignment_of :crypted_password, :password_salt, :persistence_token, :login_count, :last_request_at, :last_login_at,
@@ -1403,6 +1545,7 @@ class UserTest < ActiveSupport::TestCase
       end
     end
   
+    #{extra_tests}
     context "#admin?" do
       setup do
         @user = User.generate
@@ -1647,7 +1790,152 @@ class ApplicationHelperTest < ActionView::TestCase
 end
 END
 
-file 'test/functional/accounts_controller_test.rb', <<-END
+if require_activation
+  file 'test/functional/accounts_controller_test.rb', <<-END
+require 'test_helper'
+
+class AccountsControllerTest < ActionController::TestCase
+
+  should_have_before_filter :require_no_user, :only => [:new, :create]
+  should_have_before_filter :require_user, :only => [:show, :edit, :update]
+
+  context "routing" do
+    should_route :get, "/account/new", :controller => "accounts", :action => "new"
+    should_route :get, "/account/edit", :action=>"edit", :controller=>"accounts"
+    should_route :get, "/account", :action=>"show", :controller=>"accounts"
+    should_route :put, "/account", :action=>"update", :controller=>"accounts"
+    should_route :post, "/account", :action=>"create", :controller=>"accounts"
+    # TODO: Figure out what to do about this
+    # should_route :get, "/register", :action=>"new", :controller=>"accounts"
+
+    context "named routes" do
+      setup do
+        get :show
+      end
+
+      should "generate account_path" do
+        assert_equal "/account", account_path
+      end
+      should "generate new_account_path" do
+        assert_equal "/account/new", new_account_path
+      end
+      should "generate edit_account_path" do
+        assert_equal "/account/edit", edit_account_path
+      end
+      should "generate register_path" do
+        assert_equal "/register", register_path
+      end
+    end
+  end
+
+  context "on GET to :new" do
+    setup do
+      controller.stubs(:require_no_user).returns(true)
+      @the_user = User.generate!
+      User.stubs(:new).returns(@the_user)
+      get :new
+    end
+
+    should_assign_to(:user) { @the_user }
+    should_assign_to(:page_title) { "Create Account" }
+    should_respond_with :success
+    should_render_template "users/new"
+    should_not_set_the_flash
+  end
+
+  context "on POST to :create" do
+    setup do
+      controller.stubs(:require_no_user).returns(true)
+      @the_user = User.generate!
+      User.stubs(:new).returns(@the_user)
+    end
+
+    context "with successful creation" do
+      setup do
+        @the_user.stubs(:signup!).returns(true)
+        post :create, :user => { :login => "bobby", :password => "bobby", :password_confirmation => "bobby" }
+      end
+
+      should_assign_to(:user) { @the_user }
+      should_respond_with :redirect
+      should_set_the_flash_to "Your account has been created. Please check your e-mail for your account activation instructions!"
+      should_redirect_to("the root url") { root_url }
+    end
+
+    context "with failed creation" do
+      setup do
+        @the_user.stubs(:signup!).returns(false)
+        post :create, :user => { :login => "bobby", :password => "bobby", :password_confirmation => "bobby" }
+      end
+
+      should_assign_to(:user) { @the_user }
+      should_respond_with :success
+      should_not_set_the_flash
+      should_render_template "users/new"
+    end
+  end
+
+  context "with a regular user" do
+    setup do
+      @the_user = User.generate!
+      @the_user.activate!
+      UserSession.create(@the_user)
+    end
+
+    context "on GET to :show" do
+      setup do
+        get :show
+      end
+
+      should_assign_to(:user) { @the_user }
+      should_assign_to(:page_title) { "#{@the_user.login} details" }
+      should_respond_with :success
+      should_not_set_the_flash
+      should_render_template "users/show"
+    end
+
+    context "on GET to :edit" do
+      setup do
+        get :edit
+      end
+
+      should_assign_to(:user) { @the_user }
+      should_assign_to(:page_title) { "Edit #{@the_user.login}" }
+      should_respond_with :success
+      should_not_set_the_flash
+      should_render_template "users/edit"
+    end
+
+    context "on PUT to :update" do
+      context "with successful update" do
+        setup do
+          User.any_instance.stubs(:update_attributes).returns(true)
+          put :update, :user => {:login => "bill" }
+        end
+
+        should_assign_to(:user) { @the_user }
+        should_respond_with :redirect
+        should_set_the_flash_to "Account updated!"
+        should_redirect_to("the user's account") { account_url }
+      end
+
+      context "with failed update" do
+        setup do
+          User.any_instance.stubs(:update_attributes).returns(false)
+          put :update, :user => {:login => "bill" }
+        end
+
+        should_assign_to(:user) { @the_user }
+        should_respond_with :success
+        should_not_set_the_flash
+        should_render_template "users/edit"
+      end
+    end
+  end
+end
+END
+else
+  file 'test/functional/accounts_controller_test.rb', <<-END
 require 'test_helper'
 
 class AccountsControllerTest < ActionController::TestCase
@@ -1789,6 +2077,125 @@ class AccountsControllerTest < ActionController::TestCase
   end
 end
 END
+end
+
+if require_activation
+  file 'test/functional/activations_controller_test.rb', <<-END
+require 'test_helper'
+
+class ActivationsControllerTest < ActionController::TestCase
+  
+  should_have_before_filter :require_no_user, :only => [:new, :create]
+  
+  context "routing" do
+    should_route :get, "/activate/ABC", :controller => "activations", :action => "new", :activation_code => "ABC"
+    should_route :post, "/finish_activate/1", :action=>"create", :controller=>"activations", :id => 1
+    
+    context "named routes" do
+      setup do
+        controller.stubs(:require_no_user).returns(true)
+        @the_user = User.generate!
+        User.stubs(:find_using_perishable_token).returns(@the_user)
+        get :new, :activation_code => "ABC"
+      end
+      
+      should "generate activate_path" do
+        assert_equal "/activate/ABC", activate_path("ABC")
+      end
+      should "generate finish_activate_path" do
+        assert_equal "/finish_activate/1", finish_activate_path(1)
+      end
+    end
+  end
+    
+  context "on GET to :new" do
+    setup do
+      controller.stubs(:require_no_user).returns(true)
+      @the_user = User.generate!
+    end
+    
+    context "with correct activation code" do
+      setup do
+        User.stubs(:find_using_perishable_token).returns(@the_user)
+        get :new, :activation_code => "ABC"
+      end
+
+    should_assign_to(:user) { @the_user }
+    should_assign_to(:page_title) { "Activate Your Account" }
+    should_respond_with :success
+    should_render_template "activations/new"
+    should_not_set_the_flash
+    end
+
+    context "with incorrect activation code" do
+      should "raise an exception" do
+        assert_raise Exception do
+          User.stubs(:find_using_perishable_token).returns(nil)
+          get :new, :activation_code => "XYZ"
+        end
+      end
+    end
+
+  end
+
+  context "on POST to :create" do
+    setup do
+      controller.stubs(:require_no_user).returns(true)
+      @the_user = User.generate!
+      User.stubs(:find).returns(@the_user)
+    end
+
+    context "with active user" do
+      setup do
+        @the_user.activate!
+        post :create, :user => { :id => @the_user.id, :password => "sekrit", :password_confirmation => "sekrit"}
+      end
+
+      should_respond_with :redirect
+      should_redirect_to("the root url") { root_url }
+
+    end
+
+    context "with successful activation" do
+      setup do
+        @the_user.stubs(:activate!).returns(true)
+        post :create, :user => { :id => @the_user.id, :password => "sekrit", :password_confirmation => "sekrit"}
+      end
+
+      should_assign_to(:user) { @the_user }
+      should_respond_with :redirect
+      should_set_the_flash_to "Your account has been activated."
+      should_redirect_to("the root url") { root_url }
+    end
+
+    context "with failed activation" do
+      setup do
+        @the_user.stubs(:activate!).returns(false)
+        post :create, :user => { :id => @the_user.id, :password => "sekrit", :password_confirmation => "sekrit"}
+      end
+
+      should_assign_to(:user) { @the_user }
+      should_respond_with :success
+      should_not_set_the_flash
+      should_render_template "new"
+    end
+  end
+
+end
+END
+end
+
+generate_user_block = ""
+if require_activation
+  generate_user_block = <<-END
+      @the_user = User.generate!
+      @the_user.activate!
+END
+else
+  generate_user_block = <<-END
+      @the_user = User.generate!
+END
+end
 
 file 'test/functional/application_controller_test.rb', <<-END
 require 'test_helper'
@@ -1803,7 +2210,7 @@ class ApplicationControllerTest < ActionController::TestCase
   
   context "#logged_in?" do
     should "return true if there is a user session" do
-      @the_user = User.generate!
+      #{generate_user_block}
       UserSession.create(@the_user)
       assert controller.logged_in?
     end
@@ -1815,14 +2222,14 @@ class ApplicationControllerTest < ActionController::TestCase
   
   context "#admin_logged_in?" do
     should "return true if there is a user session for an admin" do
-      @the_user = User.generate!
+      #{generate_user_block}
       @the_user.roles << "admin"
       UserSession.create(@the_user)
       assert controller.admin_logged_in?
     end
     
     should "return false if there is a user session for a non-admin" do
-      @the_user = User.generate!
+      #{generate_user_block}
       @the_user.roles = []
       UserSession.create(@the_user)
       assert !controller.admin_logged_in?
@@ -1837,7 +2244,185 @@ class ApplicationControllerTest < ActionController::TestCase
 end
 END
 
-file 'test/functional/users_controller_test.rb', <<-END
+if require_activation
+  file 'test/functional/users_controller_test.rb', <<-END
+require 'test_helper'
+
+class UsersControllerTest < ActionController::TestCase
+  
+  should_have_before_filter :require_no_user, :only => [:new, :create]
+  should_have_before_filter :require_user, :only => [:show, :edit, :update]
+  should_have_before_filter :admin_required, :only => [:index, :destroy]
+  
+  
+  context "routing" do
+    should_route :get, "/users", :action=>"index", :controller=>"users"
+    should_route :post, "/users", :action=>"create", :controller=>"users"
+    should_route :get, "/users/new", :action=>"new", :controller=>"users"
+    should_route :get, "/users/1/edit", :action=>"edit", :controller=>"users", :id => 1
+    should_route :get, "/users/1", :action=>"show", :controller=>"users", :id => 1
+    should_route :put, "/users/1", :action=>"update", :controller=>"users", :id => 1
+    should_route :delete, "/users/1", :action=>"destroy", :controller=>"users", :id => 1
+    
+    context "named routes" do
+      setup do
+        get :index
+      end
+      
+      should "generate users_path" do
+        assert_equal "/users", users_path
+      end
+      should "generate user_path" do
+        assert_equal "/users/1", user_path(1)
+      end
+      should "generate new_user_path" do
+        assert_equal "/users/new", new_user_path
+      end
+      should "generate edit_user_path" do
+        assert_equal "/users/1/edit", edit_user_path(1)
+      end
+    end
+  end
+    
+  context "on GET to :index" do
+    setup do
+      controller.stubs(:admin_required).returns(true)
+      @the_user = User.generate!
+      User.stubs(:all).returns([@the_user])
+      get :index
+    end
+    
+    should_assign_to(:users) { [@the_user] }
+    should_assign_to(:page_title) { "All Users" }
+    should_respond_with :success
+    should_render_template :index
+    should_not_set_the_flash
+  end
+   
+  context "on GET to :new" do
+    setup do
+      controller.stubs(:require_no_user).returns(true)
+      @the_user = User.generate!
+      User.stubs(:new).returns(@the_user)
+      get :new
+    end
+    
+    should_assign_to(:user) { @the_user }
+    should_assign_to(:page_title) { "Create Account" }
+    should_respond_with :success
+    should_render_template :new
+    should_not_set_the_flash
+  end
+
+  context "on POST to :create" do
+    setup do
+      controller.stubs(:require_no_user).returns(true)
+      @the_user = User.generate!
+      User.stubs(:new).returns(@the_user)
+    end
+    
+    context "with successful creation" do
+      setup do
+        @the_user.stubs(:signup!).returns(true)
+        post :create, :user => { :login => "bobby", :password => "bobby", :password_confirmation => "bobby" }
+      end
+
+      should_assign_to(:user) { @the_user }
+      should_respond_with :redirect
+      should_set_the_flash_to "Your account has been created. Please check your e-mail for your account activation instructions!"
+      should_redirect_to("the root url") { root_url }
+    end
+    
+    context "with failed creation" do
+      setup do
+        @the_user.stubs(:signup!).returns(false)
+        post :create, :user => { :login => "bobby", :password => "bobby", :password_confirmation => "bobby" }
+      end
+      
+      should_assign_to(:user) { @the_user }
+      should_respond_with :success
+      should_not_set_the_flash
+      should_render_template :new
+    end
+  end
+  
+  context "with a regular user" do
+    # TODO: insert checks that user can only get to their own stuff, even with spoofed URLs
+  end
+  
+  context "with an admin user" do
+    setup do
+      @admin_user = User.generate!
+      @admin_user.activate!
+      @admin_user.roles << "admin"
+      UserSession.create(@admin_user)
+      @the_user = User.generate!
+    end
+
+    context "on GET to :show" do
+      setup do
+        get :show, :id => @the_user.id
+      end
+    
+      should_assign_to(:user) { @the_user }
+      should_assign_to(:page_title) { "#{@the_user.login} details" }
+      should_respond_with :success
+      should_not_set_the_flash
+      should_render_template :show
+    end
+
+    context "on GET to :edit" do
+      setup do
+        get :edit, :id => @the_user.id
+      end
+    
+      should_assign_to(:user) { @the_user }
+      should_assign_to(:page_title) { "Edit #{@the_user.login}" }
+      should_respond_with :success
+      should_not_set_the_flash
+      should_render_template :edit
+    end
+
+    context "on PUT to :update" do
+      context "with successful update" do
+        setup do
+          User.any_instance.stubs(:update_attributes).returns(true)
+          put :update, :id => @the_user.id, :user => { :login => "bill" }
+        end
+      
+        should_assign_to(:user) { @the_user }
+        should_respond_with :redirect
+        should_set_the_flash_to "Account updated!"
+        should_redirect_to("the user's account") { account_url }
+      end
+    
+      context "with failed update" do
+        setup do
+          User.any_instance.stubs(:update_attributes).returns(false)
+          put :update, :id => @the_user.id, :user => { :login => "bill" }
+        end
+      
+        should_assign_to(:user) { @the_user }
+        should_respond_with :success
+        should_not_set_the_flash
+        should_render_template :edit
+      end
+    end
+    
+    context "on DELETE to :destroy" do
+      setup do
+        delete :destroy, :id => @the_user.id
+      end
+
+      should_respond_with :redirect
+      should_set_the_flash_to "User was deleted."
+      should_redirect_to("the users page") { users_path }
+    end
+  end
+end
+END
+else
+  file 'test/functional/users_controller_test.rb', <<-END
 require 'test_helper'
 
 class UsersControllerTest < ActionController::TestCase
@@ -2012,6 +2597,19 @@ class UsersControllerTest < ActionController::TestCase
   end
 end
 END
+end
+
+generate_user_block = ""
+if require_activation
+  generate_user_block = <<-END
+      @the_user = User.generate!
+      @the_user.activate!
+END
+else
+  generate_user_block = <<-END
+      @the_user = User.generate!
+END
+end
 
 file 'test/functional/user_sessions_controller_test.rb', <<-END
 require 'test_helper'
@@ -2097,7 +2695,7 @@ class UserSessionsControllerTest < ActionController::TestCase
   
   context "on DELETE to :destroy" do
     setup do
-      @the_user = User.generate!
+      #{generate_user_block}
       UserSession.create(@the_user)
       delete :destroy
     end
@@ -2278,6 +2876,18 @@ class PasswordResetsControllerTest < ActionController::TestCase
 end
 END
 
+extra_fields = ""
+contained_text = ""
+if require_activation
+  contained_text = 'Your account has been created'
+else
+  extra_fields = <<-END
+      fill_in 'Password', :with => 'spambot'
+      fill_in 'Password Confirmation', :with => 'spambot'
+END
+  contained_text = 'Account registered!'
+end
+
 file 'test/integration/new_user_can_register_test.rb', <<-END
 require File.join(File.dirname(__FILE__), '..', 'test_helper')
 
@@ -2295,16 +2905,27 @@ class NewUserCanRegisterTest < ActionController::IntegrationTest
       fill_in 'Last Name', :with => "Ferdinand"
       fill_in 'Login', :with => 'francis'
       fill_in 'Email', :with => 'francis@example.com'
-      fill_in 'Password', :with => 'spambot'
-      fill_in 'Password Confirmation', :with => 'spambot'
+#{extra_fields}
       click_button 'Register'
       
       assert_equal root_path, path
-      assert_contain 'Account registered!'
+      assert_contain '#{contained_text}'
     end
   end
 end
 END
+
+make_user_block = ""
+if require_activation
+  make_user_block = <<-END
+      @user = User.generate!
+      @user.activate!
+END
+else
+  make_user_block = <<-END
+      @user = User.generate!
+END
+end
 
 file 'test/integration/user_can_login_test.rb', <<-END
 require File.join(File.dirname(__FILE__), '..', 'test_helper')
@@ -2313,7 +2934,7 @@ class UserCanLoginTest < ActionController::IntegrationTest
 
   context 'an existing user' do
     setup do
-      @user = User.generate!
+#{make_user_block}
     end
     
     should 'be able to login with valid id and password' do
@@ -2338,7 +2959,7 @@ class UserCanLogoutTest < ActionController::IntegrationTest
 
   context 'a logged-in user' do
     setup do
-      @user = User.generate!
+#{make_user_block}
       visit login_path
       fill_in 'Login', :with => @user.login
       fill_in 'Password', :with => @user.password
@@ -2360,6 +2981,35 @@ END
 commit_state "basic tests"
 
 # authlogic setup
+
+create_block = ""
+if require_activation
+  create_block = <<-END
+  def create
+    @user = User.new(params[:user])
+    if @user.signup!(params)
+      @user.deliver_activation_instructions!
+      flash[:notice] = "Your account has been created. Please check your e-mail for your account activation instructions."
+      redirect_back_or_default root_url
+    else
+      render :template => "users/new"
+    end
+  end
+END
+else
+  create_block = <<-END
+  def create
+    @user = User.new(params[:user])
+    if @user.save
+      flash[:notice] = "Account registered!"
+      redirect_back_or_default root_url
+    else
+      render :template => "users/new"
+    end
+  end
+END
+end
+
 file 'app/controllers/accounts_controller.rb', <<-END
 class AccountsController < ApplicationController
   before_filter :require_no_user, :only => [:new, :create]
@@ -2371,15 +3021,7 @@ class AccountsController < ApplicationController
     render :template => "users/new"
   end
   
-  def create
-    @user = User.new(params[:user])
-    if @user.save
-      flash[:notice] = "Account registered!"
-      redirect_back_or_default root_url
-    else
-      render :template => "users/new"
-    end
-  end
+  #{create_block}
   
   def show
     find_user
@@ -2411,6 +3053,39 @@ private
   
 end
 END
+
+if require_activation
+  file 'app/controllers/accounts_controller.rb', <<-END
+class ActivationsController < ApplicationController
+  before_filter :require_no_user, :only => [:new, :create]
+
+  def new
+    @user = User.find_using_perishable_token(params[:activation_code], 1.week)
+    raise Exception unless @user && !@user.active?
+    @page_title = "Activate Your Account"
+  end
+
+# TODO: Reset token and resend email on expired token
+
+  def create
+    @user = User.find(params[:id])
+
+    if !@user || @user.active?
+      redirect_to root_url and return
+    end
+
+    if @user.activate!(params)
+      @user.deliver_welcome_email!
+      flash[:notice] = "Your account has been activated."
+      redirect_to root_url
+    else
+      render :action => :new
+    end
+  end
+  
+end
+END
+end
 
 file 'app/controllers/password_resets_controller.rb', <<-END
 class PasswordResetsController < ApplicationController
@@ -2490,6 +3165,34 @@ class UserSessionsController < ApplicationController
 end
 END
 
+create_block = ""
+if require_activation
+  create_block = <<-END
+  def create
+    @user = User.new(params[:user])
+    if @user.signup!(params)
+      @user.deliver_activation_instructions!
+      flash[:notice] = "Your account has been created. Please check your e-mail for your account activation instructions."
+      redirect_back_or_default root_url
+    else
+      render :action => :new
+    end
+  end
+END
+else
+  create_block = <<-END
+  def create
+    @user = User.new(params[:user])
+    if @user.save
+      flash[:notice] = "Account registered!"
+      redirect_back_or_default root_url
+    else
+      render :action => :new
+    end
+  end
+END
+end
+
 file 'app/controllers/users_controller.rb', <<-END
 class UsersController < ApplicationController
   before_filter :require_no_user, :only => [:new, :create]
@@ -2506,15 +3209,7 @@ class UsersController < ApplicationController
     @page_title = "Create Account"
   end
   
-  def create
-    @user = User.new(params[:user])
-    if @user.save
-      flash[:notice] = "Account registered!"
-      redirect_back_or_default root_url
-    else
-      render :action => :new
-    end
-  end
+  #{create_block}
   
   def show
     find_user
@@ -2556,6 +3251,18 @@ private
 end
 END
 
+activation_instructions_block = ""
+if require_activation
+  activation_instructions_block = <<-END
+  def activation_instructions(user)
+    setup(user)
+    subject "Activation Instructions"
+    body :account_activation_url => activate_url(user.perishable_token)
+  end
+  
+END
+end
+
 file 'app/models/notifier.rb', <<-END
 class Notifier < ActionMailer::Base
   default_url_options[:host] = "#{default_url_options_host}"
@@ -2572,6 +3279,7 @@ class Notifier < ActionMailer::Base
     body :user => user
   end
   
+  #{activation_instructions_block}
 private
 
   def setup(user)
@@ -2583,7 +3291,89 @@ private
 end
 END
 
-file 'app/models/user.rb', <<-END
+if require_activation
+  file 'app/models/user.rb', <<-END
+class User < ActiveRecord::Base
+  acts_as_authentic do |c|
+    c.merge_validates_format_of_login_field_options :live_validator => /^\w[\w\.+\-_@ ]+$/
+    c.merge_validates_format_of_email_field_options :live_validator => /^[A-Z0-9_\.%\+\-]+@(?:[A-Z0-9\-]+\.)+(?:[A-Z]{2,4}|museum|travel)$/i
+    c.validates_length_of_password_field_options = {:on => :update, :minimum => 4, :if => :has_no_credentials?}
+    c.validates_length_of_password_confirmation_field_options = {:on => :update, :minimum => 4, :if => :has_no_credentials?}
+  end
+
+  serialize :roles, Array
+
+  before_validation_on_create :make_default_roles
+
+  attr_accessible :login, :password, :password_confirmation, :email, :first_name, :last_name
+
+  def deliver_password_reset_instructions!
+    reset_perishable_token!
+    Notifier.deliver_password_reset_instructions(self)
+  end
+
+  def deliver_activation_instructions!
+    reset_perishable_token!
+    Notifier.deliver_activation_instructions(self)
+  end
+
+  def deliver_welcome_email!
+    reset_perishable_token!
+    Notifier.deliver_welcome_email(self)
+  end
+
+  def has_no_credentials?
+    self.crypted_password.blank?
+  end
+
+  def signup!(params)
+    self.login = params[:user][:login]
+    self.email = params[:user][:email]
+    save_without_session_maintenance
+  end
+
+  def activate!(params = nil)
+    self.active = true
+    if params
+      self.password = params[:user][:password]
+      self.password_confirmation = params[:user][:password_confirmation]
+    end
+    save
+  end
+
+  def admin?
+    has_role?("admin")
+  end
+
+  def has_role?(role)
+    roles.include?(role)
+  end
+
+  def add_role(role)
+    self.roles << role
+  end
+
+  def remove_role(role)
+    self.roles.delete(role)
+  end
+
+  def clear_roles
+    self.roles = []
+  end
+
+  def kaboom!
+    r = RegExp.new("foo")
+  end
+
+private
+  def make_default_roles
+    clear_roles if roles.nil?
+  end
+  
+end
+END
+else
+  file 'app/models/user.rb', <<-END
 class User < ActiveRecord::Base
   acts_as_authentic do |c|
     c.merge_validates_format_of_login_field_options :live_validator => /^\\w[\\w\\.+\\-_@ ]+$/
@@ -2636,10 +3426,31 @@ private
   end
 end
 END
+end
 
 file 'app/models/user_session.rb', <<-END
 class UserSession < Authlogic::Session::Base
 end
+END
+
+file 'app/views/activations/new.html.erb', <<-END
+<h1>Activate your account</h1>
+
+<p>Set your password and click Activate to log in to the site.</p>
+
+<% semantic_form_for @user, :url => finish_activate_path(@user.id), :html => { :method => :post } do |form| %>
+	<%= form.error_messages %>
+	<%= form.inputs :password, :password_confirmation %>
+	<%= form.submit "Activate" %>
+<% end %>
+END
+
+file 'app/views/notifier/activation_instructions.html.erb', <<-END
+Thank you for creating an account! Click the url below to activate your account!
+
+<%= @account_activation_url %>
+
+If the above URL does not work try copying and pasting it into your browser. If you continue to have problem, please feel free to contact us.
 END
 
 file 'app/views/notifier/password_reset_instructions.html.erb', <<-END
@@ -2737,12 +3548,21 @@ file 'app/views/users/index.html.erb', <<-END
 <%= link_to 'New user', new_user_path %>
 END
 
-file 'app/views/users/_form.html.erb', <<-END
-<%= form.inputs :first_name, :last_name, :login, :email %>
+password_input_block = ""
+if require_activation
+  password_input_block = ''
+else
+  password_input_block = <<-END
 <br />
 <% if form.object.new_record? %>
   <%= form.inputs :password, :password_confirmation %>
 <% end %>
+END
+end
+
+file 'app/views/users/_form.html.erb', <<-END
+<%= form.inputs :first_name, :last_name, :login, :email %>
+#{password_input_block}
 END
 
 if design == "bluetrip" 
@@ -2784,7 +3604,7 @@ if design == "bluetrip"
     <%= f.error_messages %>
     <%= render :partial => "users/form", :object => f %>
     <% f.buttons do %>
-    <%= f.commit_button "Register" %>
+      <%= f.commit_button "Register" %>
     <% end %>
   <% end %>
 
@@ -2848,7 +3668,44 @@ file 'app/views/users/show.html.erb', <<-END
 <%= link_to 'Edit', edit_account_path %>
 END
 
-file 'db/migrate/01_create_users.rb', <<-END
+if require_activation
+  file 'db/migrate/01_create_users.rb', <<-END
+class CreateUsers < ActiveRecord::Migration
+  def self.up
+    create_table :users do |t|
+      t.timestamps
+      t.string :login, :null => false
+      t.string :crypted_password
+      t.string :password_salt
+      t.string :persistence_token, :null => false
+      t.integer :login_count, :default => 0, :null => false
+      t.datetime :last_request_at
+      t.datetime :last_login_at
+      t.datetime :current_login_at
+      t.string :last_login_ip
+      t.string :current_login_ip
+      t.string :roles
+      t.string :first_name
+      t.string :last_name
+      t.string :perishable_token, :default => "", :null => false
+      t.string :email, :default => "", :null => false
+      t.boolean :active
+    end
+
+    add_index :users, :login
+    add_index :users, :persistence_token
+    add_index :users, :last_request_at
+    add_index :users, :perishable_token
+    add_index :users, :email
+  end
+
+  def self.down
+    drop_table :users
+  end
+end
+END
+else
+  file 'db/migrate/01_create_users.rb', <<-END
 class CreateUsers < ActiveRecord::Migration
   def self.up
     create_table :users do |t|
@@ -2882,6 +3739,7 @@ class CreateUsers < ActiveRecord::Migration
   end
 end
 END
+end
 
 file 'db/migrate/02_create_sessions.rb', <<-END
 class CreateSessions < ActiveRecord::Migration
@@ -3266,6 +4124,14 @@ END
 
 commit_state "static pages"
 
+activation_routes = ""
+if require_activation
+  activation_routes = <<-END
+  map.activate '/activate/:activation_code', :controller => 'activations', :action => 'new'
+  map.finish_activate '/finish_activate/:id', :controller => 'activations', :action => 'create'
+END
+end
+
 # simple default routing
 file 'config/routes.rb', <<-END
 ActionController::Routing::Routes.draw do |map|
@@ -3275,6 +4141,7 @@ ActionController::Routing::Routes.draw do |map|
   map.resource :user_session, :only => [:new, :create, :destroy]
   map.login 'login', :controller => "user_sessions", :action => "new"
   map.logout 'logout', :controller => "user_sessions", :action => "destroy"
+#{activation_routes}
   map.register 'register', :controller => "accounts", :action => "new"
   map.root :controller => "pages", :action => "home"
   map.pages 'pages/:action', :controller => "pages"

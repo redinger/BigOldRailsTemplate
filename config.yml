@@ -23,6 +23,8 @@ ie6_blocking: light
 javascript_library: prototype
 # Design: none (default), bluetrip
 design: none
+# Require users to activate after creating an account: false (default), true
+require_activation: false
 #
 # These options can be omitted, and the template will default to sensible behavior
 #
