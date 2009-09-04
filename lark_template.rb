@@ -157,26 +157,32 @@ end
 
 current_app_name = File.basename(File.expand_path(root))
 
-# Option set-up
-begin
-  template_options = {}
-  template_paths = [
-                    File.expand_path(File.join(ENV['HOME'],'.big_old_rails_template')),
-                    File.expand_path(File.dirname(template), File.join(root,'..'))
-                   ]
+def load_template_config_file(filename, root=root, template=template)
+  begin
+    options = {}
+    template_paths = [
+                      File.expand_path(File.join(ENV['HOME'],'.big_old_rails_template')),
+                      File.expand_path(File.dirname(template), File.join(root,'..'))
+                     ]
 
-  template_paths.each do |template_path|
-    template = File.join(template_path, "config.yml")
-    next unless File.exists? template
+    template_paths.each do |template_path|
+      config_file = File.join(template_path, filename)
 
-    open(template) do |f|
-      template_options = YAML.load(f)
+      next unless File.exists? config_file
+
+      open(config_file) do |f|
+        options = YAML.load(f)
+      end
+      # Config loaded, stop searching
+      break if options
     end
-    # Config loaded, stop searching
-    break if template_options
+    options
+  rescue
   end
-rescue
 end
+
+# Option set-up
+template_options = load_template_config_file('config.yml', root, template)
 
 rails_branch = template_options["rails_branch"]
 rails_branch = "2-3-stable" if rails_branch.nil?
@@ -281,35 +287,9 @@ END
 commit_state "base application"
 
 # plugins
-plugins = 
-  {
-    'admin_data' => {:options => {:git => 'git://github.com/neerajdotname/admin_data.git'}},
-    'db_populate' => {:options => {:git => 'git://github.com/ffmike/db-populate.git'}},
-    'exceptional' => {:options => {:git => 'git://github.com/contrast/exceptional.git'},
-                      :if => 'exception_handling == "exceptional"'},
-    'fast_remote_cache' => {:options => {:git => 'git://github.com/37signals/fast_remote_cache.git'}},
-    'hashdown' => {:options => {:git => 'git://github.com/rubysolo/hashdown.git'}},
-    'hoptoad_notifier' => {:options => {:git => 'git://github.com/thoughtbot/hoptoad_notifier.git'},
-                           :if => 'exception_handling == "hoptoad"'},
-    'live_validations' => {:options => {:git => 'git://github.com/augustl/live-validations.git'}},
-    'new_relic' => {:options => {:git => 'git://github.com/newrelic/rpm.git'},
-                    :if => 'monitoring == "new_relic"'},
-    'object_daddy' => {:options => {:git => 'git://github.com/flogic/object_daddy.git'}},
-    'paperclip' => {:options => {:git => 'git://github.com/thoughtbot/paperclip.git'}},
-    'parallel_specs' => {:options => {:git => 'git://github.com/grosser/parallel_specs.git'}},
-    'rack-bug' => {:options => {:git => 'git://github.com/brynary/rack-bug.git'}},
-    'rubaidhstrano' => {:options => {:git => 'git://github.com/rubaidh/rubaidhstrano.git'}},
-    'scout_rails_instrumentation' => {:options => {:git => 'git://github.com/highgroove/scout_rails_instrumentation.git'},
-                                      :if => 'monitoring == "scout"'},
-    'shmacros' => {:options => {:git => 'git://github.com/maxim/shmacros.git'}},
-    'stringex' => {:options => {:git => 'git://github.com/rsl/stringex.git'}},
-    'superdeploy' => {:options => {:git => 'git://github.com/saizai/superdeploy.git'}},
-    'time-warp' => {:options => {:git => 'git://github.com/iridesco/time-warp.git'}},    
-    'validation_reflection' => {:options => {:git => 'git://github.com/redinger/validation_reflection.git'}}    
-  }
-  
+plugins = load_template_config_file('plugins.yml', root, template)  
 plugins.each do |name, value|
-  if  value[:if].nil? || eval(value[:if])
+  if value[:if].nil? || eval(value[:if])
     install_plugin name, value[:options]
   end
 end

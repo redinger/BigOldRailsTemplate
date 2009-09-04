@@ -1,0 +1,67 @@
+--- 
+admin_data: 
+  :options: 
+    :git: :git://github.com/neerajdotname/admin_data.git
+db_populate: 
+  :options: 
+    :git: :git://github.com/ffmike/db-populate.git
+fast_remote_cache: 
+  :options: 
+    :git: :git://github.com/37signals/fast_remote_cache.git
+  hashdown: 
+    :options: 
+      :git: :git://github.com/rubysolo/hashdown.git
+live_validations: 
+  :options: 
+    :git: :git://github.com/augustl/live-validations.git
+object_daddy: 
+  :options: 
+    :git: :git://github.com/flogic/object_daddy.git
+paperclip: 
+  :options: 
+    :git: :git://github.com/thoughtbot/paperclip.git
+parallel_specs: 
+  :options: 
+    :git: :git://github.com/grosser/parallel_specs.git
+rack-bug: 
+  :options: 
+    :git: :git://github.com/brynary/rack-bug.git
+rubaidhstrano: 
+  :options: 
+    :git: :git://github.com/rubaidh/rubaidhstrano.git
+shmacros: 
+  :options: 
+    :git: :git://github.com/maxim/shmacros.git
+stringex: 
+  :options: 
+    :git: :git://github.com/rsl/stringex.git
+superdeploy: 
+  :options: 
+    :git: :git://github.com/saizai/superdeploy.git
+time-warp: 
+  :options: 
+    :git: :git://github.com/iridesco/time-warp.git
+validation_reflection: 
+  :options: 
+    :git: :git://github.com/redinger/validation_reflection.git
+
+# Optional monitoring
+new_relic: 
+  :options: 
+    :git: :git://github.com/newrelic/rpm.git
+  :if: monitoring == "new_relic"
+scout_rails_instrumentation: 
+  :options: 
+    :git: :git://github.com/highgroove/scout_rails_instrumentation.git
+  :if: monitoring == "scout"
+
+# Optional exception handling
+exceptional: 
+  :options: 
+    :git: :git://github.com/contrast/exceptional.git
+  :if: exception_handling == "exceptional"
+hoptoad_notifier: 
+  :options: 
+    :git: :git://github.com/thoughtbot/hoptoad_notifier.git
+  :if: exception_handling == "hoptoad"
+    
