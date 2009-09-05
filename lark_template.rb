@@ -295,41 +295,12 @@ plugins.each do |name, value|
 end
   
 # gems
-gem 'authlogic',
-  :version => '~> 2.0'
-gem 'mislav-will_paginate', 
-  :version => '~> 2.2', 
-  :lib => 'will_paginate',
-  :source => 'http://gems.github.com'
-gem 'jscruggs-metric_fu', 
-  :version => '~> 1.1', 
-  :lib => 'metric_fu', 
-  :source => 'http://gems.github.com' 
-gem "binarylogic-searchlogic",
-  :lib     => 'searchlogic',
-  :source  => 'http://gems.github.com',
-  :version => '~> 2.0'
-gem "justinfrench-formtastic", 
-  :lib     => 'formtastic', 
-  :source  => 'http://gems.github.com'
-  
-# development only
-gem "cwninja-inaction_mailer", 
-  :lib => 'inaction_mailer/force_load', 
-  :source => 'http://gems.github.com', 
-  :env => 'development'
-gem "ffmike-query_trace",
-  :lib => 'query_trace', 
-  :source => 'http://gems.github.com',
-  :env => 'development'
-
-# test only
-gem "ffmike-test_benchmark", 
-  :lib => 'test_benchmark', 
-  :source => 'http://gems.github.com',
-  :env => 'test'
-gem "webrat",
-  :env => "test"
+gems = load_template_config_file('gems.yml', root, template)  
+gems.each do |name, value|
+  if value[:if].nil? || eval(value[:if])
+    gem name, value[:options]
+  end
+end
 
 # assume gems are already on dev box, so don't install    
 # rake("gems:install", :sudo => true)

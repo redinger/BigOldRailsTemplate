@@ -1,0 +1,45 @@
+--- 
+authlogic: 
+  :options: 
+    :version: ~> 2.0
+mislav-will_paginate:
+  :options:
+    :version: ~> 2.2
+    :lib: will_paginate
+    :source: http://gems.github.com
+jscruggs-metric_fu:
+  :options:
+    :version: ~> 1.1
+    :lib: metric_fu
+    :source: http://gems.github.com 
+binarylogic-searchlogic:
+  :options:
+    :lib: searchlogic
+    :source: http://gems.github.com
+    :version: ~> 2.0
+justinfrench-formtastic:
+  :options:
+    :lib: formtastic
+    :source: http://gems.github.com
+
+# development only
+cwninja-inaction_mailer: 
+  :options:
+    :lib: inaction_mailer/force_load
+    :source: http://gems.github.com
+    :env: development
+ffmike-query_trace:
+  :options:
+    :lib: query_trace
+    :source: http://gems.github.com
+    :env: development
+
+# test only
+ffmike-test_benchmark:
+  :options:
+    :lib: test_benchmark
+    :source: http://gems.github.com
+    :env: test
+webrat:
+  :options:
+    :env: test
