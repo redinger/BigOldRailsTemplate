@@ -21,6 +21,10 @@ justinfrench-formtastic:
   :options:
     :lib: formtastic
     :source: http://gems.github.com
+haml:
+  :options:
+    :version: ~> 2.2
+  :if: template_engine == "haml"
 
 # development only
 cwninja-inaction_mailer: 
