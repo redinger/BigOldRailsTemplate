@@ -1,0 +1,2 @@
+fill_in 'Password', :with => 'spambot'
+fill_in 'Password Confirmation', :with => 'spambot'

@@ -1,0 +1,23 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title><%= @page_title || controller.action_name %></title>
+    #{extra_stylesheet_tags}
+    <%= stylesheet_link_tag 'formtastic', 'formtastic_changes', 'application', :media => 'all', :cache => true %>
+    #{javascript_include_tags}
+    <%= yield :head %>
+  </head>
+  <body>
+    <div class="container">
+      <%= yield :top_menu %>
+      <%= render :partial => 'layouts/flashes' -%>
+      <%= yield %>
+
+      <div id="footer" class="#{footer_class}">
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      </div>    
+    </div>
+  </body>
+</html>

@@ -1,0 +1,2 @@
+@the_user = User.generate!
+@the_user.activate!

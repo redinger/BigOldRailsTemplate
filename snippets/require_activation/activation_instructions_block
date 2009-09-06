@@ -1,0 +1,6 @@
+def activation_instructions(user)
+  setup(user)
+  subject "Activation Instructions"
+  body :account_activation_url => activate_url(user.perishable_token)
+end
+

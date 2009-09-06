@@ -1,0 +1,13 @@
+<div id="main_without_left_menu" class="span-22 prefix-1 suffix-1 last">
+
+  <h1>Register</h1>
+
+  <% semantic_form_for @user, :url => account_path, :live_validations => true do |f| %>
+    <%= f.error_messages %>
+    <%= render :partial => "users/form", :object => f %>
+    <% f.buttons do %>
+      <%= f.commit_button "Register" %>
+    <% end %>
+  <% end %>
+
+</div>

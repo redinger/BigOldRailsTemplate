@@ -1,0 +1,39 @@
+<% content_for :top_menu do %>
+  <div id="top_menu" class="#{top_menu_class}">
+    <% anonymous_only do %>
+      <%= link_to "Register", new_account_path %>
+      <%= link_to "Login", new_user_session_path %>
+    <% end %>
+    <% authenticated_only do %>
+      <%= link_to "Logout", user_session_path, :method => :delete, :confirm => "Are you sure you want to logout?" %>
+      <%= link_to "Your Account", account_path %>
+    <% end %>
+  </div>
+<% end %>
+
+<div id="main_wrapper">
+  <div id="left_menu" class="#{left_menu_class}">
+    <ul>
+    <% anonymous_only do %>
+      <li><%= link_to "Register", new_account_path %></li>
+      <li><%= link_to "Login", new_user_session_path %></li>
+    <% end %>
+    <% authenticated_only do %>
+      <li><%= link_to "App menu item", "#" %></li>
+      <li><%= link_to "App menu item", "#" %></li>
+      <li><%= link_to "App menu item", "#" %></li>
+    <% end %>
+    </ul>
+  </div>
+
+  <div id="main_with_left_menu" class="#{main_with_left_menu_class}">
+    <h1>Welcome to #{current_app_name}</h1>
+      <!--[if lt IE 7]>
+  	<p class="flash_error">
+  		Your browser is obsolete. For best results in #{current_app_name}, please <%= link_to "Upgrade", pages_path(:action => 'upgrade'), :target => :blank %>
+  	</p>
+    <![endif]-->
+
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+  </div>
+</div>

@@ -1,0 +1,9 @@
+<h1>Login</h1>
+
+<% semantic_form_for @user_session, :url => user_session_path do |f| %>
+  <%= f.error_messages %>
+  <%= f.inputs :login, :password %>
+  <%= f.check_box :remember_me %>
+  Remember Me <%= f.commit_button "Login" %>
+<% end %>
+<%= link_to "Register", register_path %>

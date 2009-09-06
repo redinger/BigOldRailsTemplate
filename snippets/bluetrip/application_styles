@@ -1,0 +1,40 @@
+
+/* @group Application Styles */
+
+body {
+	background-color: #ccff99;
+}
+
+.container {
+	background-color: white;
+}
+
+#top_menu {
+	text-align: right;
+}
+
+#left_menu ul {
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+}
+
+#left_menu ul a {
+	display: block;
+	width: 150px;
+	height: 20px;
+	line-height: 40px;
+	text-decoration: none;	
+}
+
+#left_menu li {
+
+}
+
+#footer {
+	margin-top: 15px;
+	margin-bottom: 10px;
+	text-align: center;
+}
+
+/* @end */

@@ -1,0 +1,2 @@
+map.activate '/activate/:activation_code', :controller => 'activations', :action => 'new'
+map.finish_activate '/finish_activate/:id', :controller => 'activations', :action => 'create'
