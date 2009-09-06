@@ -21,6 +21,8 @@ link_rails_root: ~/rails
 ie6_blocking: light
 # javascript library: prototype (default), jquery
 javascript_library: prototype
+# template engine: erb (default), haml
+template_engine: erb
 # Design: none (default), bluetrip
 design: none
 # Require users to activate after creating an account: false (default), true

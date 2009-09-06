@@ -251,6 +251,9 @@ ie6_blocking = "light" if ie6_blocking.nil?
 @javascript_library = template_options["javascript_library"].nil? ? ask("Which javascript library? prototype (default), jquery").downcase : template_options["javascript_library"]
 @javascript_library = "prototype" if @javascript_library.nil?
 
+template_engine = template_options["templating"].nil? ? ask("Which template engine? erb (default), haml").downcase : template_options["template_engine"]
+template_engine = "erb" if template_engine.nil?
+
 design = template_options["design"].nil? ? ask("Which design? none (default), bluetrip").downcase : template_options["design"]
 design = "none" if design.nil?
 
@@ -651,6 +654,85 @@ end
 file 'config/routes.rb', load_pattern('config/routes.rb', 'default', binding)
 
 commit_state "routing"
+
+# optionally convert html/erb/css to haml/sass
+if template_engine == 'haml'
+  def get_indent(line)
+    line = line.to_s
+    space_areas = line.scan(/^\s+/)
+    space_areas.empty? ? 0 : space_areas.first.size
+  end
+
+  def block_start?(line)
+    block_starters = [/\s+do\W/, /^-\s+while/, /^-\s+module/, /^-\s+begin/,
+                      /^-\s+case/, /^-\s+class/, /^-\s+unless/, /^-\s+for/, 
+                      /^-\s+until/, /^-\s+if/]
+
+    line = line.to_s
+    line.strip =~ /^-/ && block_starters.any?{|bs| line =~ bs}
+  end
+
+  def block_end?(line)
+    line = line.to_s
+    line.strip =~ /^-\send$/
+  end
+
+  def indent(line, steps = 0)
+    exceptions = [/\s+else\W/, /^-\s+elsif/, /^-\s+when/, /^-\s+ensure/, /^-\s+rescue/]
+    return if exceptions.any?{|ex| line =~ ex}
+
+    steps ||= 0
+    line = line.to_s
+    ("  " * steps) + line
+  end
+  
+  in_root do
+    Dir["app/views/**/*.erb"].each do |origin|
+      destination = origin.gsub(/\.erb$/, '.haml')
+      run "html2haml -rx #{origin} #{destination}"
+      
+      # Auto-fix for haml indentation. Likely not very reliable.
+      stack = []
+      lines = File.readlines(destination)
+      line_number = lines.size
+      goner_lines = []
+      indented_lines = []
+
+      lines.reverse_each do |line|
+        line_number -= 1
+
+        if block_end?(line)
+          stack << 1
+          goner_lines << line_number
+        elsif block_start?(line)
+          stack.pop
+        else
+          indented_lines << [line_number, stack.last]
+        end
+      end
+      
+      indented_lines.each do |pair|
+        line_number, indent_by = pair
+        lines[line_number] = indent(lines[line_number], indent_by)
+      end
+
+      goner_lines.each do |i|
+        lines.delete_at(i)
+      end
+      
+      File.open(destination, "w") do |f|
+        f.write(lines.join)
+      end
+      
+      File.delete(origin)
+    end
+    
+    Dir["public/stylesheets/**/*.css"].each do |file|
+      run "css2sass #{file} #{file.gsub(/\.css$/, '.sass')}"
+      File.delete(file)
+    end
+  end
+end
 
 # databases
 rake('db:create')
