@@ -24,7 +24,17 @@ justinfrench-formtastic:
 haml:
   :options:
     :version: ~> 2.2
-  :if: template_engine == "haml"
+  :if: template_engine == "haml" || design == "compass"
+chriseppstein-compass:
+  :options:
+    :lib: compass
+    :source: http://gems.github.com
+  :if: design == "compass"
+chriseppstein-compass-960-plugin:
+  :options:
+    :lib: ninesixty
+    :source: http://gems.github.com
+  :if: "design == 'compass' && compass_css_framework =~ /960/"
 
 # development only
 cwninja-inaction_mailer: 

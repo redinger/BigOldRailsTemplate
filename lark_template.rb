@@ -1,6 +1,7 @@
 require 'open-uri'
 require 'yaml'
 require 'base64'
+require 'cgi'
 
 # Utility Methods
  
@@ -253,10 +254,13 @@ ie6_blocking = "light" if ie6_blocking.nil?
 @javascript_library = template_options["javascript_library"].nil? ? ask("Which javascript library? prototype (default), jquery").downcase : template_options["javascript_library"]
 @javascript_library = "prototype" if @javascript_library.nil?
 
-template_engine = template_options["templating"].nil? ? ask("Which template engine? erb (default), haml").downcase : template_options["template_engine"]
+template_engine = template_options["template_engine"].nil? ? ask("Which template engine? erb (default), haml").downcase : template_options["template_engine"]
 template_engine = "erb" if template_engine.nil?
 
-design = template_options["design"].nil? ? ask("Which design? none (default), bluetrip").downcase : template_options["design"]
+compass_css_framework = template_options["compass_css_framework"]
+compass_css_framework = "blueprint" if compass_css_framework.nil?
+
+design = template_options["design"].nil? ? ask("Which design? none (default), bluetrip, compass").downcase : template_options["design"]
 design = "none" if design.nil?
 
 require_activation = (template_options["require_activation"] == "true")
@@ -372,6 +376,40 @@ if design == "bluetrip"
   %w(cross doc email external feed im information key pdf tick visited xls).each do |icon|
     file_from_repo "mikecrittenden", "bluetrip-css-framework", "master", "img/icons/#{icon}.png", "public/img/icons/#{icon}.png"
   end
+end
+
+if design == "compass"
+  compass_css_framework = template_options["compass_css_framework"].nil? ? ask("Compass CSS Framework? blueprint (default), 960").downcase : template_options["compass_css_framework"]
+  compass_css_framework = "blueprint" if compass_css_framework.blank?
+
+  compass_sass_dir = "app/stylesheets"
+  compass_css_dir = "public/stylesheets"
+
+
+  # load any compass framework plugins
+  if compass_css_framework =~ /960/
+    plugin_require = "-r ninesixty"
+  end
+
+  # build out compass command
+  compass_command = "compass --rails -f #{compass_css_framework} . --css-dir=#{compass_css_dir} --sass-dir=#{compass_sass_dir} "
+  compass_command << plugin_require if plugin_require
+
+  # Require compass during plugin loading
+  file 'vendor/plugins/compass/init.rb', <<-CODE
+  # This is here to make sure that the right version of sass gets loaded (haml 2.2) by the compass requires.
+  require 'compass'
+  CODE
+
+  # integrate it!
+  run "haml --rails ."
+  run compass_command
+
+  puts "Compass (with #{compass_css_framework}) is all setup, have fun!"
+end
+
+if design != "compass" && template_engine == "haml"
+  run "haml --rails ."
 end
 
 flash_class =  load_snippet('flash_class', design)
@@ -658,11 +696,11 @@ file 'config/routes.rb', load_pattern('config/routes.rb', 'default', binding)
 commit_state "routing"
 
 # optionally convert html/erb/css to haml/sass
-if template_engine == 'haml'
+if template_engine == 'haml' || design == "compass"
   def get_indent(line)
     line = line.to_s
     space_areas = line.scan(/^\s+/)
-    space_areas.empty? ? 0 : space_areas.first.size
+    space_areas.empty? ? 0 : (space_areas.first.size / 2)
   end
 
   def block_start?(line)
@@ -677,6 +715,16 @@ if template_engine == 'haml'
   def block_end?(line)
     line = line.to_s
     line.strip =~ /^-\send$/
+  end
+  
+  def ie_block_start?(line)
+    line = line.to_s
+    line =~ /\[if IE\]>/i
+  end
+  
+  def ie_block_end?(line)
+    line = line.to_s
+    line =~ /<!\[endif\]/i
   end
 
   def indent(line, steps = 0)
@@ -699,18 +747,47 @@ if template_engine == 'haml'
       line_number = lines.size
       goner_lines = []
       indented_lines = []
-
+      altered_lines = []
+      inside_ie_block = false
+      just_passed_ie_block = false
+      
       lines.reverse_each do |line|
         line_number -= 1
-
-        if block_end?(line)
+        
+        if just_passed_ie_block
+          altered_lines << [line_number, line.sub('/', '/[if IE]')]
+          just_passed_ie_block = false
+        elsif ie_block_start?(line)
+          goner_lines << line_number
+          inside_ie_block = false
+          stack.pop
+          just_passed_ie_block = true
+        elsif ie_block_end?(line)
+          goner_lines << line_number
+          inside_ie_block = true
+          stack << get_indent(line)
+        elsif inside_ie_block
+          match = line.match(/<haml[^>]*>([^<]+)<\/haml/)
+          string = match && match[1]
+          fixed_ie = string && "= #{CGI::unescapeHTML(CGI::unescapeHTML(string.strip))}\n"
+          altered_lines << [line_number, fixed_ie]
+          indented_lines << [line_number, stack.last]
+          
+        elsif block_end?(line)
           stack << 1
           goner_lines << line_number
+          
         elsif block_start?(line)
           stack.pop
+          
         else
           indented_lines << [line_number, stack.last]
         end
+      end
+      
+      altered_lines.each do |pair|
+        line_number, text = pair
+        lines[line_number] = text
       end
       
       indented_lines.each do |pair|
@@ -732,6 +809,14 @@ if template_engine == 'haml'
     Dir["public/stylesheets/**/*.css"].each do |file|
       run "css2sass #{file} #{file.gsub(/\.css$/, '.sass')}"
       File.delete(file)
+    end
+  end
+end
+
+if design == "compass"
+  in_root do
+    Dir["public/stylesheets/**/*.sass"].each do |file|
+      run "mv #{file} app/stylesheets/#{File.basename(file)}"
     end
   end
 end
