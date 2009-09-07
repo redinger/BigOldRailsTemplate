@@ -24,7 +24,7 @@ javascript_library: prototype
 # template engine: erb (default), haml
 template_engine: erb
 # Design: none (default), bluetrip, compass
-design: compass
+design: none
 # compass_css_framework is only used if design == compass: blueprint (default), 960
 compass_css_framework: blueprint
 # Require users to activate after creating an account: false (default), true
