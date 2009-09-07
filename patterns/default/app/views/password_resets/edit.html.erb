@@ -1,4 +1,4 @@
-<h1>Change My Password</h1>
+<% title 'Change My Password' %>
 
 <% semantic_form_for @user, :url => password_reset_path, :method => :put, :live_validations => true do |f| %>
   <%= f.error_messages %>

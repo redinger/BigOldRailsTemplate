@@ -436,6 +436,7 @@ generate(:formtastic_stylesheets)
 
 file 'app/controllers/application_controller.rb', load_pattern('app/controllers/application_controller.rb')
 file 'app/helpers/application_helper.rb', load_pattern('app/helpers/application_helper.rb')
+file 'app/helpers/layout_helper.rb', load_pattern('app/helpers/layout_helper.rb')
 
 # initializers
 initializer 'requires.rb', load_pattern('config/initializers/requires.rb')

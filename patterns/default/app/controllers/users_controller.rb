@@ -5,24 +5,20 @@ class UsersController < ApplicationController
   
   def index
     @users = User.all
-    @page_title = "All Users"
   end
   
   def new
     @user = User.new
-    @page_title = "Create Account"
   end
   
   #{user_create_block}
   
   def show
     find_user
-    @page_title = "\#{@user.login} details"
   end
 
   def edit
     find_user
-    @page_title = "Edit \#{@user.login}"
   end
   
   def update

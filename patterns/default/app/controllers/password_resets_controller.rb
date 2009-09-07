@@ -2,7 +2,6 @@ class PasswordResetsController < ApplicationController
   before_filter :load_user_using_perishable_token, :only => [:edit, :update]
   
   def new
-    @page_title = "Forgot Password?"
   end
   
   def create
@@ -19,7 +18,6 @@ class PasswordResetsController < ApplicationController
   end
   
   def edit
-    @page_title = "Select a New Password"
   end
 
   def update

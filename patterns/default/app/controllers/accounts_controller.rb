@@ -4,7 +4,6 @@ class AccountsController < ApplicationController
   
   def new
     @user = User.new
-    @page_title = "Create Account"
     render :template => "users/new"
   end
 
@@ -12,13 +11,11 @@ class AccountsController < ApplicationController
   
   def show
     find_user
-    @page_title = "\#{@user.login} details"
     render :template => "users/show"
   end
 
   def edit
     find_user
-    @page_title = "Edit \#{@user.login}"
     render :template => "users/edit"
   end
   

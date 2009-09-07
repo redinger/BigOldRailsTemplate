@@ -4,7 +4,6 @@ class ActivationsController < ApplicationController
   def new
     @user = User.find_using_perishable_token(params[:activation_code], 1.week)
     raise Exception unless @user && !@user.active?
-    @page_title = "Activate Your Account"
   end
 
 # TODO: Reset token and resend email on expired token
