@@ -17,7 +17,7 @@ class ActivationsController < ApplicationController
 
     if @user.activate!(params)
       @user.deliver_welcome_email!
-      flash[:notice] = t('flash.activation_success')
+      flash[:notice] = t('flash.activations.create.notice')
       redirect_to root_url
     else
       render :action => :new

@@ -7,7 +7,7 @@
       <%= link_to t('link.login'), new_user_session_path %>
     <% end %>
     <% authenticated_only do %>
-      <%= link_to t('link.logout'), user_session_path, :method => :delete, :confirm => t('flash.logout_confirmation') %>
+      <%= link_to t('link.logout'), user_session_path, :method => :delete, :confirm => t('confirm.logout') %>
       <%= link_to t('link.user'), account_path %>
     <% end %>
   </div>

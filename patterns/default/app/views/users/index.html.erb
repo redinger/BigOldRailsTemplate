@@ -11,7 +11,7 @@
     <td><%=h user.login %></td>
     <td><%= link_to t('link.show'), user %></td>
     <td><%= link_to t('link.edit'), edit_user_path(user) %></td>
-    <td><%= link_to t('link.destroy'), user, :confirm => t('flash.destroy_confirmation'), :method => :delete %></td>
+    <td><%= link_to t('link.destroy'), user, :confirm => t('confirm.destroy'), :method => :delete %></td>
   </tr>
 <% end %>
 </table>

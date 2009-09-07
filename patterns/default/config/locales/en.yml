@@ -17,27 +17,48 @@ en:
     edit: Edit
     destroy: Destroy
     
+  confirm:
+    logout: "Are you sure you want to logout?"
+    destroy: "Are you sure?"  
+  
   flash:
-    logout_confirmation: "Are you sure you want to logout?"
-    destroy_confirmation: "Are you sure?"
+    accounts:
+      create:
+        notice: "Account registered!"
+      update:
+        notice: "Account successfully updated."
     
+    users:
+      create:
+        notice: "User successfully created."
+      update:
+        notice: "User successfully updated."
+      destroy:
+        notice: "User successfully deleted."
+
+    activations:
+      create:
+        notice: "Your account has been activated."
+
+    user_sessions:
+      create:
+        notice: "Login successful!"
+      destroy:
+        notice: "Logout successful!"
+        
+    password_resets: 
+      create: 
+        notice: "Instructions to reset your password have been emailed to you. Please check your email."
+        error: "No user was found with that email address."
+      update:
+        notice: "Password successfully updated."
+
     require_admin: "Sorry, you don't have access to that."
     require_user: "You must be logged in to access this page."
     require_no_user: "You must be logged out to access this page."
     
-    user_create_success: "Account registered!"
-    user_update_success: "Account successfully updated."
-    user_destroy_success: 'User successfully deleted.'
-    
-    activation_required: "Your account has been created. Please check your e-mail for your account activation instructions."
-    activation_success: "Your account has been activated."
-    
-    password_instructions_sent: "Instructions to reset your password have been emailed to you. Please check your email."
-    email_not_found: "No user was found with that email address."
-    password_update_success: "Password successfully updated."
-    user_token_not_found: "We're sorry, but we could not locate your account. If you are having issues try copying and pasting the URL from your email into your browser or restarting the reset password process."
-    login_success: "Login successful!"
-    logout_success: "Logout successful!"
+    require_activation: "Your account has been created. Please check your e-mail for your account activation instructions."
+    require_user_token: "We're sorry, but we could not locate your account. If you are having issues try copying and pasting the URL from your email into your browser or restarting the reset password process."
   
   # Email subjects
   subject:

@@ -35,6 +35,11 @@ chriseppstein-compass-960-plugin:
     :lib: ninesixty
     :source: http://gems.github.com
   :if: "design == 'compass' && compass_css_framework =~ /960/"
+josevalim-inherited_resources:
+  :options:
+    :lib: inherited_resources
+    :source: http://gems.github.com
+    :version: >= 0.9.0
 
 # development only
 cwninja-inaction_mailer: 
