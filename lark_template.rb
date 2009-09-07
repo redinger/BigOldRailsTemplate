@@ -359,6 +359,8 @@ if @javascript_library == "prototype"
   download "http://livevalidation.com/javascripts/src/1.3/livevalidation_prototype.js", "public/javascripts/livevalidation.js"
 elsif @javascript_library == "jquery"
   file_from_repo "ffmike", "jquery-validate", "master", "jquery.validate.min.js", "public/javascripts/jquery.validate.min.js"
+  rake("jrails:js:scrub")
+  rake("jrails:js:install")
 end
 
 if design == "bluetrip"

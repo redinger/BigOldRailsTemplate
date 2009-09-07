@@ -64,4 +64,9 @@ hoptoad_notifier:
   :options: 
     :git: :git://github.com/thoughtbot/hoptoad_notifier.git
   :if: exception_handling == "hoptoad"
-    
+
+# Optional javascript library
+jrails:
+  :options:
+    :git: :git://github.com/aaronchi/jrails.git
+  :if: @javascript_library == "jquery"
