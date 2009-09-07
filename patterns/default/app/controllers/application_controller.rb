@@ -22,7 +22,7 @@ class ApplicationController < ActionController::Base
   
   def admin_required
     unless current_user && current_user.admin?
-      flash[:error] = "Sorry, you don't have access to that."
+      flash[:error] = t("flash.require_admin")
       redirect_to root_url and return false
     end
   end
@@ -45,7 +45,7 @@ private
   def require_user
     unless current_user
       store_location
-      flash[:notice] = "You must be logged in to access this page"
+      flash[:notice] = t('flash.require_user')
       redirect_to new_user_session_url
       return false
     end
@@ -54,7 +54,7 @@ private
   def require_no_user
     if current_user
       store_location
-      flash[:notice] = "You must be logged out to access this page"
+      flash[:notice] = t('flash.require_no_user')
       redirect_to account_url
       return false
     end

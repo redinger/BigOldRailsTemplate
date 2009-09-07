@@ -1,0 +1,175 @@
+en:
+  label:
+    login: Login
+    update: Update
+    email: Email
+    register: Register
+    activate: Activate
+    
+  link:
+    user: My Profile
+    register: Register
+    new_user: New User
+    login: Login
+    logout: Logout
+    upgrade: Upgrade
+    show: Show
+    edit: Edit
+    destroy: Destroy
+    
+  flash:
+    logout_confirmation: "Are you sure you want to logout?"
+    destroy_confirmation: "Are you sure?"
+    
+    require_admin: "Sorry, you don't have access to that."
+    require_user: "You must be logged in to access this page."
+    require_no_user: "You must be logged out to access this page."
+    
+    user_create_success: "Account registered!"
+    user_update_success: "Account successfully updated."
+    user_destroy_success: 'User successfully deleted.'
+    
+    activation_required: "Your account has been created. Please check your e-mail for your account activation instructions."
+    activation_success: "Your account has been activated."
+    
+    password_instructions_sent: "Instructions to reset your password have been emailed to you. Please check your email."
+    email_not_found: "No user was found with that email address."
+    password_update_success: "Password successfully updated."
+    user_token_not_found: "We're sorry, but we could not locate your account. If you are having issues try copying and pasting the URL from your email into your browser or restarting the reset password process."
+    login_success: "Login successful!"
+    logout_success: "Logout successful!"
+  
+  # Email subjects
+  subject:
+    activation_instructions: Activation Instructions
+  
+  # Views
+  user_sessions:
+    new:
+      title: Login
+      remember_me: Remember Me
+  
+  activations:
+    new:
+      title: "Activate Your Account"
+      instruction: "Set your password and click Activate to log in to the site."
+  
+  users:
+    index:
+      title: All Users
+    new:
+      title: Register
+    edit:
+      title: Edit My Account
+    show:
+      title: My Account
+  
+  password_resets:
+    edit:
+      title: Change My Password
+      submit: Update my password and log me in
+    new:
+      title: Forgot Password?
+      submit: Reset my password
+  
+  notifier:
+    activation_instructions:
+      text: |
+        Thank you for creating an account! Click the url below to activate your account!
+        
+        {{activation_url}}
+        
+        If the above URL does not work try copying and pasting it into your browser. If you continue to have problem, please feel free to contact us.
+      
+    
+    password_reset_instructions:
+      text: |
+        A request to reset your password has been made. If you did not make this request, simply ignore this email. If you did make this request just click the link below:
+        
+        {{password_reset_url}}
+        
+        If the above URL does not work try copying and pasting it into your browser. If you continue to have problem please feel free to contact us.
+        
+    welcome_email:
+      text: |
+        Welcome to #{current_app_name}!
+        
+        Thank you for creating an account at #{current_app_name}.
+        Your login is {{login}}. You can log in to the site at {{login_url}} .
+        
+        If you forget your password, you can visit {{password_reset_url}} to reset it.
+  
+  pages:
+    home:
+      welcome: Welcome to #{current_app_name}
+      
+    upgrade:
+      text: |
+        <div id="ie6msg">
+        <h4>#{current_app_name} works best with a newer browser than you are using.</h4>
+        <p>To get the best possible experience using #{current_app_name}, we recommend that you upgrade your browser to a newer version. The current version is <a href="http://www.microsoft.com/windows/downloads/ie/getitnow.mspx" target="_blank">Internet Explorer 7</a> or <a href="http://www.microsoft.com/windows/internet-explorer/default.aspx target="_blank"">Internet Explorer 8</a>. The upgrade is free. If you’re using a PC at work you should contact your IT-administrator. Either way, we'd like to encourage you to stop using IE6 and try a more secure and Web Standards-friendly browser.</p>
+        <p>#{current_app_name} also supports other popular browsers like <strong><a href="http://getfirefox.com" target="_blank">Firefox</a></strong> or <strong><a href="http://www.opera.com" target="_blank">Opera</a></strong>.</p>
+        </div>
+    
+
+  ie:
+    upgrade_message: |
+      Your browser is obsolete. For best results in #{current_app_name}, please {{upgrade_page_url}}
+    outdated_browser: You are using an outdated browser
+    please_upgrade: "For a better experience using this site, please upgrade to a modern web browser."
+    browser_obsolete: Your Browser is Obsolete
+  
+  states:
+    AL: Alabama
+    AK: Alaska
+    AZ: Arizona
+    AR: Arkansas
+    CA: California
+    CO: Colorado
+    CT: Connecticut
+    DE: Delaware
+    DC: District Of Columbia
+    FL: Florida
+    GA: Georgia
+    HI: Hawaii
+    ID: Idaho
+    IL: Illinois
+    IN: Indiana
+    IA: Iowa
+    KS: Kansas
+    KY: Kentucky
+    LA: Louisiana
+    ME: Maine
+    MD: Maryland
+    MA: Massachusetts
+    MI: Michigan
+    MN: Minnesota
+    MS: Mississippi
+    MO: Missouri
+    MT: Montana
+    NE: Nebraska
+    NV: Nevada
+    NH: New Hampshire
+    NJ: New Jersey
+    NM: New Mexico
+    NY: New York
+    NC: North Carolina
+    ND: North Dakota
+    OH: Ohio
+    OK: Oklahoma
+    OR: Oregon
+    PA: Pennsylvania
+    RI: Rhode Island
+    SC: South Carolina
+    SD: South Dakota
+    TN: Tennessee
+    TX: Texas
+    UT: Utah
+    VT: Vermont
+    VA: Virginia
+    WA: Washington
+    WV: West Virginia
+    WI: Wisconsin
+    WY: Wyoming
+      
+    

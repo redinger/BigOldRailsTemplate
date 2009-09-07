@@ -1,9 +1,9 @@
-<% title "Edit My Account" %>
+<% title t('.title') %>
 
 <% semantic_form_for @user, :url => account_path, :live_validations => true do |f| %>
   <%= f.error_messages %>
   <%= render :partial => "users/form", :object => f %>
-  <%= f.commit_button "Update"%>
+  <%= f.commit_button t('label.update') %>
 <% end %>
 
-<br /><%= link_to "My Profile", account_path %>
+<br /><%= link_to t('link.user'), account_path %>

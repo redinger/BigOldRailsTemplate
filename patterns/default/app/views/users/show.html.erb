@@ -1,45 +1,45 @@
-<% title "My Account" %>
+<% title t('.title') %>
 
 <p>
-  <b>Login:</b>
+  <b><%= User.human_attribute_name('login') %>:</b>
   <%=h @user.login %>
 </p>
 
 <p>
-  <b>Email:</b>
+  <b><%= User.human_attribute_name('email') %>:</b>
   <%=h @user.email %>
 </p>
 
 <% admin_only do %>
   <p>
-    <b>Login count:</b>
+    <b><%= User.human_attribute_name('login_count') %>:</b>
     <%=h @user.login_count %>
   </p>
 
   <p>
-    <b>Last request at:</b>
+    <b><%= User.human_attribute_name('last_request_at') %>:</b>
     <%=h @user.last_request_at %>
   </p>
 
   <p>
-    <b>Last login at:</b>
+    <b><%= User.human_attribute_name('last_login_at') %>:</b>
     <%=h @user.last_login_at %>
   </p>
 
   <p>
-    <b>Current login at:</b>
+    <b><%= User.human_attribute_name('current_login_at') %>:</b>
     <%=h @user.current_login_at %>
   </p>
 
   <p>
-    <b>Last login ip:</b>
+    <b><%= User.human_attribute_name('last_login_ip') %>:</b>
     <%=h @user.last_login_ip %>
   </p>
 
   <p>
-    <b>Current login ip:</b>
+    <b><%= User.human_attribute_name('current_login_ip') %>:</b>
     <%=h @user.current_login_ip %>
   </p>
 <% end %>
 
-<%= link_to 'Edit', edit_account_path %>
+<%= link_to t('link.edit'), edit_account_path %>

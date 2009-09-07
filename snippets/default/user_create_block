@@ -1,7 +1,7 @@
 def create
   @user = User.new(params[:user])
   if @user.save
-    flash[:notice] = "Account registered!"
+    flash[:notice] = t('flash.user_create_success')
     redirect_back_or_default root_url
   else
     render :template => "users/new"

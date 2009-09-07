@@ -24,7 +24,7 @@ class UsersController < ApplicationController
   def update
     find_user
     if @user.update_attributes(params[:user])
-      flash[:notice] = "Account updated!"
+      flash[:notice] = t('flash.user_update_success')
       redirect_to account_url
     else
       render :action => :edit
@@ -34,7 +34,7 @@ class UsersController < ApplicationController
   def destroy
     find_user
     @user.destroy
-    flash[:notice] = 'User was deleted.'
+    flash[:notice] = t('flash.user_destroy_success')
     redirect_to(users_url)  
   end
 

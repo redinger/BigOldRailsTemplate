@@ -1,9 +1,9 @@
-<% title "Activate Your Account" %>
+<% title t('.title') %>
 
-<p>Set your password and click Activate to log in to the site.</p>
+<p><%= t('.instruction') %></p>
 
 <% semantic_form_for @user, :url => finish_activate_path(@user.id), :html => { :method => :post } do |form| %>
 	<%= form.error_messages %>
 	<%= form.inputs :password, :password_confirmation %>
-	<%= form.submit "Activate" %>
+	<%= form.submit t("label.activate") %>
 <% end %>

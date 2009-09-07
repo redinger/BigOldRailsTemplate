@@ -22,7 +22,7 @@ class AccountsController < ApplicationController
   def update
     find_user
     if @user.update_attributes(params[:user])
-      flash[:notice] = "Account updated!"
+      flash[:notice] = t('flash.user_update_success')
       redirect_to account_url
     else
       render :template => "users/edit"

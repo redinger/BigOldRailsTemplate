@@ -1,5 +1,5 @@
 <!--[if lt IE 7]>
 <p class="flash_error">
-	Your browser is obsolete. For best results in #{current_app_name}, please <%= link_to "Upgrade", pages_path(:action => 'upgrade'), :target => :blank %>
+  <%= t('ie.upgrade_message', :upgrade_page_url => link_to(t('link.upgrade'), pages_path(:action => 'upgrade'), :target => :blank)) %>
 </p>
 <![endif]-->

@@ -1,1 +1,1 @@
-, :upgrade => 'Your Browser is Obsolete'
+, :upgrade => t('ie.browser_obsolete')

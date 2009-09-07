@@ -3,12 +3,12 @@
 <% content_for :top_menu do %>
   <div id="top_menu" class="#{top_menu_class}">
     <% anonymous_only do %>
-      <%= link_to "Register", new_account_path %>
-      <%= link_to "Login", new_user_session_path %>
+      <%= link_to t('link.register'), new_account_path %>
+      <%= link_to t('link.login'), new_user_session_path %>
     <% end %>
     <% authenticated_only do %>
-      <%= link_to "Logout", user_session_path, :method => :delete, :confirm => "Are you sure you want to logout?" %>
-      <%= link_to "Your Account", account_path %>
+      <%= link_to t('link.logout'), user_session_path, :method => :delete, :confirm => t('flash.logout_confirmation') %>
+      <%= link_to t('link.user'), account_path %>
     <% end %>
   </div>
 <% end %>
@@ -17,8 +17,8 @@
   <div id="left_menu" class="#{left_menu_class}">
     <ul>
     <% anonymous_only do %>
-      <li><%= link_to "Register", new_account_path %></li>
-      <li><%= link_to "Login", new_user_session_path %></li>
+      <li><%= link_to t('link.register'), new_account_path %></li>
+      <li><%= link_to t('link.login'), new_user_session_path %></li>
     <% end %>
     <% authenticated_only do %>
       <li><%= link_to "App menu item", "#" %></li>
@@ -29,10 +29,10 @@
   </div>
 
   <div id="main_with_left_menu" class="#{main_with_left_menu_class}">
-    <h1>Welcome to #{current_app_name}</h1>
+    <h1><%= t('.welcome') %></h1>
       <!--[if lt IE 7]>
   	<p class="flash_error">
-  		Your browser is obsolete. For best results in #{current_app_name}, please <%= link_to "Upgrade", pages_path(:action => 'upgrade'), :target => :blank %>
+  		<%= t('ie.upgrade_message', :upgrade_page_url => link_to(t('link.upgrade'), pages_path(:action => 'upgrade'), :target => :blank) %>
   	</p>
     <![endif]-->
 

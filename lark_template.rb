@@ -484,6 +484,9 @@ end
 file 'config/database.yml', load_pattern("config/database.#{database}.yml", 'default', binding)
 file 'db/populate/01_sample_seed.rb', load_pattern('db/populate/01_sample_seed.rb')
 
+# locale
+file 'config/locales/en.yml', load_pattern('config/locale/en.yml', 'default', binding)
+
 commit_state "configuration files"
 
 # testing
