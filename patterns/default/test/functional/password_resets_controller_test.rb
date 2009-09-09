@@ -33,7 +33,6 @@ class PasswordResetsControllerTest < ActionController::TestCase
       get :new
     end
     
-    should_assign_to(:page_title) { "Forgot Password?" }
     should_respond_with :success
     should_render_template :new
     should_not_set_the_flash
@@ -52,7 +51,7 @@ class PasswordResetsControllerTest < ActionController::TestCase
       end
 
       should_respond_with :success
-      should_set_the_flash_to "No user was found with that email address"
+      should_set_the_flash_to I18n.t("flash.password_resets.create.error")
       should_render_template :new
     end
     
@@ -63,8 +62,7 @@ class PasswordResetsControllerTest < ActionController::TestCase
       end
       
       should_respond_with :redirect
-      should_set_the_flash_to "Instructions to reset your password have been emailed to you. " +
-        "Please check your email."
+      should_set_the_flash_to I18n.t("flash.password_resets.create.notice")
       should_redirect_to("the home page") { root_url }
     end
   end
@@ -77,7 +75,6 @@ class PasswordResetsControllerTest < ActionController::TestCase
       get :edit, :id => "the token"
     end
     
-    should_assign_to(:page_title) { "Select a New Password" }
     should_respond_with :success
     should_render_template :edit
     should_not_set_the_flash
@@ -97,7 +94,7 @@ class PasswordResetsControllerTest < ActionController::TestCase
       end
 
       should_respond_with :redirect
-      should_set_the_flash_to "Password successfully updated"
+      should_set_the_flash_to I18n.t("flash.password_resets.update.notice")
       should_redirect_to("the user's page") { account_url }
     end
     

@@ -1,23 +1,29 @@
 class AccountsController < InheritedResources::Base
-  actions :new, :show, :edit, :update
+  actions :new, :create, :show, :edit, :update
   respond_to :html
   defaults :resource_class => User, :instance_name => 'user'
   
   before_filter :require_no_user, :only => [:new, :create]
   before_filter :require_user, :only => [:show, :edit, :update]
   
-  new! do |format|
-    format.html { render :template => "users/new" }
+  def new
+    new! do |format|
+      format.html { render :template => "users/new" }
+    end
   end
-
-  #{account_create_block}
   
-  show! do |format|
-    format.html { render :template => "users/show" }
+#{account_create_block}
+  
+  def show
+    show! do |format|
+      format.html { render :template => "users/show" }
+    end
   end
 
-  edit! do |format|
-    format.html { render :template => "users/edit" }
+  def edit 
+    edit! do |format|
+      format.html { render :template => "users/edit" }
+    end
   end
   
   update! do |success, failure|

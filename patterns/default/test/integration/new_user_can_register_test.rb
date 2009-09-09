@@ -18,7 +18,7 @@ class NewUserCanRegisterTest < ActionController::IntegrationTest
       click_button 'Register'
       
       assert_equal root_path, path
-      assert_contain '#{new_user_contained_text}'
+      assert_contain #{new_user_contained_text}
     end
   end
 end

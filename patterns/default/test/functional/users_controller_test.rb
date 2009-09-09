@@ -45,7 +45,6 @@ class UsersControllerTest < ActionController::TestCase
     end
     
     should_assign_to(:users) { [@the_user] }
-    should_assign_to(:page_title) { "All Users" }
     should_respond_with :success
     should_render_template :index
     should_not_set_the_flash
@@ -60,7 +59,6 @@ class UsersControllerTest < ActionController::TestCase
     end
     
     should_assign_to(:user) { @the_user }
-    should_assign_to(:page_title) { "Create Account" }
     should_respond_with :success
     should_render_template :new
     should_not_set_the_flash
@@ -81,7 +79,7 @@ class UsersControllerTest < ActionController::TestCase
 
       should_assign_to(:user) { @the_user }
       should_respond_with :redirect
-      should_set_the_flash_to "Account registered!"
+      should_set_the_flash_to I18n.t("flash.users.create.notice")
       should_redirect_to("the root url") { root_url }
     end
     
@@ -116,7 +114,6 @@ class UsersControllerTest < ActionController::TestCase
       end
     
       should_assign_to(:user) { @the_user }
-      should_assign_to(:page_title) { "#{@the_user.login} details" }
       should_respond_with :success
       should_not_set_the_flash
       should_render_template :show
@@ -128,7 +125,6 @@ class UsersControllerTest < ActionController::TestCase
       end
     
       should_assign_to(:user) { @the_user }
-      should_assign_to(:page_title) { "Edit #{@the_user.login}" }
       should_respond_with :success
       should_not_set_the_flash
       should_render_template :edit
@@ -143,7 +139,7 @@ class UsersControllerTest < ActionController::TestCase
       
         should_assign_to(:user) { @the_user }
         should_respond_with :redirect
-        should_set_the_flash_to "Account updated!"
+        should_set_the_flash_to I18n.t("flash.users.update.notice")
         should_redirect_to("the user's account") { account_url }
       end
     
@@ -166,7 +162,7 @@ class UsersControllerTest < ActionController::TestCase
       end
 
       should_respond_with :redirect
-      should_set_the_flash_to "User was deleted."
+      should_set_the_flash_to I18n.t("flash.users.destroy.notice")
       should_redirect_to("the users page") { users_path }
     end
   end

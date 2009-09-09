@@ -24,7 +24,7 @@ en:
   flash:
     accounts:
       create:
-        notice: "Account registered!"
+        notice: '#{account_create_flash}'
       update:
         notice: "Account successfully updated."
     
@@ -57,7 +57,6 @@ en:
     require_user: "You must be logged in to access this page."
     require_no_user: "You must be logged out to access this page."
     
-    require_activation: "Your account has been created. Please check your e-mail for your account activation instructions."
     require_user_token: "We're sorry, but we could not locate your account. If you are having issues try copying and pasting the URL from your email into your browser or restarting the reset password process."
   
   # Email subjects

@@ -1,1 +1,1 @@
-, :upgrade => t('ie.browser_obsolete')
+, :upgrade => I18n.t('ie.browser_obsolete')

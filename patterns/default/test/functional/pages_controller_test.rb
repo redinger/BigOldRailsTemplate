@@ -24,7 +24,6 @@ class PagesControllerTest < ActionController::TestCase
         get page
       end
     
-      should_assign_to(:page_title) { page_title }
       should_respond_with :success
       should_not_set_the_flash
       should_render_template page

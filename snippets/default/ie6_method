@@ -1,2 +1,2 @@
-def upgrade
-end
+  def upgrade
+  end

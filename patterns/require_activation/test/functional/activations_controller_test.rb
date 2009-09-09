@@ -38,7 +38,6 @@ class ActivationsControllerTest < ActionController::TestCase
       end
 
     should_assign_to(:user) { @the_user }
-    should_assign_to(:page_title) { "Activate Your Account" }
     should_respond_with :success
     should_render_template "activations/new"
     should_not_set_the_flash
@@ -81,7 +80,7 @@ class ActivationsControllerTest < ActionController::TestCase
 
       should_assign_to(:user) { @the_user }
       should_respond_with :redirect
-      should_set_the_flash_to "Your account has been activated."
+      should_set_the_flash_to I18n.t("flash.activations.create.notice")
       should_redirect_to("the root url") { root_url }
     end
 

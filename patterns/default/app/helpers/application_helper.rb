@@ -27,7 +27,7 @@ module ApplicationHelper
   end
 
   def state_options
-    I18n.t('states').collect{|abbrev, full_name| [full_name.to_s, abbrev.to_s]}
+    I18n.t('states').collect{|abbrev, full_name| [full_name.to_s, abbrev.to_s]}.sort{|a,b| a.first <=> b.first}
   end
 
   def state_options_with_blank(label = "")
