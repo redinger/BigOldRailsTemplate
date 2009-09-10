@@ -34,9 +34,9 @@ class UserSessionsControllerTest < ActionController::TestCase
 
   context "on GET to :new" do
     setup do
-      controller.stubs(:require_no_user).returns(true)
+      stub(controller).require_no_user{ true }
       @the_user_session = UserSession.new
-      UserSession.stubs(:new).returns(@the_user_session)
+      stub(UserSession).new{ @the_user_session }
       get :new
     end
     
@@ -48,14 +48,14 @@ class UserSessionsControllerTest < ActionController::TestCase
 
   context "on POST to :create" do
     setup do
-      controller.stubs(:require_no_user).returns(true)
+      stub(controller).require_no_user{ true }
       @the_user_session = UserSession.new
-      UserSession.stubs(:new).returns(@the_user_session)
+      stub(UserSession).new{ @the_user_session }
     end
     
     context "with successful creation" do
       setup do
-        @the_user_session.stubs(:save).returns(true)
+        stub(@the_user_session).save{ true }
         post :create, :user_session => { :login => "bobby", :password => "bobby" }
       end
 
@@ -67,7 +67,7 @@ class UserSessionsControllerTest < ActionController::TestCase
     
     context "with failed creation" do
       setup do
-        @the_user_session.stubs(:save).returns(false)
+        stub(@the_user_session).save{ false }
         post :create, :user_session => { :login => "bobby", :password => "bobby" }
       end
       

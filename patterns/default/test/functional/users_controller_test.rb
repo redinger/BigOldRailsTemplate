@@ -38,9 +38,9 @@ class UsersControllerTest < ActionController::TestCase
     
   context "on GET to :index" do
     setup do
-      controller.stubs(:admin_required).returns(true)
+      stub(controller).admin_required{ true }
       @the_user = User.generate!
-      User.stubs(:all).returns([@the_user])
+      stub(User).all{ [@the_user] }
       get :index
     end
     
@@ -52,9 +52,9 @@ class UsersControllerTest < ActionController::TestCase
    
   context "on GET to :new" do
     setup do
-      controller.stubs(:require_no_user).returns(true)
+      stub(controller).require_no_user{ true }
       @the_user = User.generate!
-      User.stubs(:new).returns(@the_user)
+      stub(User).new{ @the_user }
       get :new
     end
     
@@ -66,14 +66,14 @@ class UsersControllerTest < ActionController::TestCase
 
   context "on POST to :create" do
     setup do
-      controller.stubs(:require_no_user).returns(true)
+      stub(controller).require_no_user{ true }
       @the_user = User.generate!
-      User.stubs(:new).returns(@the_user)
+      stub(User).new{ @the_user }
     end
     
     context "with successful creation" do
       setup do
-        @the_user.stubs(:save).returns(true)
+        stub(@the_user).save{ true }
         post :create, :user => { :login => "bobby", :password => "bobby", :password_confirmation => "bobby" }
       end
 
@@ -85,7 +85,7 @@ class UsersControllerTest < ActionController::TestCase
     
     context "with failed creation" do
       setup do
-        @the_user.stubs(:save).returns(false)
+        stub(@the_user).save{ false }
         post :create, :user => { :login => "bobby", :password => "bobby", :password_confirmation => "bobby" }
       end
       
@@ -133,7 +133,7 @@ class UsersControllerTest < ActionController::TestCase
     context "on PUT to :update" do
       context "with successful update" do
         setup do
-          User.any_instance.stubs(:update_attributes).returns(true)
+          stub.instance_of(User).update_attributes{ true }
           put :update, :id => @the_user.id, :user => { :login => "bill" }
         end
       
@@ -145,7 +145,7 @@ class UsersControllerTest < ActionController::TestCase
     
       context "with failed update" do
         setup do
-          User.any_instance.stubs(:update_attributes).returns(false)
+          stub.instance_of(User).update_attributes{ false }
           put :update, :id => @the_user.id, :user => { :login => "bill" }
         end
       

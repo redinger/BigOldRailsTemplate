@@ -67,4 +67,7 @@ ffmike-test_benchmark:
 webrat:
   :options:
     :env: test
-    
+rr:
+  :options:
+    :version: ">=0.10.2"
+    :env: test
