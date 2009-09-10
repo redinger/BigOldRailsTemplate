@@ -505,6 +505,7 @@ file 'test/test_helper.rb', load_pattern('test/test_helper.rb')
 extra_notifier_test = ""
 if require_activation
   extra_notifier_test = load_snippet('extra_notifier_test', 'require_activation')
+  extra_notifier_test.sub!('#{notifier_email_from}', notifier_email_from)
 end
 
 file 'test/unit/notifier_test.rb', load_pattern('test/unit/notifier_test.rb', 'default', binding)
