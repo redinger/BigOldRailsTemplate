@@ -60,8 +60,10 @@ def load_from_file_in_template(file_name, parent_binding = nil, file_group = 'de
 
     template_paths.each do |template_path|
       full_file_name = File.join(template_path, file_type.to_s.pluralize, file_group, base_name)
+      log "Searching for #{full_file_name} ... "
 
       next unless File.exists? full_file_name
+      log "Found!"
 
       if file_type == :config
         contents = open(full_file_name) { |f| YAML.load(f) }
