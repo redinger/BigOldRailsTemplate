@@ -25,8 +25,10 @@ h3. Rails
 
 * Uses the edge of the 2-3-stable branch in the Rails git repository. You can change the branch in config.yml, so you can use, for example, 2-2-stable or (if you're feeling brave) master.
 * Uses "formtastic":http://github.com/justinfrench/formtastic/tree/master for forms.
-* Optionally uses "Bluetrip":http://bluetrip.org/ CSS for design.
-* Choice of prototype or jquery
+* Optionally uses "Haml and Sass":http://haml.hamptoncatlin.com/ for views and CSS.
+* Uses "inherited resources":http://github.com/josevalim/inherited_resources/tree/master to DRY up controllers.
+* Optionally uses "Bluetrip":http://bluetrip.org/ CSS or "Compass":http://compass-style.org/ for design.
+* Choice of prototype or jQuery. Loading jQuery will include jRails for backwards compatibility.
     
 h3. SCM
 
@@ -68,7 +70,7 @@ h3. External Services
 h3. Testing Tools
 
 * "Shoulda":http://thoughtbot.com/projects/shoulda and Test::Unit for testing
-* Mocha for mocking
+* "rr":http://github.com/btakita/rr/tree/master for mocking
 * "Object Daddy":http://github.com/flogic/object_daddy/tree/master for factories
 * Generated code is already covered by tests
 * "parallel-specs":http://github.com/grosser/parallel_specs/tree/master for faster testing. rake spec:parallel:prepare[2] to set up two test databases. rake test:parallel[2] to distribute tests across two cores
@@ -77,10 +79,12 @@ h3. Testing Tools
 * More extra shoulda macros: @should_have_before_filter@, @should_have_after_filter@, @should_protect_from_forgery@, @should_have_helper_method@
 * "metric-fu":http://metric-fu.rubyforge.org/ for static code analysis. rake metrics:all, configure in Rakefile
 * "inaction-mailer":http://github.com/cwninja/inaction_mailer/tree/master is installed for development environment, so mails sent during dev will end up as files in /tmp/sent_mails. @rake mail:clear@ will clean out this directory.
+* "test-unit 2.0":http://test-unit.rubyforge.org/test-unit/ for nicer output.
 
 h3. Miscellaneous
 
 * Code to encourage IE6 users to get a real browser is included on the home page by default. You can adjust this in the configuration.
+* The generated application is localization-ready, with all strings in an English locale by default.
 
 h2. Contributing
 
@@ -97,3 +101,4 @@ Thanks to:
 * Matt Hooks (inspiration for Authlogic activation code)
 * Joey Geiger (typo fix)
 * Reuben Doetsch (original implementation of file/snippet loading code)
+* Maxim Chernyak (bug fixes, jRails, Haml & Sass support, Compass support, internationalization, inherited_resources, test updates)
