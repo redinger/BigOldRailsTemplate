@@ -252,12 +252,6 @@ ie6_blocking = "light" if ie6_blocking.nil?
 @javascript_library = template_options["javascript_library"].nil? ? ask("Which javascript library? prototype (default), jquery").downcase : template_options["javascript_library"]
 @javascript_library = "prototype" if @javascript_library.nil?
 
-<<<<<<< HEAD
-template_engine = template_options["templating"].nil? ? ask("Which template engine? erb (default), haml").downcase : template_options["template_engine"]
-template_engine = "erb" if template_engine.nil?
-
-design = template_options["design"].nil? ? ask("Which design? none (default), bluetrip").downcase : template_options["design"]
-=======
 template_engine = template_options["template_engine"].nil? ? ask("Which template engine? erb (default), haml").downcase : template_options["template_engine"]
 template_engine = "erb" if template_engine.nil?
 
@@ -265,7 +259,6 @@ compass_css_framework = template_options["compass_css_framework"]
 compass_css_framework = "blueprint" if compass_css_framework.nil?
 
 design = template_options["design"].nil? ? ask("Which design? none (default), bluetrip, compass").downcase : template_options["design"]
->>>>>>> maxim
 design = "none" if design.nil?
 
 require_activation = (template_options["require_activation"].to_s == "true")
@@ -719,18 +712,6 @@ if template_engine == 'haml'
   def get_indent(line)
     line = line.to_s
     space_areas = line.scan(/^\s+/)
-<<<<<<< HEAD
-    space_areas.empty? ? 0 : space_areas.first.size
-  end
-
-  def block_start?(line)
-    block_starters = [/\s+do\W/, /^-\s+while/, /^-\s+module/, /^-\s+begin/,
-                      /^-\s+case/, /^-\s+class/, /^-\s+unless/, /^-\s+for/, 
-                      /^-\s+until/, /^-\s+if/]
-
-    line = line.to_s
-    line.strip =~ /^-/ && block_starters.any?{|bs| line =~ bs}
-=======
     space_areas.empty? ? 0 : (space_areas.first.size / 2)
   end
 
@@ -741,7 +722,6 @@ if template_engine == 'haml'
 
     line = line.to_s
     line.strip =~ /^-/ && block_starters.any?{|bs| line.strip =~ bs}
->>>>>>> maxim
   end
 
   def block_end?(line)
@@ -749,11 +729,6 @@ if template_engine == 'haml'
     line.strip =~ /^-\send$/
   end
 
-<<<<<<< HEAD
-  def indent(line, steps = 0)
-    exceptions = [/\s+else\W/, /^-\s+elsif/, /^-\s+when/, /^-\s+ensure/, /^-\s+rescue/]
-    return if exceptions.any?{|ex| line =~ ex}
-=======
   def ie_block_start?(line)
     line = line.to_s
     line =~ /\[if/i && line =~ /IE/ && line.strip =~ /\]>$/
@@ -773,14 +748,11 @@ if template_engine == 'haml'
     line = line.to_s
     exceptions = [/\s+else\W/, /^-\s+elsif/, /^-\s+when/, /^-\s+ensure/, /^-\s+rescue/]
     return if exceptions.any?{|ex| line.strip =~ ex}
->>>>>>> maxim
 
     steps ||= 0
     line = line.to_s
     ("  " * steps) + line
   end
-<<<<<<< HEAD
-=======
 
   def alter_lines(lines, altered_lines)
     altered_lines.each do |pair|
@@ -804,7 +776,6 @@ if template_engine == 'haml'
     end
     lines.compact
   end
->>>>>>> maxim
   
   in_root do
     Dir["app/views/**/*.erb"].each do |origin|
@@ -817,19 +788,13 @@ if template_engine == 'haml'
       line_number = lines.size
       goner_lines = []
       indented_lines = []
-<<<<<<< HEAD
-=======
       altered_lines = []
       inside_ie_block = false
       just_passed_ie_block = false
->>>>>>> maxim
 
       lines.reverse_each do |line|
         line_number -= 1
 
-<<<<<<< HEAD
-        if block_end?(line)
-=======
         if just_passed_ie_block
           altered_lines << [line_number, line.sub('/', "/" + just_passed_ie_block)]
           just_passed_ie_block = false
@@ -849,7 +814,6 @@ if template_engine == 'haml'
           altered_lines << [line_number, string]
           indented_lines << [line_number, stack.last]
         elsif block_end?(line)
->>>>>>> maxim
           stack << 1
           goner_lines << line_number
         elsif block_start?(line)
@@ -858,17 +822,6 @@ if template_engine == 'haml'
           indented_lines << [line_number, stack.last]
         end
       end
-<<<<<<< HEAD
-      
-      indented_lines.each do |pair|
-        line_number, indent_by = pair
-        lines[line_number] = indent(lines[line_number], indent_by)
-      end
-
-      goner_lines.each do |i|
-        lines.delete_at(i)
-      end
-=======
 
       lines = alter_lines(lines, altered_lines)
       lines = indent_lines(lines, indented_lines)
@@ -898,7 +851,6 @@ if template_engine == 'haml'
 
       lines = alter_lines(lines, altered_lines)
       lines = remove_lines(lines, goner_lines)
->>>>>>> maxim
       
       File.open(destination, "w") do |f|
         f.write(lines.join)
@@ -906,12 +858,6 @@ if template_engine == 'haml'
       
       File.delete(origin)
     end
-<<<<<<< HEAD
-    
-    Dir["public/stylesheets/**/*.css"].each do |file|
-      run "css2sass #{file} #{file.gsub(/\.css$/, '.sass')}"
-      File.delete(file)
-=======
   end
 end
 
@@ -926,7 +872,6 @@ if design == "compass"
   in_root do
     Dir["public/stylesheets/**/*.sass"].each do |file|
       run "mv #{file} app/stylesheets/#{File.basename(file)}"
->>>>>>> maxim
     end
   end
 end
