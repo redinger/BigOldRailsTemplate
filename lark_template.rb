@@ -2,6 +2,9 @@ require 'open-uri'
 require 'yaml'
 require 'base64'
 
+# Turn on for noisy logging during template generation
+DEBUG_LOGGING = false
+
 # Utility Methods
  
 # download, from_repo, and commit_state methods swiped from 
@@ -29,18 +32,11 @@ def file_from_repo(github_user, repo, sha, filename, to = filename)
   download("http://github.com/#{github_user}/#{repo}/raw/#{sha}/#{filename}", to)
 end
 
-# Original implementation by Reuben Doetsch
-# TEMPLATE_PATH = "/Users/reubendoetsch/Sites/BigOldRailsTemplate/CodeFragments"
-# #This methods reads a file from either the file system or repo to get 
-# def file_from(path_name, binding_var, filename=nil, from_repo = false, github_user = nil, custom_url = nil)
-#   filename=File.basename(path_name) if filename==nil
-#   filePath = File.join(TEMPLATE_PATH,filename)
-#   puts filePath.inspect
-#   puts File.exist? filePath
-#   #str=IO.read(filePath).gsub('"','\\"')
-#   str = eval('"'+IO.read(filePath).gsub('"','\\"')+'"',binding_var)
-#   file path_name, str
-# end
+def debug_log(msg)
+  if DEBUG_LOGGING
+    log msg
+  end
+end
 
 @template = template
 @root = root
@@ -60,10 +56,10 @@ def load_from_file_in_template(file_name, parent_binding = nil, file_group = 'de
 
     template_paths.each do |template_path|
       full_file_name = File.join(template_path, file_type.to_s.pluralize, file_group, base_name)
-      log "Searching for #{full_file_name} ... "
+      debug_log "Searching for #{full_file_name} ... "
 
       next unless File.exists? full_file_name
-      log "Found!"
+      debug_log "Found!"
 
       if file_type == :config
         contents = open(full_file_name) { |f| YAML.load(f) }
