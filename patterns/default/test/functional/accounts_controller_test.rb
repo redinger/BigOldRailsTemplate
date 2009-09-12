@@ -36,14 +36,13 @@ class AccountsControllerTest < ActionController::TestCase
     
   context "on GET to :new" do
     setup do
-      controller.stubs(:require_no_user).returns(true)
+      stub(controller).require_no_user{ true }
       @the_user = User.generate!
-      User.stubs(:new).returns(@the_user)
+      stub(User).new{ @the_user }
       get :new
     end
     
     should_assign_to(:user) { @the_user }
-    should_assign_to(:page_title) { "Create Account" }
     should_respond_with :success
     should_render_template "users/new"
     should_not_set_the_flash
@@ -51,26 +50,26 @@ class AccountsControllerTest < ActionController::TestCase
 
   context "on POST to :create" do
     setup do
-      controller.stubs(:require_no_user).returns(true)
+      stub(controller).require_no_user{ true }
       @the_user = User.generate!
-      User.stubs(:new).returns(@the_user)
+      stub(User).new{ @the_user }
     end
     
     context "with successful creation" do
       setup do
-        @the_user.stubs(:save).returns(true)
+        stub(@the_user).save{ true }
         post :create, :user => { :login => "bobby", :password => "bobby", :password_confirmation => "bobby" }
       end
 
       should_assign_to(:user) { @the_user }
       should_respond_with :redirect
-      should_set_the_flash_to "Account registered!"
+      should_set_the_flash_to I18n.t("flash.accounts.create.notice")
       should_redirect_to("the root url") { root_url }
     end
     
     context "with failed creation" do
       setup do
-        @the_user.stubs(:save).returns(false)
+        stub(@the_user).save{ false }
         post :create, :user => { :login => "bobby", :password => "bobby", :password_confirmation => "bobby" }
       end
       
@@ -93,7 +92,6 @@ class AccountsControllerTest < ActionController::TestCase
       end
     
       should_assign_to(:user) { @the_user }
-      should_assign_to(:page_title) { "#{@the_user.login} details" }
       should_respond_with :success
       should_not_set_the_flash
       should_render_template "users/show"
@@ -105,7 +103,6 @@ class AccountsControllerTest < ActionController::TestCase
       end
     
       should_assign_to(:user) { @the_user }
-      should_assign_to(:page_title) { "Edit #{@the_user.login}" }
       should_respond_with :success
       should_not_set_the_flash
       should_render_template "users/edit"
@@ -114,19 +111,19 @@ class AccountsControllerTest < ActionController::TestCase
     context "on PUT to :update" do
       context "with successful update" do
         setup do
-          User.any_instance.stubs(:update_attributes).returns(true)
+          stub.instance_of(User).update_attributes{ true }
           put :update, :user => {:login => "bill" }
         end
       
         should_assign_to(:user) { @the_user }
         should_respond_with :redirect
-        should_set_the_flash_to "Account updated!"
+        should_set_the_flash_to I18n.t("flash.accounts.update.notice")
         should_redirect_to("the user's account") { account_url }
       end
     
       context "with failed update" do
         setup do
-          User.any_instance.stubs(:update_attributes).returns(false)
+          stub.instance_of(User).update_attributes{ false }
           put :update, :user => {:login => "bill" }
         end
       

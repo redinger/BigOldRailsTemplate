@@ -4,10 +4,10 @@ class UserCanLogoutTest < ActionController::IntegrationTest
 
   context 'a logged-in user' do
     setup do
-#{make_user_block}
+      #{generate_user_block}
       visit login_path
-      fill_in 'Login', :with => @user.login
-      fill_in 'Password', :with => @user.password
+      fill_in 'Login', :with => @the_user.login
+      fill_in 'Password', :with => @the_user.password
       click_button 'Login'
     end
     
@@ -17,7 +17,7 @@ class UserCanLogoutTest < ActionController::IntegrationTest
       click_link "Logout"
 
       assert_equal new_user_session_path, path
-      assert_contain "Logout successful!"
+      assert_contain I18n.t('flash.user_sessions.destroy.notice')
     end
   end
 end

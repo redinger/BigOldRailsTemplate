@@ -1,21 +1,21 @@
-<h1>Listing users</h1>
+<% title t(".title") %>
 
 <table>
   <tr>
-    <th>Login</th>
+    <th><%= t('label.login') %></th>
     <th colspan="3"></th>
   </tr>
 
 <% @users.each do |user| %>
   <tr>
     <td><%=h user.login %></td>
-    <td><%= link_to 'Show', user %></td>
-    <td><%= link_to 'Edit', edit_user_path(user) %></td>
-    <td><%= link_to 'Destroy', user, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to t('link.show'), user %></td>
+    <td><%= link_to t('link.edit'), edit_user_path(user) %></td>
+    <td><%= link_to t('link.destroy'), user, :confirm => t('confirm.destroy'), :method => :delete %></td>
   </tr>
 <% end %>
 </table>
 
 <br />
 
-<%= link_to 'New user', new_user_path %>
+<%= link_to t('link.new_user'), new_user_path %>

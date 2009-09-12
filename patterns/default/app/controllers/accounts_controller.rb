@@ -1,41 +1,37 @@
-class AccountsController < ApplicationController
+class AccountsController < InheritedResources::Base
+  actions :new, :create, :show, :edit, :update
+  respond_to :html
+  defaults :resource_class => User, :instance_name => 'user'
+  
   before_filter :require_no_user, :only => [:new, :create]
   before_filter :require_user, :only => [:show, :edit, :update]
   
   def new
-    @user = User.new
-    @page_title = "Create Account"
-    render :template => "users/new"
+    new! do |format|
+      format.html { render :template => "users/new" }
+    end
   end
-
-  #{account_create_block}
+  
+#{account_create_block}
   
   def show
-    find_user
-    @page_title = "\#{@user.login} details"
-    render :template => "users/show"
-  end
-
-  def edit
-    find_user
-    @page_title = "Edit \#{@user.login}"
-    render :template => "users/edit"
-  end
-  
-  def update
-    find_user
-    if @user.update_attributes(params[:user])
-      flash[:notice] = "Account updated!"
-      redirect_to account_url
-    else
-      render :template => "users/edit"
+    show! do |format|
+      format.html { render :template => "users/show" }
     end
   end
 
-private
-
-  def find_user
-    @user = @current_user
+  def edit 
+    edit! do |format|
+      format.html { render :template => "users/edit" }
+    end
   end
   
+  update! do |success, failure|
+    failure.html { render :template => "users/edit" }
+  end
+
+protected
+  def resource
+    @user ||= @current_user
+  end
 end

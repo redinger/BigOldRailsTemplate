@@ -1,11 +1,8 @@
-class PagesController < ApplicationController
-  
+class PagesController < ApplicationController  
   def home
-    @page_title = '#{current_app_name}'
   end
   
   def css_test
-    @page_title = "CSS Test"
   end
   
   def kaboom

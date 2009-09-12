@@ -1,6 +1,7 @@
 require 'open-uri'
 require 'yaml'
 require 'base64'
+require 'cgi'
 
 # Turn on for noisy logging during template generation
 DEBUG_LOGGING = false
@@ -251,13 +252,23 @@ ie6_blocking = "light" if ie6_blocking.nil?
 @javascript_library = template_options["javascript_library"].nil? ? ask("Which javascript library? prototype (default), jquery").downcase : template_options["javascript_library"]
 @javascript_library = "prototype" if @javascript_library.nil?
 
+<<<<<<< HEAD
 template_engine = template_options["templating"].nil? ? ask("Which template engine? erb (default), haml").downcase : template_options["template_engine"]
 template_engine = "erb" if template_engine.nil?
 
 design = template_options["design"].nil? ? ask("Which design? none (default), bluetrip").downcase : template_options["design"]
+=======
+template_engine = template_options["template_engine"].nil? ? ask("Which template engine? erb (default), haml").downcase : template_options["template_engine"]
+template_engine = "erb" if template_engine.nil?
+
+compass_css_framework = template_options["compass_css_framework"]
+compass_css_framework = "blueprint" if compass_css_framework.nil?
+
+design = template_options["design"].nil? ? ask("Which design? none (default), bluetrip, compass").downcase : template_options["design"]
+>>>>>>> maxim
 design = "none" if design.nil?
 
-require_activation = (template_options["require_activation"] == "true")
+require_activation = (template_options["require_activation"].to_s == "true")
 
 smtp_address = template_options["smtp_address"]
 smtp_domain = template_options["smtp_domain"]
@@ -343,6 +354,9 @@ end
 environment 'config.middleware.use "Rack::Bug"', :env => 'development'
 environment 'config.middleware.use "Rack::Bug"', :env => 'staging'
 
+environment 'config.action_mailer.delivery_method = :smtp', :env => 'production'
+environment 'config.action_mailer.delivery_method = :smtp', :env => 'staging'
+
 commit_state "Set up staging environment and hooked up Rack::Bug"
 
 # make sure HAML files get searched if we go that route
@@ -353,6 +367,8 @@ if @javascript_library == "prototype"
   download "http://livevalidation.com/javascripts/src/1.3/livevalidation_prototype.js", "public/javascripts/livevalidation.js"
 elsif @javascript_library == "jquery"
   file_from_repo "ffmike", "jquery-validate", "master", "jquery.validate.min.js", "public/javascripts/jquery.validate.min.js"
+  rake("jrails:js:scrub")
+  rake("jrails:js:install")
 end
 
 if design == "bluetrip"
@@ -370,6 +386,40 @@ if design == "bluetrip"
   %w(cross doc email external feed im information key pdf tick visited xls).each do |icon|
     file_from_repo "mikecrittenden", "bluetrip-css-framework", "master", "img/icons/#{icon}.png", "public/img/icons/#{icon}.png"
   end
+end
+
+if design == "compass"
+  compass_css_framework = template_options["compass_css_framework"].nil? ? ask("Compass CSS Framework? blueprint (default), 960").downcase : template_options["compass_css_framework"]
+  compass_css_framework = "blueprint" if compass_css_framework.blank?
+
+  compass_sass_dir = "app/stylesheets"
+  compass_css_dir = "public/stylesheets"
+
+
+  # load any compass framework plugins
+  if compass_css_framework =~ /960/
+    plugin_require = "-r ninesixty"
+  end
+
+  # build out compass command
+  compass_command = "compass --rails -f #{compass_css_framework} . --css-dir=#{compass_css_dir} --sass-dir=#{compass_sass_dir} "
+  compass_command << plugin_require if plugin_require
+
+  # Require compass during plugin loading
+  file 'vendor/plugins/compass/init.rb', <<-CODE
+  # This is here to make sure that the right version of sass gets loaded (haml 2.2) by the compass requires.
+  require 'compass'
+  CODE
+
+  # integrate it!
+  run "haml --rails ."
+  run compass_command
+
+  puts "Compass (with #{compass_css_framework}) is all setup, have fun!"
+end
+
+if design != "compass" && template_engine == "haml"
+  run "haml --rails ."
 end
 
 flash_class =  load_snippet('flash_class', design)
@@ -394,6 +444,7 @@ generate(:formtastic_stylesheets)
 
 file 'app/controllers/application_controller.rb', load_pattern('app/controllers/application_controller.rb')
 file 'app/helpers/application_helper.rb', load_pattern('app/helpers/application_helper.rb')
+file 'app/helpers/layout_helper.rb', load_pattern('app/helpers/layout_helper.rb')
 
 # initializers
 initializer 'requires.rb', load_pattern('config/initializers/requires.rb')
@@ -441,6 +492,15 @@ end
 file 'config/database.yml', load_pattern("config/database.#{database}.yml", 'default', binding)
 file 'db/populate/01_sample_seed.rb', load_pattern('db/populate/01_sample_seed.rb')
 
+if require_activation
+  account_create_flash = "Your account has been created. Please check your e-mail for your account activation instructions."
+else
+  account_create_flash = "Account registered!"
+end
+
+# locale
+file 'config/locales/en.yml', load_pattern('config/locales/en.yml', 'default', binding)
+
 commit_state "configuration files"
 
 # testing
@@ -450,6 +510,7 @@ file 'test/test_helper.rb', load_pattern('test/test_helper.rb')
 extra_notifier_test = ""
 if require_activation
   extra_notifier_test = load_snippet('extra_notifier_test', 'require_activation')
+  extra_notifier_test.sub!('#{notifier_email_from}', notifier_email_from)
 end
 
 file 'test/unit/notifier_test.rb', load_pattern('test/unit/notifier_test.rb', 'default', binding)
@@ -507,13 +568,11 @@ end
 file 'test/functional/pages_controller_test.rb', load_pattern('test/functional/pages_controller_test.rb', 'default', binding)
 file 'test/functional/password_resets_controller_tests.rb', load_pattern('test/functional/password_resets_controller_tests.rb')
 
+new_user_contained_text = 'I18n.t("flash.accounts.create.notice")'
+
 new_user_extra_fields = ""
-new_user_contained_text = ""
-if require_activation
-  new_user_contained_text = 'Your account has been created'
-else
+unless require_activation
   new_user_extra_fields = load_snippet('new_user_extra_fields')
-  new_user_contained_text = 'Account registered!'
 end
 
 file 'test/integration/new_user_can_register_test.rb', load_pattern('test/integration/new_user_can_register_test.rb', 'default', binding)
@@ -660,6 +719,7 @@ if template_engine == 'haml'
   def get_indent(line)
     line = line.to_s
     space_areas = line.scan(/^\s+/)
+<<<<<<< HEAD
     space_areas.empty? ? 0 : space_areas.first.size
   end
 
@@ -670,6 +730,18 @@ if template_engine == 'haml'
 
     line = line.to_s
     line.strip =~ /^-/ && block_starters.any?{|bs| line =~ bs}
+=======
+    space_areas.empty? ? 0 : (space_areas.first.size / 2)
+  end
+
+  def block_start?(line)
+    block_starters = [/\s+do/, /^-\s+while/, /^-\s+module/, /^-\s+begin/,
+                      /^-\s+case/, /^-\s+class/, /^-\s+unless/, /^-\s+for/, 
+                      /^-\s+until/, /^-\s*if/]
+
+    line = line.to_s
+    line.strip =~ /^-/ && block_starters.any?{|bs| line.strip =~ bs}
+>>>>>>> maxim
   end
 
   def block_end?(line)
@@ -677,14 +749,62 @@ if template_engine == 'haml'
     line.strip =~ /^-\send$/
   end
 
+<<<<<<< HEAD
   def indent(line, steps = 0)
     exceptions = [/\s+else\W/, /^-\s+elsif/, /^-\s+when/, /^-\s+ensure/, /^-\s+rescue/]
     return if exceptions.any?{|ex| line =~ ex}
+=======
+  def ie_block_start?(line)
+    line = line.to_s
+    line =~ /\[if/i && line =~ /IE/ && line.strip =~ /\]>$/
+  end
+
+  def ie_block_end?(line)
+    line = line.to_s
+    line =~ /<!\[endif\]/i
+  end
+
+  def comment_line?(line)
+    line = line.to_s
+    line.strip =~ /^\//
+  end
+
+  def indent(line, steps = 0)
+    line = line.to_s
+    exceptions = [/\s+else\W/, /^-\s+elsif/, /^-\s+when/, /^-\s+ensure/, /^-\s+rescue/]
+    return if exceptions.any?{|ex| line.strip =~ ex}
+>>>>>>> maxim
 
     steps ||= 0
     line = line.to_s
     ("  " * steps) + line
   end
+<<<<<<< HEAD
+=======
+
+  def alter_lines(lines, altered_lines)
+    altered_lines.each do |pair|
+      line_number, text = pair
+      lines[line_number] = text
+    end
+    lines
+  end
+
+  def indent_lines(lines, indented_lines)
+    indented_lines.each do |pair|
+      line_number, indent_by = pair
+      lines[line_number] = indent(lines[line_number], indent_by)
+    end
+    lines
+  end
+
+  def remove_lines(lines, goner_lines)
+    goner_lines.each do |i|
+      lines[i] = nil
+    end
+    lines.compact
+  end
+>>>>>>> maxim
   
   in_root do
     Dir["app/views/**/*.erb"].each do |origin|
@@ -697,11 +817,39 @@ if template_engine == 'haml'
       line_number = lines.size
       goner_lines = []
       indented_lines = []
+<<<<<<< HEAD
+=======
+      altered_lines = []
+      inside_ie_block = false
+      just_passed_ie_block = false
+>>>>>>> maxim
 
       lines.reverse_each do |line|
         line_number -= 1
 
+<<<<<<< HEAD
         if block_end?(line)
+=======
+        if just_passed_ie_block
+          altered_lines << [line_number, line.sub('/', "/" + just_passed_ie_block)]
+          just_passed_ie_block = false
+        elsif ie_block_start?(line)
+          goner_lines << line_number
+          inside_ie_block = false
+          stack.pop
+          just_passed_ie_block = line.strip.chop
+        elsif ie_block_end?(line)
+          goner_lines << line_number
+          inside_ie_block = true
+          stack << get_indent(line)
+        elsif inside_ie_block
+          match = line.match(/<haml[^>]*>([^<]+)<\/haml/)
+          string = match && match[1]
+          string = string ? "= #{CGI::unescapeHTML(CGI::unescapeHTML(string.strip))}\n" : "#{line.strip}\n"
+          altered_lines << [line_number, string]
+          indented_lines << [line_number, stack.last]
+        elsif block_end?(line)
+>>>>>>> maxim
           stack << 1
           goner_lines << line_number
         elsif block_start?(line)
@@ -710,6 +858,7 @@ if template_engine == 'haml'
           indented_lines << [line_number, stack.last]
         end
       end
+<<<<<<< HEAD
       
       indented_lines.each do |pair|
         line_number, indent_by = pair
@@ -719,6 +868,37 @@ if template_engine == 'haml'
       goner_lines.each do |i|
         lines.delete_at(i)
       end
+=======
+
+      lines = alter_lines(lines, altered_lines)
+      lines = indent_lines(lines, indented_lines)
+      lines = remove_lines(lines, goner_lines)
+
+      altered_lines = []
+      indented_lines = [] 
+      goner_lines = []
+
+      line_number = -1
+      lines.each_cons(3) do |three_lines|
+        line_number += 1
+        line2_number = line_number + 1
+        middle_indented_by_one = (get_indent(three_lines[1]) - get_indent(three_lines[0]) == 1)
+        top_indented_more = (get_indent(three_lines[0]) >= get_indent(three_lines[2]))
+        commented = (three_lines[0].to_s.strip =~ /^\//)
+
+        if(top_indented_more && middle_indented_by_one && !commented)
+          if (three_lines[1].strip =~ /^=/)
+            altered_lines << [line_number, (three_lines[0].rstrip + three_lines[1].lstrip)]
+          else
+            altered_lines << [line_number, (three_lines[0].rstrip + " " + three_lines[1].lstrip)]
+          end
+          goner_lines << line2_number
+        end
+      end
+
+      lines = alter_lines(lines, altered_lines)
+      lines = remove_lines(lines, goner_lines)
+>>>>>>> maxim
       
       File.open(destination, "w") do |f|
         f.write(lines.join)
@@ -726,10 +906,27 @@ if template_engine == 'haml'
       
       File.delete(origin)
     end
+<<<<<<< HEAD
     
     Dir["public/stylesheets/**/*.css"].each do |file|
       run "css2sass #{file} #{file.gsub(/\.css$/, '.sass')}"
       File.delete(file)
+=======
+  end
+end
+
+if template_engine == "haml" || design == "compass"
+  Dir["public/stylesheets/**/*.css"].each do |file|
+    run "css2sass #{file} #{file.gsub(/\.css$/, '.sass')}"
+    File.delete(file)
+  end
+end
+
+if design == "compass"
+  in_root do
+    Dir["public/stylesheets/**/*.sass"].each do |file|
+      run "mv #{file} app/stylesheets/#{File.basename(file)}"
+>>>>>>> maxim
     end
   end
 end

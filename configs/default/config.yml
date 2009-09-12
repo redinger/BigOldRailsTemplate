@@ -23,8 +23,14 @@ ie6_blocking: light
 javascript_library: prototype
 # template engine: erb (default), haml
 template_engine: erb
+<<<<<<< HEAD
 # Design: none (default), bluetrip
+=======
+# Design: none (default), bluetrip, compass
+>>>>>>> maxim
 design: none
+# compass_css_framework is only used if design == compass: blueprint (default), 960
+compass_css_framework: blueprint
 # Require users to activate after creating an account: false (default), true
 require_activation: false
 #

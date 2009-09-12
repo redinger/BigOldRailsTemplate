@@ -1,10 +1,10 @@
-def create
-  @user = User.new(params[:user])
-  if @user.signup!(params)
-    @user.deliver_activation_instructions!
-    flash[:notice] = "Your account has been created. Please check your e-mail for your account activation instructions."
-    redirect_back_or_default root_url
-  else
-    render :template => "users/new"
+  def create
+    @user = User.new(params[:user])
+    if @user.signup!(params)
+      @user.deliver_activation_instructions!
+      flash[:notice] = t('flash.accounts.create.notice')
+      redirect_back_or_default root_url
+    else
+      render :template => "users/new"
+    end
   end
-end

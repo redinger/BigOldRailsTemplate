@@ -1,3 +1,2 @@
-def upgrade
-  @page_title = "Your Browser is Obsolete"
-end
+  def upgrade
+  end

@@ -1,55 +1,21 @@
-class UsersController < ApplicationController
+class UsersController < InheritedResources::Base
   before_filter :require_no_user, :only => [:new, :create]
   before_filter :require_user, :only => [:show, :edit, :update]
   before_filter :admin_required, :only => [:index, :destroy]
   
-  def index
-    @users = User.all
-    @page_title = "All Users"
-  end
-  
-  def new
-    @user = User.new
-    @page_title = "Create Account"
-  end
-  
-  #{user_create_block}
-  
-  def show
-    find_user
-    @page_title = "\#{@user.login} details"
-  end
+#{user_create_block}
 
-  def edit
-    find_user
-    @page_title = "Edit \#{@user.login}"
+  update! do |success, failure|
+    success.html { redirect_to account_url }
+    failure.html { render :action => :edit }
   end
   
-  def update
-    find_user
-    if @user.update_attributes(params[:user])
-      flash[:notice] = "Account updated!"
-      redirect_to account_url
-    else
-      render :action => :edit
-    end
-  end
-
-  def destroy
-    find_user
-    @user.destroy
-    flash[:notice] = 'User was deleted.'
-    redirect_to(users_url)  
-  end
-
 private
-
-  def find_user
-    if @current_user.admin? && params[:id]
-      @user = User.find(params[:id])
+  def resource
+    @user ||= if(@current_user.admin? && params[:id])
+      User.find(params[:id])
     else
-      @user = @current_user
-    end
+      @current_user
+    end    
   end
-  
 end

@@ -24,7 +24,26 @@ justinfrench-formtastic:
 haml:
   :options:
     :version: ~> 2.2
+<<<<<<< HEAD
   :if: template_engine == "haml"
+=======
+  :if: template_engine == "haml" || design == "compass"
+chriseppstein-compass:
+  :options:
+    :lib: compass
+    :source: http://gems.github.com
+  :if: design == "compass"
+chriseppstein-compass-960-plugin:
+  :options:
+    :lib: ninesixty
+    :source: http://gems.github.com
+  :if: "design == 'compass' && compass_css_framework =~ /960/"
+josevalim-inherited_resources:
+  :options:
+    :lib: inherited_resources
+    :source: http://gems.github.com
+    :version: >= 0.9.0
+>>>>>>> maxim
 
 # development only
 cwninja-inaction_mailer: 
@@ -39,6 +58,11 @@ ffmike-query_trace:
     :env: development
 
 # test only
+test-unit:
+  :options:
+    :lib: test/unit
+    :version: ">=2.0.3"
+    :env: test
 ffmike-test_benchmark:
   :options:
     :lib: test_benchmark
@@ -47,4 +71,7 @@ ffmike-test_benchmark:
 webrat:
   :options:
     :env: test
-    
+rr:
+  :options:
+    :version: ">=0.10.2"
+    :env: test

@@ -1,6 +1,6 @@
 def activation_instructions(user)
   setup(user)
-  subject "Activation Instructions"
+  subject I18n.t("subject.activation_instructions")
   body :account_activation_url => activate_url(user.perishable_token)
 end
 

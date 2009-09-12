@@ -34,14 +34,13 @@ class UserSessionsControllerTest < ActionController::TestCase
 
   context "on GET to :new" do
     setup do
-      controller.stubs(:require_no_user).returns(true)
+      stub(controller).require_no_user{ true }
       @the_user_session = UserSession.new
-      UserSession.stubs(:new).returns(@the_user_session)
+      stub(UserSession).new{ @the_user_session }
       get :new
     end
     
     should_assign_to(:user_session) { @the_user_session }
-    should_assign_to(:page_title) { "Login" }
     should_respond_with :success
     should_render_template :new
     should_not_set_the_flash
@@ -49,26 +48,26 @@ class UserSessionsControllerTest < ActionController::TestCase
 
   context "on POST to :create" do
     setup do
-      controller.stubs(:require_no_user).returns(true)
+      stub(controller).require_no_user{ true }
       @the_user_session = UserSession.new
-      UserSession.stubs(:new).returns(@the_user_session)
+      stub(UserSession).new{ @the_user_session }
     end
     
     context "with successful creation" do
       setup do
-        @the_user_session.stubs(:save).returns(true)
+        stub(@the_user_session).save{ true }
         post :create, :user_session => { :login => "bobby", :password => "bobby" }
       end
 
       should_assign_to(:user_session) { @the_user_session }
       should_respond_with :redirect
-      should_set_the_flash_to "Login successful!"
+      should_set_the_flash_to I18n.t("flash.user_sessions.create.notice")
       should_redirect_to("the root url") { root_url }
     end
     
     context "with failed creation" do
       setup do
-        @the_user_session.stubs(:save).returns(false)
+        stub(@the_user_session).save{ false }
         post :create, :user_session => { :login => "bobby", :password => "bobby" }
       end
       
@@ -87,7 +86,7 @@ class UserSessionsControllerTest < ActionController::TestCase
     end
     
     should_respond_with :redirect
-    should_set_the_flash_to "Logout successful!"
+    should_set_the_flash_to I18n.t("flash.user_sessions.destroy.notice")
     should_redirect_to("the login page") { new_user_session_url }
   end
   

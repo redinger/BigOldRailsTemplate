@@ -4,7 +4,6 @@ class ActivationsController < ApplicationController
   def new
     @user = User.find_using_perishable_token(params[:activation_code], 1.week)
     raise Exception unless @user && !@user.active?
-    @page_title = "Activate Your Account"
   end
 
 # TODO: Reset token and resend email on expired token
@@ -18,7 +17,7 @@ class ActivationsController < ApplicationController
 
     if @user.activate!(params)
       @user.deliver_welcome_email!
-      flash[:notice] = "Your account has been activated."
+      flash[:notice] = t('flash.activations.create.notice')
       redirect_to root_url
     else
       render :action => :new
