@@ -71,3 +71,4 @@ rr:
   :options:
     :version: ">=0.10.2"
     :env: test
+  :if: @mocking == "rr"

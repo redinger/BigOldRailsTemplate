@@ -36,9 +36,9 @@ class AccountsControllerTest < ActionController::TestCase
 
   context "on GET to :new" do
     setup do
-      controller.stubs(:require_no_user).returns(true)
+      #{generate_stub 'controller', 'require_no_user', 'true'}
       @the_user = User.generate!
-      User.stubs(:new).returns(@the_user)
+      #{generate_stub 'User', 'new', '@the_user'}
       get :new
     end
 
@@ -50,14 +50,14 @@ class AccountsControllerTest < ActionController::TestCase
 
   context "on POST to :create" do
     setup do
-      controller.stubs(:require_no_user).returns(true)
+      #{generate_stub 'controller', 'require_no_user', 'true'}
       @the_user = User.generate!
-      User.stubs(:new).returns(@the_user)
+      #{generate_stub 'User', 'new', '@the_user'}
     end
 
     context "with successful creation" do
       setup do
-        @the_user.stubs(:signup!).returns(true)
+        #{generate_stub '@the_user', 'signup!', 'true'}
         post :create, :user => { :login => "bobby", :password => "bobby", :password_confirmation => "bobby" }
       end
 
@@ -69,7 +69,7 @@ class AccountsControllerTest < ActionController::TestCase
 
     context "with failed creation" do
       setup do
-        @the_user.stubs(:signup!).returns(false)
+        #{generate_stub '@the_user', 'signup!', 'false'}
         post :create, :user => { :login => "bobby", :password => "bobby", :password_confirmation => "bobby" }
       end
 
@@ -112,7 +112,7 @@ class AccountsControllerTest < ActionController::TestCase
     context "on PUT to :update" do
       context "with successful update" do
         setup do
-          User.any_instance.stubs(:update_attributes).returns(true)
+          #{generate_any_instance_stub 'User', 'update_attributes', 'true'}
           put :update, :user => {:login => "bill" }
         end
 
@@ -124,7 +124,7 @@ class AccountsControllerTest < ActionController::TestCase
 
       context "with failed update" do
         setup do
-          User.any_instance.stubs(:update_attributes).returns(false)
+          #{generate_any_instance_stub 'User', 'update_attributes', 'false'}
           put :update, :user => {:login => "bill" }
         end
 

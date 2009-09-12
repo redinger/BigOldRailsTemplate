@@ -19,7 +19,7 @@ Test::Unit::UI::Console::TestRunner.set_test_benchmark_limits(1,5)
 class User < ActiveRecord::Base; def send_welcome_email; end; end
 
 class ActiveSupport::TestCase
-  include RR::Adapters::TestUnit
+#{mock_include}
   
   self.use_transactional_fixtures = true
   self.use_instantiated_fixtures  = false

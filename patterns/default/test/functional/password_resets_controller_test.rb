@@ -29,7 +29,7 @@ class PasswordResetsControllerTest < ActionController::TestCase
     
   context "on GET to :new" do
     setup do
-      stub(controller).require_no_user{ true }
+      #{generate_stub('controller', 'require_no_user', 'true')}
       get :new
     end
     
@@ -40,13 +40,13 @@ class PasswordResetsControllerTest < ActionController::TestCase
 
   context "on POST to :create" do
     setup do
-      stub(Notifier).deliver_password_reset_instruction
-      stub(controller).require_no_user{ true }
+      #{generate_stub 'Notifier', 'deliver_password_reset_intructions', 'nil'}
+      #{generate_stub 'controller', 'require_no_user', 'true'}
     end
 
     context "with user not found" do
       setup do
-        stub(User).find_by_email{ nil }
+        #{generate_stub 'User', 'find_by_email', 'nil'}
         post :create, :email => "foo@example.com"
       end
 
@@ -69,9 +69,9 @@ class PasswordResetsControllerTest < ActionController::TestCase
 
   context "on GET to :edit" do
     setup do
-      stub(controller).require_no_user{ true }
+      #{generate_stub 'controller', 'require_no_user', 'true'}
       @user = User.generate!
-      stub(User).find_using_perishable_token{ @user }
+      #{generate_stub 'User', 'find_using_perishable_token', '@user'}
       get :edit, :id => "the token"
     end
     
@@ -82,14 +82,14 @@ class PasswordResetsControllerTest < ActionController::TestCase
 
   context "on PUT to :update" do
     setup do
-      stub(controller).require_no_user{ true }
+      #{generate_stub 'controller', 'require_no_user', 'true'}
       @user = User.generate!
-      stub(User).find_using_perishable_token{ @user }
+      #{generate_stub 'User', 'find_using_perishable_token', '@user'}
     end
     
     context "with successful save" do
       setup do
-        stub.instance_of(User).save{ true }
+        #{generate_any_instance_stub 'User', 'save', 'true'}
         put :update, :id => "the token", :user => {:password => "the new password", :password_confirmation => "the new password"}
       end
 
@@ -100,7 +100,7 @@ class PasswordResetsControllerTest < ActionController::TestCase
     
     context "with failed save" do
       setup do
-        stub.instance_of(User).save{ false }
+        #{generate_any_instance_stub 'User', 'save', 'false'}
         put :update, :id => "the token", :user => {:password => "the new password", :password_confirmation => "the new password"}
       end
 

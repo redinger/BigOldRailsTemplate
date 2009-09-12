@@ -44,16 +44,16 @@ class UserTest < ActiveSupport::TestCase
     context "#deliver_password_reset_instructions!" do
       setup do
         @user = User.generate!
-        stub(Notifier).deliver_password_reset_instructions
+        #{generate_stub 'Notifier', 'deliver_password_reset_instructions', 'nil'}
       end
     
       should "reset the perishable token" do
-        mock(@user).reset_perishable_token!
+        #{generate_expectation '@user', 'reset_perishable_token!'}
         @user.deliver_password_reset_instructions!
       end
     
       should "send the reset mail" do
-        mock(Notifier).deliver_password_reset_instructions(@user)
+        #{generate_expectation 'Notifier', 'deliver_password_reset_instructions', '@user'}
         @user.deliver_password_reset_instructions!
       end
     end

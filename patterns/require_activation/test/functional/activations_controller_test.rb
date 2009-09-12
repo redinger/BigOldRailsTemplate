@@ -10,9 +10,9 @@ class ActivationsControllerTest < ActionController::TestCase
 
     context "named routes" do
       setup do
-        controller.stubs(:require_no_user).returns(true)
+        #{generate_stub 'controller', 'require_no_user', 'true'}
         @the_user = User.generate!
-        User.stubs(:find_using_perishable_token).returns(@the_user)
+        #{generate_stub 'User', 'find_using_perishable_token', '@the_user'}
         get :new, :activation_code => "ABC"
       end
 
@@ -27,13 +27,13 @@ class ActivationsControllerTest < ActionController::TestCase
 
   context "on GET to :new" do
     setup do
-      controller.stubs(:require_no_user).returns(true)
+      #{generate_stub 'controller', 'require_no_user', 'true'}
       @the_user = User.generate!
     end
 
     context "with correct activation code" do
       setup do
-        User.stubs(:find_using_perishable_token).returns(@the_user)
+        #{generate_stub 'User', 'find_using_perishable_token', '@the_user'}
         get :new, :activation_code => "ABC"
       end
 
@@ -46,7 +46,7 @@ class ActivationsControllerTest < ActionController::TestCase
     context "with incorrect activation code" do
       should "raise an exception" do
         assert_raise Exception do
-          User.stubs(:find_using_perishable_token).returns(nil)
+          #{generate_stub 'User', 'find_using_perishable_token', 'nil'}
           get :new, :activation_code => "XYZ"
         end
       end
@@ -56,9 +56,9 @@ class ActivationsControllerTest < ActionController::TestCase
 
   context "on POST to :create" do
     setup do
-      controller.stubs(:require_no_user).returns(true)
+      #{generate_stub 'controller', 'require_no_user', 'true'}
       @the_user = User.generate!
-      User.stubs(:find).returns(@the_user)
+      #{generate_stub 'User', 'find', '@the_user'}
     end
 
     context "with active user" do
@@ -74,7 +74,7 @@ class ActivationsControllerTest < ActionController::TestCase
 
     context "with successful activation" do
       setup do
-        @the_user.stubs(:activate!).returns(true)
+        #{generate_stub '@the_user', 'activate!', 'true'}
         post :create, :user => { :id => @the_user.id, :password => "sekrit", :password_confirmation => "sekrit"}
       end
 
@@ -86,7 +86,7 @@ class ActivationsControllerTest < ActionController::TestCase
 
     context "with failed activation" do
       setup do
-        @the_user.stubs(:activate!).returns(false)
+        #{generate_stub '@the_user', 'activate!', 'false'}
         post :create, :user => { :id => @the_user.id, :password => "sekrit", :password_confirmation => "sekrit"}
       end
 

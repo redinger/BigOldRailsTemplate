@@ -1,7 +1,7 @@
 context "#deliver_activation_instructions!" do
   setup do
     @user = User.generate!
-    stub(Notifier).deliver_activation_instructions
+    Notifier.stubs(:deliver_activation_instructions)
   end
 
   should "reset the perishable token" do
@@ -10,7 +10,7 @@ context "#deliver_activation_instructions!" do
   end
 
   should "send the reset mail" do
-    mock(Notifier).deliver_activation_instructions(@user)
+    Notifier.expects(:deliver_activation_instructions).with(@user)
     @user.deliver_activation_instructions!
   end
 end
@@ -18,16 +18,16 @@ end
 context "#deliver_welcome_email!" do
   setup do
     @user = User.generate!
-    stub(Notifier).deliver_welcome_email
+    Notifier.stubs(:deliver_welcome_email)
   end
 
   should "reset the perishable token" do
-    mock(@user).reset_perishable_token!
+    @user.expects(:reset_perishable_token!)
     @user.deliver_welcome_email!
   end
 
   should "send the reset mail" do
-    mock(Notifier).deliver_welcome_email(@user)
+    Notifier.expects(:deliver_welcome_email).with(@user)
     @user.deliver_welcome_email!
   end
 end
@@ -51,7 +51,7 @@ end
 context "#signup!" do
   setup do
     @user = User.generate
-    stub(@user).save_without_session_maintenance{ true }
+    @user.stubs(:save_without_session_maintenance).returns(true)
   end
 
   should "set the login" do
@@ -65,7 +65,7 @@ context "#signup!" do
   end
 
   should "save the user without session maintenance" do
-    mock(@user).save_without_session_maintenance
+    @user.expects(:save_without_session_maintenance).once
     @user.signup!(:user => {:login => "joe", :email => "joe@example.com"})
   end
 end
@@ -73,7 +73,7 @@ end
 context "#activate!" do
   setup do
     @user = User.generate
-    stub(@user).save{ true }
+    @user.stubs(:save).returns(true)
   end
 
   context "without parameters" do
@@ -83,7 +83,7 @@ context "#activate!" do
     end
   
     should "save the user" do
-      mock(@user).save
+      @user.expects(:save).once
       @user.activate!
     end
   end

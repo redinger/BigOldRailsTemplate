@@ -76,6 +76,7 @@ def load_from_file_in_template(file_name, parent_binding = nil, file_group = 'de
     end
     contents
   rescue
+    debug_log "Error in load_from_file_in_template #{file_name}"
   end
 end
 
@@ -263,6 +264,9 @@ design = "none" if design.nil?
 
 require_activation = (template_options["require_activation"].to_s == "true")
 
+@mocking = template_options["mocking"].nil? ? ask("Which mocking library? rr (default), mocha").downcase : template_options["mocking"]
+@mocking = "rr" if @mocking.nil?
+
 smtp_address = template_options["smtp_address"]
 smtp_domain = template_options["smtp_domain"]
 smtp_username = template_options["smtp_username"]
@@ -300,6 +304,38 @@ def install_rails (options)
     braid_rails options
   when 'git'
     clone_rails options.merge(:submodule => true)
+  end
+end
+
+def generate_stub(object_name, method_name, return_value)
+  if @mocking == "rr"
+    "stub(#{object_name}).#{method_name}{ #{return_value} }"
+  elsif @mocking == "mocha"
+    "#{object_name}.stubs(:#{method_name}).returns(#{return_value})"
+  end
+end
+
+def generate_any_instance_stub(object_name, method_name, return_value)
+  if @mocking == "rr"
+    "stub.instance_of(#{object_name}).#{method_name}{ #{return_value} }"
+  elsif @mocking == "mocha"
+    "#{object_name}.any_instance.stubs(:#{method_name}).returns(#{return_value})"
+  end
+end
+
+def generate_expectation(object_name, method_name, parameter = nil)
+  if parameter
+    if @mocking == "rr"
+      "mock(#{object_name}).#{method_name}(#{parameter})"
+    elsif @mocking == "mocha"
+      "#{object_name}.expects(:#{method_name}).with(#{parameter})"
+    end
+  else
+    if @mocking == "rr"
+      "mock(#{object_name}).#{method_name}"
+    elsif @mocking == "mocha"
+      "#{object_name}.expects(:#{method_name})"
+    end
   end
 end
 
@@ -498,7 +534,11 @@ commit_state "configuration files"
 
 # testing
 file 'test/exemplars/sample_exemplar.rb', load_pattern('test/exemplars/sample_exemplar.rb')
-file 'test/test_helper.rb', load_pattern('test/test_helper.rb')
+mock_include = ""
+if @mocking == "rr"
+  mock_include = "  include RR::Adapters::TestUnit"
+end
+file 'test/test_helper.rb', load_pattern('test/test_helper.rb', 'default', binding)
 
 extra_notifier_test = ""
 if require_activation
@@ -511,7 +551,11 @@ file 'test/unit/notifier_test.rb', load_pattern('test/unit/notifier_test.rb', 'd
 welcome_callback = ""
 extra_user_tests = ""
 if require_activation
-  extra_user_tests = load_snippet('extra_user_tests', 'require_activation')
+  if @mocking == "rr"
+    extra_user_tests = load_snippet('extra_user_tests', 'require_activation')
+  elsif @mocking == "mocha"
+    extra_user_tests = load_snippet('extra_user_tests_mocha', 'require_activation')
+  end
 else
   welcome_callback = "should_callback :send_welcome_email, :after_create"
 end
@@ -530,10 +574,10 @@ file 'test/unit/helpers/application_helper_test.rb', load_pattern('test/unit/hel
 
 
 if require_activation
-  file 'test/functional/accounts_controller_test.rb', load_pattern('test/functional/accounts_controller_test.rb', 'require_activation')
-  file 'test/functional/activations_controller_test.rb', load_pattern('test/functional/activations_controller_test.rb', 'require_activation')
+  file 'test/functional/accounts_controller_test.rb', load_pattern('test/functional/accounts_controller_test.rb', 'require_activation', binding)
+  file 'test/functional/activations_controller_test.rb', load_pattern('test/functional/activations_controller_test.rb', 'require_activation', binding)
 else
-  file 'test/functional/accounts_controller_test.rb', load_pattern('test/functional/accounts_controller_test.rb')
+  file 'test/functional/accounts_controller_test.rb', load_pattern('test/functional/accounts_controller_test.rb', 'default', binding)
 end
 
 generate_user_block = ""
@@ -546,9 +590,9 @@ end
 file 'test/functional/application_controller_test.rb', load_pattern('test/functional/application_controller_test.rb', 'default', binding)
 
 if require_activation
-  file 'test/functional/users_controller_test.rb', load_pattern('test/functional/users_controller_test.rb', 'require_activation')
+  file 'test/functional/users_controller_test.rb', load_pattern('test/functional/users_controller_test.rb', 'require_activation', binding)
 else
-  file 'test/functional/users_controller_test.rb', load_pattern('test/functional/users_controller_test.rb')
+  file 'test/functional/users_controller_test.rb', load_pattern('test/functional/users_controller_test.rb', 'default', binding)
 end
 
 file 'test/functional/user_sessions_controller_test.rb', load_pattern('test/functional/user_sessions_controller_test.rb', 'default', binding)
@@ -559,7 +603,7 @@ if ie6_blocking == 'light'
 end
 
 file 'test/functional/pages_controller_test.rb', load_pattern('test/functional/pages_controller_test.rb', 'default', binding)
-file 'test/functional/password_resets_controller_tests.rb', load_pattern('test/functional/password_resets_controller_tests.rb')
+file 'test/functional/password_resets_controller_test.rb', load_pattern('test/functional/password_resets_controller_test.rb', 'default', binding)
 
 new_user_contained_text = 'I18n.t("flash.accounts.create.notice")'
 
