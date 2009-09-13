@@ -2,6 +2,6 @@
 
 <% semantic_form_for @user, :url => password_reset_path, :method => :put, :live_validations => true do |f| %>
   <%= f.error_messages %>
-  <%= f.input :password, :password_confirmation %>
+  <%= f.inputs :password, :password_confirmation %>
   <%= f.commit_button t(".submit") %>
 <% end %>
