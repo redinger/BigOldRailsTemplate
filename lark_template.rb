@@ -399,11 +399,8 @@ commit_state "Set up staging environment and hooked up Rack::Bug"
 # make sure HAML files get searched if we go that route
 file '.ackrc', load_pattern('.ackrc')
 
-# some files for app
-if @javascript_library == "prototype"
-  download "http://livevalidation.com/javascripts/src/1.3/livevalidation_prototype.js", "public/javascripts/livevalidation.js"
-elsif @javascript_library == "jquery"
-  file_from_repo "ffmike", "jquery-validate", "master", "jquery.validate.min.js", "public/javascripts/jquery.validate.min.js"
+# jrails setup
+if @javascript_library == "jquery"
   rake("jrails:js:scrub")
   rake("jrails:js:install")
 end
@@ -486,7 +483,6 @@ file 'app/helpers/layout_helper.rb', load_pattern('app/helpers/layout_helper.rb'
 # initializers
 initializer 'requires.rb', load_pattern('config/initializers/requires.rb')
 initializer 'admin_data.rb', load_pattern('config/initializers/admin_data.rb')
-initializer 'live_validations.rb', load_pattern('config/initializers/live_validations.rb', @javascript_library) 
 
 base64_user_name = Base64.encode64(smtp_username) unless smtp_username.blank? 
 base64_password = Base64.encode64(smtp_password) unless smtp_username.blank? 

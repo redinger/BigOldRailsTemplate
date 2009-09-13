@@ -23,7 +23,6 @@ Design Tools
 - Uses inherited_resources to DRY up controllers.
 #{' - Bluetrip CSS for visual design' if design == 'bluetrip'}
 #{' - Compass for visual design' if design == 'compass'}
-- live-validations for client-side JavaScript data entry validation. Add :live_validations => true to form_for declarations to hook this up.
 
 Coding Tools
 ============

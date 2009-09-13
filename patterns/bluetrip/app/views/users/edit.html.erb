@@ -2,7 +2,7 @@
 
   <h1><%= t('.title') %></h1>
 
-  <% semantic_form_for @user, :url => account_path, :live_validations => true do |f| %>
+  <% semantic_form_for @user, :url => account_path do |f| %>
     <%= f.error_messages %>
     <%= render :partial => "users/form", :object => f %>
     <%= f.commit_button t('label.update') %>
