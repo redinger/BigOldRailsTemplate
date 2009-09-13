@@ -18,8 +18,11 @@ This application includes:
 
 Design Tools
 ============
+#{' - Set up for Haml and Sass' if template_engine == 'haml'}
 - Forms are built using formtastic for added DRYness
+- Uses inherited_resources to DRY up controllers.
 #{' - Bluetrip CSS for visual design' if design == 'bluetrip'}
+#{' - Compass for visual design' if design == 'compass'}
 - live-validations for client-side JavaScript data entry validation. Add :live_validations => true to form_for declarations to hook this up.
 
 Coding Tools
@@ -43,6 +46,7 @@ Coding Tools
 Database Tools
 ==============
 - Hooked up for #{'PostgreSQL' if database == 'postgresql'}#{'MySQL' if database == 'mysql'}#{'sqlite 3' if database == 'sqlite'}
+- foreigner for foreign key support
 - admin-data plugin for administrative UI. http://localhost:3000/admin_data will get you to the application's data. On production,
   only admin can view data, no one can edit (modify config/initializers/admin_data.rb to adjust this)
 - db-populate for seed data
@@ -66,7 +70,8 @@ External Services
 Testing Tools
 =============
 - Shoulda and Test::Unit for testing
-- Mocha for mocking
+#{'- Mocha for mocking' if mocking == 'mocha'}
+#{'- rr for mocking' if mocking == 'rr'}
 - Object Daddy for factories
 - Generated code is already covered by tests
 - parallel-specs for faster testing. 
