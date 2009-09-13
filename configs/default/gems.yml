@@ -17,6 +17,10 @@ binarylogic-searchlogic:
     :lib: searchlogic
     :source: http://gems.github.com
     :version: ~> 2.0
+matthuhiggins-foreigner:
+  :options:
+    :lib: foreigner
+    :source: http://gems.github.com
 justinfrench-formtastic:
   :options:
     :lib: formtastic
