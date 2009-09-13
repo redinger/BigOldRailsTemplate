@@ -54,11 +54,6 @@ ffmike-query_trace:
     :env: development
 
 # test only
-test-unit:
-  :options:
-    :lib: test/unit
-    :version: ">=2.0.3"
-    :env: test
 ffmike-test_benchmark:
   :options:
     :lib: test_benchmark
