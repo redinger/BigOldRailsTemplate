@@ -353,6 +353,10 @@ git :init
 # Set up gitignore and commit base state
 file '.gitignore', load_pattern('.gitignore')
 
+if @branch_management == "git"
+  file "lib/tasks/git.rake", load_pattern("lib/tasks/git.rake", "git")
+end
+
 commit_state "base application"
 
 # plugins
@@ -361,6 +365,10 @@ plugins.each do |name, value|
   if value[:if].nil? || eval(value[:if])
     install_plugin name, value[:options]
   end
+end
+
+if @branch_management == "git"
+  rake("git:submodules:init")
 end
 
 # gems
