@@ -1,9 +1,9 @@
 class User < ActiveRecord::Base
   acts_as_authentic do |c|
-    config.merge_validates_format_of_login_field_options :allow_blank => true
-    config.merge_validates_format_of_email_field_options :allow_blank => true, :unless => "email.size < 6"
-    config.merge_validates_confirmation_of_password_field_options :allow_blank => true
-    config.merge_validates_length_of_password_confirmation_field_options :if => "false"
+    c.merge_validates_format_of_login_field_options :allow_blank => true
+    c.merge_validates_format_of_email_field_options :allow_blank => true, :unless => "email.size < 6"
+    c.merge_validates_confirmation_of_password_field_options :allow_blank => true
+    c.merge_validates_length_of_password_confirmation_field_options :if => "false"
     
     # Put any authlogic customizations here; see the authlogic help
   end
