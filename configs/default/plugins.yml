@@ -8,9 +8,9 @@ db_populate:
 fast_remote_cache: 
   :options: 
     :git: :git://github.com/37signals/fast_remote_cache.git
-  hashdown: 
-    :options: 
-      :git: :git://github.com/rubysolo/hashdown.git
+hashdown: 
+  :options: 
+    :git: :git://github.com/rubysolo/hashdown.git
 object_daddy: 
   :options: 
     :git: :git://github.com/flogic/object_daddy.git
