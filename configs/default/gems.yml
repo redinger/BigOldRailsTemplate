@@ -58,6 +58,11 @@ ffmike-query_trace:
     :env: development
 
 # test only
+thoughtbot-shoulda:
+  :options:
+    :lib: shoulda
+    :source: http://gems.github.com
+    :env: test
 ffmike-test_benchmark:
   :options:
     :lib: test_benchmark
@@ -71,3 +76,8 @@ rr:
     :version: ">=0.10.2"
     :env: test
   :if: @mocking == "rr"
+mocha:
+  :options:
+    :version: ">=0.9.7"
+    :env: test
+  :if: @mocking == "mocha"
