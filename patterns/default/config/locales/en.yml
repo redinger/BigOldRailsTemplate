@@ -62,6 +62,8 @@ en:
   # Email subjects
   subject:
     activation_instructions: Activation Instructions
+    password_reset_instructions: Password Reset Instructions
+    welcome: Welcome to #{current_app_name}!
   
   # Views
   user_sessions:

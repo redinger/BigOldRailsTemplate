@@ -3,13 +3,13 @@ class Notifier < ActionMailer::Base
   
   def password_reset_instructions(user)
     setup(user)
-    subject "Password Reset Instructions"
+    subject I18n.t("subject.password_reset_instructions")
     body :edit_password_reset_url => edit_password_reset_url(user.perishable_token)
   end
 
   def welcome_email(user)
     setup(user)
-    subject "Welcome to #{current_app_name}!"
+    subject I18n.t("subject.welcome")
     body :user => user
   end
   
