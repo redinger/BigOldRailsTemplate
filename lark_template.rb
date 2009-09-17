@@ -264,8 +264,8 @@ design = "none" if design.nil?
 
 require_activation = (template_options["require_activation"].to_s == "true")
 
-@mocking = template_options["mocking"].nil? ? ask("Which mocking library? rr (default), mocha").downcase : template_options["mocking"]
-@mocking = "rr" if @mocking.nil?
+@mocking = template_options["mocking"].nil? ? ask("Which mocking library? rr, mocha (default)").downcase : template_options["mocking"]
+@mocking = "mocha" if @mocking.nil?
 
 smtp_address = template_options["smtp_address"]
 smtp_domain = template_options["smtp_domain"]

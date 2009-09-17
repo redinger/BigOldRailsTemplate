@@ -29,8 +29,8 @@ design: none
 compass_css_framework: blueprint
 # Require users to activate after creating an account: false (default), true
 require_activation: false
-# mocking library to use in tests: rr (default), mocha
-mocking: rr
+# mocking library to use in tests: rr, mocha (default)
+mocking: mocha
 #
 # These options can be omitted, and the template will default to sensible behavior
 #
