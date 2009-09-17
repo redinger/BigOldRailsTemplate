@@ -70,7 +70,7 @@ h3. External Services
 h3. Testing Tools
 
 * "Shoulda":http://thoughtbot.com/projects/shoulda and Test::Unit for testing
-* "rr":http://github.com/btakita/rr/tree/master or Mocha for mocking
+* "rr":http://github.com/btakita/rr/tree/master or Mocha for mocking. Note that tests are currently failing under rr; I _think_ this is an issue with rr but haven't dug into it yet.
 * "Object Daddy":http://github.com/flogic/object_daddy/tree/master for factories
 * Generated code is already covered by tests
 * "parallel-specs":http://github.com/grosser/parallel_specs/tree/master for faster testing. rake spec:parallel:prepare[2] to set up two test databases. rake test:parallel[2] to distribute tests across two cores
@@ -99,6 +99,6 @@ Thanks to:
 * Wynst (bug fixes)
 * Rob Zolkos (typo fix)
 * Matt Hooks (inspiration for Authlogic activation code)
-* Joey Geiger (typo fix)
+* Joey Geiger (typo fix, bug fixes)
 * Reuben Doetsch (original implementation of file/snippet loading code)
 * Maxim Chernyak (bug fixes, jRails, Haml & Sass support, Compass support, internationalization, inherited_resources, test updates)
