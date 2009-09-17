@@ -538,9 +538,13 @@ commit_state "configuration files"
 
 # testing
 file 'test/exemplars/sample_exemplar.rb', load_pattern('test/exemplars/sample_exemplar.rb')
+mock_require = ""
 mock_include = ""
 if @mocking == "rr"
+  mock_require = "require 'rr'"
   mock_include = "  include RR::Adapters::TestUnit"
+elsif @mocking == "mocha"
+  mock_require = "require 'mocha'"
 end
 file 'test/test_helper.rb', load_pattern('test/test_helper.rb', 'default', binding)
 

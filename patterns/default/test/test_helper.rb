@@ -8,6 +8,7 @@ end
 require File.expand_path(File.dirname(__FILE__) + "/../config/environment")
 require 'test_help'
 require 'shoulda'
+#{mock_require}
 require 'authlogic/test_case'
 require 'webrat'
 
