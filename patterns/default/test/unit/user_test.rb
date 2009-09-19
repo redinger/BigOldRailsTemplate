@@ -44,7 +44,7 @@ class UserTest < ActiveSupport::TestCase
     context "#deliver_password_reset_instructions!" do
       setup do
         @user = User.generate!
-        #{generate_stub 'Notifier', 'deliver_password_reset_instructions', 'nil'}
+        #{generate_stub 'Notifier', 'password_reset_instructions', 'nil'}
       end
     
       should "reset the perishable token" do

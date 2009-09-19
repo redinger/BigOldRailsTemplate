@@ -76,9 +76,10 @@ ffmike-test_benchmark:
 webrat:
   :options:
     :env: test
-rr:
+redinger-rr:
   :options:
-    :version: ">=0.10.2"
+    :lib: rr
+    :version: ">=0.10.4"
     :env: test
   :if: @mocking == "rr"
 mocha:
