@@ -7,6 +7,7 @@ TODO after installing:
 #{'- Put the right API key in config/new_relic.yml' if monitoring == 'new_relic'}
 #{'- Put the right plugin ID in config/scout.yml' if monitoring == 'scout'}
 #{'- Install the scout agent gem on the production server (sudo gem install scout_agent)' if monitoring == 'scout'}
+- Create public/favicon.ico
 - Put the production database password in config/database.yml
 - Put mail server information in mail.rb
 - Put real IP address and git repo URL in deployment files
@@ -49,6 +50,7 @@ Database Tools
 - admin-data plugin for administrative UI. http://localhost:3000/admin_data will get you to the application's data. On production,
   only admin can view data, no one can edit (modify config/initializers/admin_data.rb to adjust this)
 - db-populate for seed data
+- bullet to find N+1 queries in development mode (modify config/environments/development.rb to enable)
 
 
 Deployment Tools

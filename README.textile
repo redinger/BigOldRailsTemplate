@@ -59,6 +59,7 @@ h3. Database Tools
 * "foreigner":http://github.com/matthuhiggins/foreigner installed for foreign key support.
 * "admin-data":http://github.com/neerajdotname/admin_data/tree/master plugin for administrative UI. http://localhost:3000/admin_data will get you to the application’s data. On production, only admin can view data, no one can edit (modify config/initializers/admin_data.rb to adjust this)
 * "db-populate":http://github.com/ffmike/db-populate/tree/master for seed data
+* "Bullet":http://github.com/flyerhzm/bullet in development mode to help find N+1 queries (enable in config/environments/development.rb)
 
 h3. Deployment Tools
 

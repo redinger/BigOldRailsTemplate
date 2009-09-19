@@ -394,6 +394,9 @@ environment 'config.middleware.use "Rack::Bug"', :env => 'staging'
 environment 'config.action_mailer.delivery_method = :smtp', :env => 'production'
 environment 'config.action_mailer.delivery_method = :smtp', :env => 'staging'
 
+bullet_initializer = load_snippet('bullet_initializer')
+environment bullet_initializer, :env => 'development'
+
 commit_state "Set up staging environment and hooked up Rack::Bug"
 
 # make sure HAML files get searched if we go that route
@@ -987,6 +990,7 @@ if monitoring == "scout"
   puts '  Put the right plugin ID in config/scout.yml'
   puts '  Install the scout agent gem on the production server (sudo gem install scout_agent)'
 end
+puts '  Create public/favicon.ico'
 puts '  Put the production database password in config/database.yml'
 puts '  Put mail server information in mail.rb'
 puts '  Put real IP address and git repo URL in deployment files'

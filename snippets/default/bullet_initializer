@@ -1,0 +1,10 @@
+
+config.after_initialize do
+  Bullet.enable = false           # flip to true to enable bullet
+  Bullet.alert = true             # javascript alert in browser
+  Bullet.bullet_logger = true     # log to separate bullet.log
+  Bullet.console = true           # log to browser console (Webkit or Firebug)
+  Bullet.growl = false            # log to Growl
+  Bullet.rails_logger = false     # log to current Rails log
+  Bullet.disable_browser_cache = true
+end

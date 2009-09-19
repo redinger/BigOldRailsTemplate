@@ -56,6 +56,11 @@ ffmike-query_trace:
     :lib: query_trace
     :source: http://gems.github.com
     :env: development
+flyerhzm-bullet:
+  :options:
+    :lib: bullet
+    :source: http://gems.github.com
+    :env: development
 
 # test only
 thoughtbot-shoulda:
