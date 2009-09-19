@@ -339,6 +339,15 @@ def generate_expectation(object_name, method_name, parameter = nil)
   end
 end
 
+def generate_pure_stub(stub_name)
+  if @mocking == "rr"
+    "stub!('#{stub_name}')"
+  elsif @mocking == "mocha"
+    "stub('#{stub_name}')"
+  end
+end
+
+
 # Actual application generation starts here
 
 # Delete unnecessary files
@@ -579,9 +588,9 @@ file 'test/shoulda_macros/helpers.rb', load_pattern('test/shoulda_macros/helpers
 
 file 'test/exemplars/user_exemplar.rb', load_pattern('test/exemplars/user_exemplar.rb')
 
-file 'test/unit/user_session_test.rb', load_pattern('test/unit/user_session_test.rb')
+file 'test/unit/user_session_test.rb', load_pattern('test/unit/user_session_test.rb', 'default', binding)
 
-file 'test/unit/helpers/application_helper_test.rb', load_pattern('test/unit/helpers/application_helper_test.rb')
+file 'test/unit/helpers/application_helper_test.rb', load_pattern('test/unit/helpers/application_helper_test.rb', 'default', binding)
 
 
 if require_activation
