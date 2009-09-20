@@ -42,6 +42,15 @@ end
 @template = template
 @root = root
 
+TEMPLATE_PATHS = [
+                  File.expand_path(File.join(ENV['HOME'],'.big_old_rails_template')),
+                  File.expand_path(File.dirname(@template), File.join(@root,'..'))
+                 ]
+                 
+def template_paths
+  @template_paths ||= TEMPLATE_PATHS
+end
+
 def load_from_file_in_template(file_name, parent_binding = nil, file_group = 'default', file_type = :pattern)
   base_name = file_name.gsub(/^\./, '')
   begin
@@ -50,12 +59,9 @@ def load_from_file_in_template(file_name, parent_binding = nil, file_group = 'de
     else
       contents = ''
     end
-    template_paths = [
-                      File.expand_path(File.join(ENV['HOME'],'.big_old_rails_template')),
-                      File.expand_path(File.dirname(@template), File.join(@root,'..'))
-                     ]
+    paths = template_paths
 
-    template_paths.each do |template_path|
+    paths.each do |template_path|
       full_file_name = File.join(template_path, file_type.to_s.pluralize, file_group, base_name)
       debug_log "Searching for #{full_file_name} ... "
 
