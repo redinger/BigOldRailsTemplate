@@ -1,10 +1,10 @@
-require 'open-uri'
-require 'yaml'
 require 'base64'
 require 'cgi'
 require File.join(File.expand_path(File.dirname(template), File.join(root,'..')), 'template_framework')
 
-init_template_framework(template, root)
+init_template_framework template, root
+add_template_path File.expand_path(File.join(ENV['HOME'],'.big_old_rails_template'))
+load_options
 
 # Delete unnecessary files
 run "rm README"
@@ -620,6 +620,7 @@ if rails_strategy == "vendored" || rails_strategy == "symlinked"
     end
   end
   update_app
+  remove_prototype if @javascript_library != "prototype"
   commit_state "updated rails files from vendored copy"
 end
 

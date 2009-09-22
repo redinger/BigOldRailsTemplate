@@ -1,13 +1,106 @@
+require 'open-uri'
+require 'yaml'
+
 module Rails
   class TemplateRunner
+
+# Logging
     # Turn on for noisy logging during template generation
     DEBUG_LOGGING = false
 
-    # Utility Methods
- 
-    # download, from_repo, and commit_state methods swiped from 
-    # http://github.com/Sutto/rails-template/blob/07b044072f3fb0b40aea27b713ca61515250f5ec/rails_template.rb
- 
+    def debug_log(msg)
+      if DEBUG_LOGGING
+        log msg
+      end
+    end
+
+# Accessors and Initialization
+    def current_app_name
+      current_app_name = File.basename(File.expand_path(root))
+    end
+
+    # TODO: This list should be data driven
+    attr_accessor :rails_branch, :database, :exception_handling, :monitoring, :branch_management, :rails_strategy, :link_rails_root,
+     :ie6_blocking, :javascript_library, :template_engine, :compass_css_framework, :design, :require_activation,
+     :mocking, :smtp_address, :smtp_domain, :smtp_username, :smtp_password, :capistrano_user, :capistrano_repo_host, :capistrano_production_host,
+     :capistrano_staging_host, :exceptional_api_key, :hoptoad_api_key, :newrelic_api_key, :notifier_email_from, :default_url_options_host,        
+     :template_paths, :template_options
+  
+    def add_template_path(path, placement = :prepend)
+      if placement == :prepend
+        @template_paths.unshift path
+      elsif placement == :append
+        @template_paths.push path
+      end
+    end
+    
+    # TODO: List of attributes should be data driven
+    def init_template_framework(template, root)
+      @template_paths = [File.expand_path(File.dirname(template), File.join(root,'..'))]
+    end
+
+    def load_options
+      # Option set-up
+      @template_options = load_template_config_file('config.yml')
+
+      @rails_branch = template_options["rails_branch"]
+      @rails_branch = "2-3-stable" if @rails_branch.nil?
+
+      @database = template_options["database"].nil? ? ask("Which database? postgresql (default), mysql, sqlite").downcase : template_options["database"]
+      @database = "postgresql" if @database.nil?
+
+      @exception_handling = template_options["exception_handling"].nil? ? ask("Which exception reporting? exceptional (default), hoptoad").downcase : template_options["exception_handling"]
+      @exception_handling = "exceptional" if @exception_handling.nil?
+
+      @monitoring = template_options["monitoring"].nil? ? ask("Which monitoring? new_relic (default), scout").downcase : template_options["monitoring"]
+      @monitoring = "new_relic" if @monitoring.nil?
+
+      @branch_management = template_options["branch_management"].nil? ? ask("Which branch management? piston (default), braid, git, none").downcase : template_options["branch_management"]
+      @branch_management = "piston" if @branch_management.nil?
+
+      @rails_strategy = template_options["rails_strategy"].nil? ? ask("Which Rails strategy? vendored (default), gem").downcase : template_options["rails_strategy"]
+      @rails_strategy = "vendored" if @rails_strategy.nil?
+
+      @link_rails_root = template_options["link_rails_root"]
+      @link_rails_root = "~/rails" if @link_rails_root.nil?
+
+      @ie6_blocking = template_options["ie6_blocking"].nil? ? ask("Which IE 6 blocking? none, light (default), ie6nomore").downcase : template_options["ie6_blocking"]
+      @ie6_blocking = "light" if @ie6_blocking.nil?
+
+      @javascript_library = template_options["javascript_library"].nil? ? ask("Which javascript library? prototype (default), jquery").downcase : template_options["javascript_library"]
+      @javascript_library = "prototype" if @javascript_library.nil?
+
+      @template_engine = template_options["template_engine"].nil? ? ask("Which template engine? erb (default), haml").downcase : template_options["template_engine"]
+      @template_engine = "erb" if @template_engine.nil?
+
+      @compass_css_framework = template_options["compass_css_framework"]
+      @compass_css_framework = "blueprint" if @compass_css_framework.nil?
+
+      @design = template_options["design"].nil? ? ask("Which design? none (default), bluetrip, compass").downcase : template_options["design"]
+      @design = "none" if @design.nil?
+
+      @require_activation = (template_options["require_activation"].to_s == "true")
+
+      @mocking = template_options["mocking"].nil? ? ask("Which mocking library? rr, mocha (default)").downcase : template_options["mocking"]
+      @mocking = "mocha" if @mocking.nil?
+
+      @smtp_address = template_options["smtp_address"]
+      @smtp_domain = template_options["smtp_domain"]
+      @smtp_username = template_options["smtp_username"]
+      @smtp_password = template_options["smtp_password"]
+      @capistrano_user = template_options["capistrano_user"]
+      @capistrano_repo_host = template_options["capistrano_repo_host"]
+      @capistrano_production_host = template_options["capistrano_production_host"]
+      @capistrano_staging_host = template_options["capistrano_staging_host"]
+      @exceptional_api_key = template_options["exceptional_api_key"]
+      @hoptoad_api_key = template_options["hoptoad_api_key"]
+      @newrelic_api_key = template_options["newrelic_api_key"]
+      @notifier_email_from = template_options["notifier_email_from"]
+      @default_url_options_host = template_options["default_url_options_host"]
+
+  end
+
+# File Management 
     def download(from, to = from.split("/").last)
       #run "curl -s -L #{from} > #{to}"
       file to, open(from).read
@@ -16,35 +109,10 @@ module Rails
       exit!
     end
  
-    def from_repo(github_user, from, to = from.split("/").last)
-      download("http://github.com/#{github_user}/rails-template/raw/master/#{from}", to)
-    end
- 
-    def commit_state(comment)
-      git :add => "."
-      git :commit => "-am '#{comment}'"
-    end
-
-
     # grab an arbitrary file from github
     def file_from_repo(github_user, repo, sha, filename, to = filename)
       download("http://github.com/#{github_user}/#{repo}/raw/#{sha}/#{filename}", to)
     end
-
-    def debug_log(msg)
-      if DEBUG_LOGGING
-        log msg
-      end
-    end
-
-    # TEMPLATE_PATHS = [
-    #                   File.expand_path(File.join(ENV['HOME'],'.big_old_rails_template')),
-    #                   File.expand_path(File.dirname(@template), File.join(@root,'..'))
-    #                  ]
-    # 
-    # def template_paths
-    #   @template_paths ||= TEMPLATE_PATHS
-    # end
 
     def load_from_file_in_template(file_name, parent_binding = nil, file_group = 'default', file_type = :pattern)
       base_name = file_name.gsub(/^\./, '')
@@ -96,7 +164,12 @@ module Rails
       load_from_file_in_template(config_file_name, nil, config_file_group, :config )
     end
 
-    # Piston and braid methods out of my own head
+# SCM and Branch Management 
+     def commit_state(comment)
+       git :add => "."
+       git :commit => "-am '#{comment}'"
+     end
+
     # sudo gem install piston on your dev box before using these
     # Piston locking support with git requires Piston 2.0.3+
     # Piston branch management with git 1.6.3 requires Piston 2.0.5+
@@ -203,6 +276,8 @@ module Rails
       log "rails installed #{'and submoduled ' if options[:submodule]}from GitHub", options[:branch]
     end
 
+# Rails Management
+
     # update rails bits in application after vendoring a new copy of rails
     # we need to do this the hard way because we want to overwrite without warning
     # TODO: Can we introspect the actual rake:update task to get a current list of subtasks?
@@ -212,98 +287,16 @@ module Rails
         run("echo 'a' | rake rails:update:javascripts")
         run("echo 'a' | rake rails:update:configs")
         run("echo 'a' | rake rails:update:application_controller")
-
-        if @javascript_library != "prototype"
-          run "rm public/javascripts/controls.js"
-          run "rm public/javascripts/dragdrop.js"
-          run "rm public/javascripts/effects.js"
-          run "rm public/javascripts/prototype.js"
-        end
       end
     end
 
-    def current_app_name
-      current_app_name = File.basename(File.expand_path(root))
+    # remove the prototype framework
+    def remove_prototype
+      run "rm public/javascripts/controls.js"
+      run "rm public/javascripts/dragdrop.js"
+      run "rm public/javascripts/effects.js"
+      run "rm public/javascripts/prototype.js"
     end
-    
-    # @template = template
-    # @root = root
-
-attr_accessor :rails_branch, :database, :exception_handling, :monitoring, :branch_management, :rails_strategy, :link_rails_root,
-  :ie6_blocking, :javascript_library, :template_engine, :compass_css_framework, :design, :require_activation,
-  :mocking, :smtp_address, :smtp_domain, :smtp_username, :smtp_password, :capistrano_user, :capistrano_repo_host, :capistrano_production_host,
-  :capistrano_staging_host, :exceptional_api_key, :hoptoad_api_key, :newrelic_api_key, :notifier_email_from, :default_url_options_host,  :template_paths, :template_options
-  
-def init_template_framework(template, root)
-puts "in init"
-   # @template = template
-   # @root = root
-
-   @template_paths = [
-                     File.expand_path(File.join(ENV['HOME'],'.big_old_rails_template')),
-                     File.expand_path(File.dirname(template), File.join(root,'..'))
-                    ]
-
-    # Option set-up
-    @template_options = load_template_config_file('config.yml')
-
-    @rails_branch = template_options["rails_branch"]
-    @rails_branch = "2-3-stable" if @rails_branch.nil?
-
-    @database = template_options["database"].nil? ? ask("Which database? postgresql (default), mysql, sqlite").downcase : template_options["database"]
-    @database = "postgresql" if @database.nil?
-
-    @exception_handling = template_options["exception_handling"].nil? ? ask("Which exception reporting? exceptional (default), hoptoad").downcase : template_options["exception_handling"]
-    @exception_handling = "exceptional" if @exception_handling.nil?
-
-    @monitoring = template_options["monitoring"].nil? ? ask("Which monitoring? new_relic (default), scout").downcase : template_options["monitoring"]
-    @monitoring = "new_relic" if @monitoring.nil?
-
-    @branch_management = template_options["branch_management"].nil? ? ask("Which branch management? piston (default), braid, git, none").downcase : template_options["branch_management"]
-    @branch_management = "piston" if @branch_management.nil?
-
-    @rails_strategy = template_options["rails_strategy"].nil? ? ask("Which Rails strategy? vendored (default), gem").downcase : template_options["rails_strategy"]
-    @rails_strategy = "vendored" if @rails_strategy.nil?
-
-    @link_rails_root = template_options["link_rails_root"]
-    @link_rails_root = "~/rails" if @link_rails_root.nil?
-
-    @ie6_blocking = template_options["ie6_blocking"].nil? ? ask("Which IE 6 blocking? none, light (default), ie6nomore").downcase : template_options["ie6_blocking"]
-    @ie6_blocking = "light" if @ie6_blocking.nil?
-
-    @javascript_library = template_options["javascript_library"].nil? ? ask("Which javascript library? prototype (default), jquery").downcase : template_options["javascript_library"]
-    @javascript_library = "prototype" if @javascript_library.nil?
-
-    @template_engine = template_options["template_engine"].nil? ? ask("Which template engine? erb (default), haml").downcase : template_options["template_engine"]
-    @template_engine = "erb" if @template_engine.nil?
-
-    @compass_css_framework = template_options["compass_css_framework"]
-    @compass_css_framework = "blueprint" if @compass_css_framework.nil?
-
-    @design = template_options["design"].nil? ? ask("Which design? none (default), bluetrip, compass").downcase : template_options["design"]
-    @design = "none" if @design.nil?
-
-    @require_activation = (template_options["require_activation"].to_s == "true")
-
-    @mocking = template_options["mocking"].nil? ? ask("Which mocking library? rr, mocha (default)").downcase : template_options["mocking"]
-    @mocking = "mocha" if @mocking.nil?
-
-    @smtp_address = template_options["smtp_address"]
-    @smtp_domain = template_options["smtp_domain"]
-    @smtp_username = template_options["smtp_username"]
-    @smtp_password = template_options["smtp_password"]
-    @capistrano_user = template_options["capistrano_user"]
-    @capistrano_repo_host = template_options["capistrano_repo_host"]
-    @capistrano_production_host = template_options["capistrano_production_host"]
-    @capistrano_staging_host = template_options["capistrano_staging_host"]
-    @exceptional_api_key = template_options["exceptional_api_key"]
-    @hoptoad_api_key = template_options["hoptoad_api_key"]
-    @newrelic_api_key = template_options["newrelic_api_key"]
-    @notifier_email_from = template_options["notifier_email_from"]
-    @default_url_options_host = template_options["default_url_options_host"]
-
-end
-
 
     def install_plugin (name, options)
       case @branch_management
@@ -330,6 +323,8 @@ end
         clone_rails options.merge(:submodule => true)
       end
     end
+    
+# Mocking generators
 
     def generate_stub(object_name, method_name, return_value)
       if @mocking == "rr"

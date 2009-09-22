@@ -97,6 +97,7 @@ I welcome suggestions and contributions. See the "project's wiki":http://wiki.gi
     
 Thanks to:
 
+* Darcy Laycock (download, commit_state, from_repo methods in framework)
 * Eric Davis (bug fixes, better architecture for config)
 * Paco Guzman (bug fixes)
 * Jeraimee (MySQL translation of database.yml)
