@@ -9,6 +9,15 @@ class UsersController < InheritedResources::Base
     success.html { redirect_to account_url }
     failure.html { render :action => :edit }
   end
+
+  def impersonate
+    @user = User.find(params[:id])
+    if @user
+      UserSession.create(@user)
+      flash[:success] = t('flash.users.impersonate.success', :name => @user.display_name)
+    end
+    redirect_back_or_default root_url
+  end
   
 private
   def resource

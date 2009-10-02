@@ -165,5 +165,17 @@ class UsersControllerTest < ActionController::TestCase
       should_set_the_flash_to I18n.t("flash.users.destroy.notice")
       should_redirect_to("the users page") { users_path }
     end
+    
+    context "on POST to impersonate" do
+      setup do
+        #{generate_any_instance_stub 'User', 'display_name', '\'Joe\''}
+        post :impersonate, :id => @the_user.id
+      end
+      
+      should_respond_with :redirect
+      should_assign_to(:user) { @the_user }
+      should_set_the_flash_to  I18n.t('flash.users.impersonate.success', :name => 'Joe')
+      should_redirect_to("the root url") { root_url }
+    end
   end
 end

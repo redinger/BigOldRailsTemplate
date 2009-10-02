@@ -15,6 +15,10 @@ class User < ActiveRecord::Base
   
   attr_accessible :login, :password, :password_confirmation, :email, :first_name, :last_name
   
+  def display_name
+    "#{first_name} #{last_name}".strip
+  end
+  
   def deliver_password_reset_instructions!
     reset_perishable_token!
     Notifier.deliver_password_reset_instructions(self)

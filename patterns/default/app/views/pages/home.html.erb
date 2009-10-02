@@ -26,6 +26,12 @@
       <li><%= link_to "App menu item", "#" %></li>
     <% end %>
     </ul>
+    <% admin_only do %>
+      <% form_tag impersonate_users_path do %>
+        <%= select_tag "id", options_for_select(User.all.collect{ |u| [u.display_name, u.id] }) %>
+        <%= submit_tag 'Impersonate' %>
+      <% end %>
+    <% end %>
   </div>
 
   <div id="main_with_left_menu" class="#{main_with_left_menu_class}">
