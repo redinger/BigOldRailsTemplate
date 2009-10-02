@@ -8,6 +8,23 @@ class UserTest < ActiveSupport::TestCase
     end
   
     should_be_authentic
+
+    context "#display_name" do
+      should "combine first and last name" do
+        @user = User.generate(:first_name => "Rocky", :last_name => "Squirrel")
+        assert_equal "Rocky Squirrel", @user.display_name
+      end
+
+      should "handle first name only" do
+        @user = User.generate(:first_name => "Rocky", :last_name => "")
+        assert_equal "Rocky", @user.display_name
+      end
+
+      should "handle last name only" do
+        @user = User.generate(:first_name => "", :last_name => "Squirrel")
+        assert_equal "Squirrel", @user.display_name
+      end
+    end
   
     context "serialize roles" do
       setup do

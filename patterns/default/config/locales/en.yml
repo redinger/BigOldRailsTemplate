@@ -35,6 +35,8 @@ en:
         notice: "User successfully updated."
       destroy:
         notice: "User successfully deleted."
+      impersonate:
+        success: "Now impersonating {{name}}"
 
     activations:
       create:

@@ -1,7 +1,7 @@
 ActionController::Routing::Routes.draw do |map|
   map.resource :account, :except => :destroy
   map.resources :password_resets, :only => [:new, :create, :edit, :update]
-  map.resources :users
+  map.resources :users, :collection => {:impersonate => :post}
   map.resource :user_session, :only => [:new, :create, :destroy]
   map.login 'login', :controller => "user_sessions", :action => "new"
   map.logout 'logout', :controller => "user_sessions", :action => "destroy"
