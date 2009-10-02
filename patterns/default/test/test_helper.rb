@@ -1,10 +1,4 @@
 ENV["RAILS_ENV"] = "test" if ENV["RAILS_ENV"].nil? || ENV["RAILS_ENV"] == ''
-begin
-  require 'rubygems'
-  gem 'test-unit', '~> 2.0'
-rescue Gem::LoadError
-  puts "Could not find Test::Unit 2.0, ignoring"
-end
 require File.expand_path(File.dirname(__FILE__) + "/../config/environment")
 require 'test_help'
 require 'shoulda'
