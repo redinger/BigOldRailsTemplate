@@ -4,7 +4,7 @@ class UsersControllerTest < ActionController::TestCase
   
   should_have_before_filter :require_no_user, :only => [:new, :create]
   should_have_before_filter :require_user, :only => [:show, :edit, :update]
-  should_have_before_filter :admin_required, :only => [:index, :destroy]
+  should_have_before_filter :admin_required, :only => [:index, :destroy, :impersonate]
   
   
   context "routing" do
