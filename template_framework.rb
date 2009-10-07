@@ -24,7 +24,7 @@ module Rails
      :ie6_blocking, :javascript_library, :template_engine, :compass_css_framework, :design, :require_activation,
      :mocking, :smtp_address, :smtp_domain, :smtp_username, :smtp_password, :capistrano_user, :capistrano_repo_host, :capistrano_production_host,
      :capistrano_staging_host, :exceptional_api_key, :hoptoad_api_key, :newrelic_api_key, :notifier_email_from, :default_url_options_host,        
-     :template_paths, :template_options
+     :template_paths, :template_options, :controller_type
   
     def add_template_path(path, placement = :prepend)
       if placement == :prepend
@@ -83,6 +83,9 @@ module Rails
 
       @mocking = template_options["mocking"].nil? ? ask("Which mocking library? rr, mocha (default)").downcase : template_options["mocking"]
       @mocking = "mocha" if @mocking.nil?
+
+      @controller_type = template_options["controller_type"].nil? ? ask("Which controller strategy? rails (default), inherited_resources").downcase : template_options["controller_type"]
+      @controller_type = "default" if @controller_type.nil? || @controller_type == 'rails'
 
       @smtp_address = template_options["smtp_address"]
       @smtp_domain = template_options["smtp_domain"]
@@ -144,8 +147,9 @@ module Rails
 
         end
         contents
-      rescue
+      rescue => ex
         debug_log "Error in load_from_file_in_template #{file_name}"
+        debug_log ex.message
       end
     end
 

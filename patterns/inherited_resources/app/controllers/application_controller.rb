@@ -2,6 +2,10 @@
 # Likewise, all the methods added will be available for all controllers.
 
 class ApplicationController < ActionController::Base
+  # Provide access to overrides for restful methods (ie #create! #edit!)
+  # See inherited_resources docs for more info.
+  include InheritedResources::DSL
+  
   helper :all # include all helpers, all the time
   
   # make methods available to views

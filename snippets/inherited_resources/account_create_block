@@ -1,0 +1,4 @@
+create! do |success, failure|
+  success.html { redirect_back_or_default root_url }
+  failure.html { render :template => "users/new" }
+end
