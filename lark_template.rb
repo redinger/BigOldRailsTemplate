@@ -144,7 +144,7 @@ file 'public/stylesheets/application.css', load_pattern('public/stylesheets/appl
 
 generate(:formtastic_stylesheets)
 
-file 'app/controllers/application_controller.rb', load_pattern('app/controllers/application_controller.rb')
+file 'app/controllers/application_controller.rb', load_pattern('app/controllers/application_controller.rb', controller_type)
 file 'app/helpers/application_helper.rb', load_pattern('app/helpers/application_helper.rb')
 file 'app/helpers/layout_helper.rb', load_pattern('app/helpers/layout_helper.rb')
 
@@ -298,29 +298,46 @@ commit_state "basic tests"
 # authlogic setup
 
 account_create_block = ""
-if require_activation
-  account_create_block = load_snippet('account_create_block', 'require_activation')
-else
-  account_create_block = load_snippet('account_create_block')
+if controller_type == 'default'
+  if require_activation
+    account_create_block = load_snippet('account_create_block', 'default_require_activation')
+  else
+    account_create_block = load_snippet('account_create_block')
+  end
+elsif controller_type == 'inherited_resources'
+  if require_activation
+    account_create_block = load_snippet('account_create_block', 'inherited_resources_require_activation')
+  else
+    account_create_block = load_snippet('account_create_block', 'inherited_resources')
+  end
 end
 
-file 'app/controllers/accounts_controller.rb', load_pattern('app/controllers/accounts_controller.rb', 'default', binding)
+file 'app/controllers/accounts_controller.rb', load_pattern('app/controllers/accounts_controller.rb', controller_type, binding)
 
 if require_activation
-  file 'app/controllers/activations_controller.rb', load_pattern('app/controllers/activations_controller.rb', 'require_activation')
+  file 'app/controllers/activations_controller.rb', load_pattern('app/controllers/activations_controller.rb', "#{controller_type}_require_activation")
 end
 
-file 'app/controllers/password_resets_controller.rb', load_pattern('app/controllers/password_resets_controller.rb')
-file 'app/controllers/user_sessions_controller.rb', load_pattern('app/controllers/user_sessions_controller.rb')
+file 'app/controllers/password_resets_controller.rb', load_pattern('app/controllers/password_resets_controller.rb', controller_type)
+file 'app/controllers/user_sessions_controller.rb', load_pattern('app/controllers/user_sessions_controller.rb', controller_type)
 
-user_create_block = ''
-if require_activation
-  user_create_block = load_snippet('user_create_block', 'require_activation')
-else
-  user_create_block = load_snippet('user_create_block')
+user_create_block = ""
+if controller_type == 'default'
+  if require_activation
+    user_create_block = load_snippet('user_create_block', 'default_require_activation')
+  else
+    user_create_block = load_snippet('user_create_block')
+  end
+elsif controller_type == 'inherited_resources'
+  if require_activation
+    user_create_block = load_snippet('user_create_block', 'inherited_resources_require_activation')
+  else
+    user_create_block = load_snippet('user_create_block', 'inherited_resources')
+  end
 end
 
-file 'app/controllers/users_controller.rb' , load_pattern('app/controllers/users_controller.rb', 'default', binding)
+
+file 'app/controllers/users_controller.rb' , load_pattern('app/controllers/users_controller.rb', controller_type, binding)
 
 activation_instructions_block = ""
 if require_activation
@@ -390,7 +407,7 @@ if ie6_blocking == "light"
   ie6_method = load_snippet("ie6_method")
 end
 
-file 'app/controllers/pages_controller.rb', load_pattern('app/controllers/pages_controller.rb', 'default', binding)
+file 'app/controllers/pages_controller.rb', load_pattern('app/controllers/pages_controller.rb', controller_type, binding)
 
 ie6_warning = ""
 if ie6_blocking == "light"

@@ -1,0 +1,10 @@
+def create
+  @user = User.new(params[:user])
+  if @user.signup!(params)
+    @user.deliver_activation_instructions!
+    flash[:notice] = t('flash.accounts.create.notice')
+    redirect_back_or_default root_url
+  else
+    render :action => :new
+  end
+end

@@ -30,7 +30,7 @@ h3. Rails
 * Uses the edge of the 2-3-stable branch in the Rails git repository. You can change the branch in config.yml, so you can use, for example, 2-2-stable or (if you're feeling brave) master.
 * Uses "formtastic":http://github.com/justinfrench/formtastic/tree/master for forms.
 * Optionally uses "Haml and Sass":http://haml.hamptoncatlin.com/ for views and CSS.
-* Uses "inherited resources":http://github.com/josevalim/inherited_resources/tree/master to DRY up controllers.
+* Optionally uses "inherited resources":http://github.com/josevalim/inherited_resources/tree/master to DRY up controllers.
 * Optionally uses "Bluetrip":http://bluetrip.org/ CSS or "Compass":http://compass-style.org/ for design.
 * Choice of prototype or jQuery. Loading jQuery will include jRails for backwards compatibility.
     

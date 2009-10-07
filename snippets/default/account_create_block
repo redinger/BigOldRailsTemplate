@@ -1,4 +1,9 @@
-  create! do |success, failure|
-    success.html { redirect_back_or_default root_url }
-    failure.html { render :template => "users/new" }
+  def create
+    @user = User.new(params[:user])
+    if @user.save
+      flash[:notice] = t("flash.accounts.create.notice")
+      redirect_back_or_default root_url
+    else
+      render :template => "users/new"
+    end
   end

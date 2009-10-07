@@ -31,6 +31,8 @@ compass_css_framework: blueprint
 require_activation: false
 # mocking library to use in tests: rr, mocha (default)
 mocking: mocha
+# controller_type: rails (default), inherited_resources
+controller_type: rails
 #
 # These options can be omitted, and the template will default to sensible behavior
 #
