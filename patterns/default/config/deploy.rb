@@ -19,8 +19,13 @@ after "deploy:update", "deploy:cleanup"
 # namespace :deploy do
 #   desc "Re-link config files"
 #   task :link_config, :roles => :app do
-#     run "ln -nsf \#{shared_path}/config/database.yml \#{current_path}/config/database.yml"
+#     link "\#{current_path}/config/database.yml" => "\#{shared_path}/config/database.yml"
 #   end
+# end
+#
+# def link(link)
+#   source, target = link.keys.first, link.values.first
+#   run "ln -nfs \#{target} \#{source}"
 # end
   
 namespace :deploy do
@@ -28,9 +33,9 @@ namespace :deploy do
   task :check_revision, :roles => [:web] do
     unless `git rev-parse HEAD` == `git rev-parse origin/\#{branch}`
       puts ""
-      puts "  \033[1;33m**************************************************\033[0m"
-      puts "  \033[1;33m* WARNING: HEAD is not the same as origin/\#{branch} *\033[0m"
-      puts "  \033[1;33m**************************************************\033[0m"
+      puts "  \\033[1;33m**************************************************\\033[0m"
+      puts "  \\033[1;33m* WARNING: HEAD is not the same as origin/\#{branch} *\\033[0m"
+      puts "  \\033[1;33m**************************************************\\033[0m"
       puts ""
  
       exit
