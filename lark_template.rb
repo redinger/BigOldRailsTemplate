@@ -172,6 +172,8 @@ capify!
 file 'config/deploy.rb', load_pattern('config/deploy.rb', 'default', binding)
 file 'config/deploy/production.rb', load_pattern('config/deploy/production.rb', 'default', binding)
 file 'config/deploy/staging.rb', load_pattern('config/deploy/staging.rb', 'default', binding)
+# rake tasks to ease Heroku deployment
+file 'lib/tasks/gems.rake', load_pattern('lib/tasks/gems.rake')
 
 commit_state "deployment files"
 

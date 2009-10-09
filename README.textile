@@ -66,6 +66,7 @@ h3. Deployment Tools
 * "fast_remote_cache":http://github.com/37signals/fast_remote_cache/tree/master strategy for deployment
 * "rubiadhstrano":http://github.com/rubaidh/rubaidhstrano/tree/master for deployment recipes; automatically uses multiple targets, so: cap production deploy for deployment to production
 * "superdeploy":http://github.com/saizai/superdeploy/tree/master for additional Capistrano tasks. cap -T for full list.
+* Rake tasks and instructions to ease deployment to Heroku
 
 h3. External Services
 
@@ -109,3 +110,4 @@ Thanks to:
 * Reuben Doetsch (original implementation of file/snippet loading code)
 * Maxim Chernyak (bug fixes, jRails, Haml & Sass support, Compass support, internationalization, inherited_resources, test updates)
 * Christopher Redinger (test and rr fixes)
+* Mark Dodwell (rake gems:specify task)
