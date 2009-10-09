@@ -6,7 +6,7 @@ module Rails
 
 # Logging
     # Turn on for noisy logging during template generation
-    DEBUG_LOGGING = false
+    DEBUG_LOGGING = true
 
     def debug_log(msg)
       if DEBUG_LOGGING
