@@ -33,6 +33,9 @@ require_activation: false
 mocking: mocha
 # controller_type: rails (default), inherited_resources
 controller_type: rails
+# post-creation options: pick one or more. At the moment, 'heroku' is the only supported option, to create the project on Heroku
+post_creation:
+  heroku:
 #
 # These options can be omitted, and the template will default to sensible behavior
 #

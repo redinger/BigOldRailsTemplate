@@ -496,7 +496,6 @@ if rails_strategy == "vendored" || rails_strategy == "symlinked"
 end
 
 # set up branches
-branches = template_options["git_branches"]
 if !branches.nil?
   default_branch = "master"
   branches.each do |name, default|
