@@ -453,9 +453,11 @@ if template_engine == 'haml'
 end
 
 if template_engine == "haml" || design == "compass"
+  FileUtils.mkdir("public/stylesheets/sass")
   Dir["public/stylesheets/**/*.css"].each do |file|
-    run "css2sass #{file} #{file.gsub(/\.css$/, '.sass')}"
-    File.mkdir("public/stylesheets/sass")
+    sass_file = file.gsub(/\.css$/, '.sass')
+    run "css2sass #{file} #{sass_file}"
+    run "mv #{sass_file} public/stylesheets/sass/#{File.basename(sass_file)}"
   end
 end
 
