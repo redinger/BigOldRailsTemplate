@@ -5,10 +5,7 @@ class PasswordResetsControllerTest < ActionController::TestCase
   should_have_before_filter :load_user_using_perishable_token, :only => [:edit, :update]
   
   context "routing" do
-    should_route :post, "/password_resets", :action=>"create", :controller=>"password_resets"
-    should_route :get, "/password_resets/new", :action=>"new", :controller=>"password_resets"
-    should_route :get, "/password_resets/1/edit", :action=>"edit", :controller=>"password_resets", :id => 1
-    should_route :put, "/password_resets/1", :action=>"update", :controller=>"password_resets", :id => 1
+    should_rest_route :create, :new, :edit, :update
     
     context "named routes" do
       setup do

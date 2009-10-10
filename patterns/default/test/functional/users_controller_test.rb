@@ -8,13 +8,7 @@ class UsersControllerTest < ActionController::TestCase
   
   
   context "routing" do
-    should_route :get, "/users", :action=>"index", :controller=>"users"
-    should_route :post, "/users", :action=>"create", :controller=>"users"
-    should_route :get, "/users/new", :action=>"new", :controller=>"users"
-    should_route :get, "/users/1/edit", :action=>"edit", :controller=>"users", :id => 1
-    should_route :get, "/users/1", :action=>"show", :controller=>"users", :id => 1
-    should_route :put, "/users/1", :action=>"update", :controller=>"users", :id => 1
-    should_route :delete, "/users/1", :action=>"destroy", :controller=>"users", :id => 1
+    should_rest_route
     
     context "named routes" do
       setup do
