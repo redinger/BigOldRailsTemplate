@@ -66,7 +66,7 @@ h3. Deployment Tools
 * "fast_remote_cache":http://github.com/37signals/fast_remote_cache/tree/master strategy for deployment
 * "rubiadhstrano":http://github.com/rubaidh/rubaidhstrano/tree/master for deployment recipes; automatically uses multiple targets, so: cap production deploy for deployment to production
 * "superdeploy":http://github.com/saizai/superdeploy/tree/master for additional Capistrano tasks. cap -T for full list.
-* Rake tasks and instructions to ease deployment to Heroku
+* Automatic Heroku integration (see the @post_creation@ setting in @config.yml@ to activate this)
 
 h3. External Services
 

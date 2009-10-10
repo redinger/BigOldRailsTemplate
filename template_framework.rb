@@ -373,5 +373,27 @@ module Rails
       end
     end
   
+# Heroku management
+# Run a command with the Heroku gem.
+#
+# ==== Examples
+#
+#   heroku :create
+#   heroku :rake => "db:migrate"
+#
+def heroku(command = {})
+  in_root do
+    if command.is_a?(Symbol)
+      log 'running', "heroku #{command}"
+      run "heroku #{command}"
+    else
+      command.each do |command, options|
+        log 'running', "heroku #{command} #{options}"
+        run("heroku #{command} #{options}")
+      end
+    end
+  end
+end
+  
   end
 end

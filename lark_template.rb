@@ -508,6 +508,21 @@ if !branches.nil?
   log "set up branches #{branches.keys.join(', ')}"
 end
 
+# post-creation work
+if !post_creation.nil?
+  post_creation.each do |name, options|
+    if name == 'heroku'
+      git :checkout => "master"
+      rake "gems:specify", :env => "production"
+      commit_state "added gem manifest"
+      heroku :create
+      git :push => "heroku master"
+      heroku :rake => "db:migrate"
+      heroku :restart
+      heroku :open
+    end
+  end
+end
 
 # Success!
 puts "SUCCESS!"

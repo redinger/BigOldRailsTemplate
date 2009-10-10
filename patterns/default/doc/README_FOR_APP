@@ -59,15 +59,6 @@ Deployment Tools
 - rubiadhstrano for deployment recipes
     automatically uses multiple targets, so: cap production deploy for deployment to production
 - superdeploy for additional Capistrano tasks. cap -T for full list.
-- set up for deployment to Heroku:
-   git checkout master
-   rake gems:specify RAILS_ENV=production
-   git add .gems
-   git commit -am "added gem manifest"
-   git push heroku master
-   heroku rake db:migrate
-   heroku restart
-   heroku open
    
 External Services
 =================
