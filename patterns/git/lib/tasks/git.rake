@@ -175,11 +175,19 @@ namespace :git do
     submodules = []
     lines.each_slice(3) do |declaration|
       next if declaration[1] =~ /vendor\/rails/
+      path = declaration[1].split('=')[1].strip
+      
+      if (head = File.read("#{path}/.git/HEAD")).include?(':')
+        hash = File.read(path + "/.git/" + head.split(':')[1].strip).strip
+      else
+        hash = head
+      end
+      
       submodule = {
-        :path => (path = declaration[1].split('=')[1].strip),
+        :path => path,
         :name => path.split('/').last,
         :url => declaration[2].split('=')[1].strip,
-        :hash => File.read(path + "/.git/" + File.read("#{path}/.git/HEAD").split(':')[1].strip).strip
+        :hash => hash
       }
       submodules << submodule
     end
