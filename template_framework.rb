@@ -286,6 +286,21 @@ module Rails
       log "rails installed #{'and submoduled ' if options[:submodule]}from GitHub", options[:branch]
     end
 
+    # setup the specified branches in the git repo
+    def git_branch_setup
+      if !branches.nil?
+        default_branch = "master"
+        branches.each do |name, default|
+          if name != "master"
+            git :branch => name
+            default_branch = name if !default.nil?
+          end
+        end
+        git :checkout => default_branch if default_branch != "master"
+        log "set up branches #{branches.keys.join(', ')}"
+      end
+    end
+    
 # Rails Management
 
     # update rails bits in application after vendoring a new copy of rails
@@ -377,26 +392,62 @@ module Rails
     end
   
 # Heroku management
-# Run a command with the Heroku gem.
-#
-# ==== Examples
-#
-#   heroku :create
-#   heroku :rake => "db:migrate"
-#
-def heroku(command = {})
-  in_root do
-    if command.is_a?(Symbol)
-      log 'running', "heroku #{command}"
-      run "heroku #{command}"
-    else
-      command.each do |command, options|
-        log 'running', "heroku #{command} #{options}"
-        run("heroku #{command} #{options}")
+
+    # Run a command with the Heroku gem.
+    #
+    # ==== Examples
+    #
+    #   heroku :create
+    #   heroku :rake => "db:migrate"
+    #
+    def heroku(command = {})
+      in_root do
+        if command.is_a?(Symbol)
+          log 'running', "heroku #{command}"
+          run "heroku #{command}"
+        else
+          command.each do |command, options|
+            log 'running', "heroku #{command} #{options}"
+            run("heroku #{command} #{options}")
+          end
+        end
       end
     end
-  end
-end
-  
+
+# post-creation hooks
+    def execute_post_creation_hooks
+      if !post_creation.nil?
+        post_creation.each do |name, options|
+          if name == 'heroku'
+            git :checkout => "master"
+            rake "gems:specify", :env => "production"
+            commit_state "added gem manifest"
+            heroku :create
+            git :push => "heroku master"
+            heroku :rake => "db:migrate"
+            heroku :restart
+            heroku :open
+            log "set up application at Heroku"
+          end
+          if name == 'github'
+            run "curl -F 'login=#{github_username}' -F 'token=#{github_token}' -F 'name=#{current_app_name}' -F 'public=#{github_public}' http://github.com/api/v2/json/repos/create"
+            git :remote => "add origin git@github.com:#{github_username}/#{current_app_name}.git"
+            git :push => "origin master"
+            if !branches.nil?
+              default_branch = "master"
+              branches.each do |name, default|
+                if name != "master"
+                  git :push => "origin #{name}"
+                  default_branch = name if !default.nil?
+                end
+              end
+              git :checkout => default_branch if default_branch != "master"
+            end
+            log "set up application at GitHub"
+          end
+        end
+      end
+    end
+    
   end
 end
