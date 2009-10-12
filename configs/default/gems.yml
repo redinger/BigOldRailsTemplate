@@ -57,10 +57,9 @@ ffmike-query_trace:
     :lib: query_trace
     :source: http://gems.github.com
     :env: development
-flyerhzm-bullet:
+bullet:
   :options:
-    :lib: bullet
-    :source: http://gems.github.com
+    :source: http://gemcutter.org
     :env: development
 
 # test only

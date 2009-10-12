@@ -21,7 +21,7 @@ Design Tools
 ============
 #{' - Set up for Haml and Sass' if template_engine == 'haml'}
 - Forms are built using formtastic for added DRYness
-#{' - Uses inherited_resources to DRY up controllers.' if controllers == 'inherited_resources'}
+#{' - Uses inherited_resources to DRY up controllers.' if controller_type == 'inherited_resources'}
 #{' - Bluetrip CSS for visual design' if design == 'bluetrip'}
 #{' - Compass for visual design' if design == 'compass'}
 
@@ -59,8 +59,7 @@ Deployment Tools
 - rubiadhstrano for deployment recipes
     automatically uses multiple targets, so: cap production deploy for deployment to production
 - superdeploy for additional Capistrano tasks. cap -T for full list.
-
-
+   
 External Services
 =================
 - #{'Exceptional' if exception_handling == 'exceptional'}#{'Hoptoad' if exception_handling == 'hoptoad'} for error tracking. Go to /pages/kaboom to test after finishing #{'Exceptional' if exception_handling == 'exceptional'}#{'Hoptoad' if exception_handling == 'hoptoad'} setup.

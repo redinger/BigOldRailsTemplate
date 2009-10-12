@@ -172,6 +172,8 @@ capify!
 file 'config/deploy.rb', load_pattern('config/deploy.rb', 'default', binding)
 file 'config/deploy/production.rb', load_pattern('config/deploy/production.rb', 'default', binding)
 file 'config/deploy/staging.rb', load_pattern('config/deploy/staging.rb', 'default', binding)
+# rake tasks to ease Heroku deployment
+file 'lib/tasks/gems.rake', load_pattern('lib/tasks/gems.rake')
 
 commit_state "deployment files"
 
@@ -451,16 +453,18 @@ if template_engine == 'haml'
 end
 
 if template_engine == "haml" || design == "compass"
+  FileUtils.mkdir("public/stylesheets/sass")
   Dir["public/stylesheets/**/*.css"].each do |file|
-    run "css2sass #{file} #{file.gsub(/\.css$/, '.sass')}"
-    File.delete(file)
+    sass_file = file.gsub(/\.css$/, '.sass')
+    run "css2sass #{file} #{sass_file}"
+    run "mv #{sass_file} public/stylesheets/sass/#{File.basename(sass_file)}"
   end
 end
 
 if design == "compass"
   in_root do
     Dir["public/stylesheets/**/*.sass"].each do |file|
-      run "mv #{file} app/stylesheets/#{File.basename(file)}"
+      run "mv #{file} app/stylesheets/sass/#{File.basename(file)}"
     end
   end
 end
@@ -494,7 +498,6 @@ if rails_strategy == "vendored" || rails_strategy == "symlinked"
 end
 
 # set up branches
-branches = template_options["git_branches"]
 if !branches.nil?
   default_branch = "master"
   branches.each do |name, default|
@@ -507,6 +510,21 @@ if !branches.nil?
   log "set up branches #{branches.keys.join(', ')}"
 end
 
+# post-creation work
+if !post_creation.nil?
+  post_creation.each do |name, options|
+    if name == 'heroku'
+      git :checkout => "master"
+      rake "gems:specify", :env => "production"
+      commit_state "added gem manifest"
+      heroku :create
+      git :push => "heroku master"
+      heroku :rake => "db:migrate"
+      heroku :restart
+      heroku :open
+    end
+  end
+end
 
 # Success!
 puts "SUCCESS!"

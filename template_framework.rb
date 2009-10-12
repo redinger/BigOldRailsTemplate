@@ -24,7 +24,7 @@ module Rails
      :ie6_blocking, :javascript_library, :template_engine, :compass_css_framework, :design, :require_activation,
      :mocking, :smtp_address, :smtp_domain, :smtp_username, :smtp_password, :capistrano_user, :capistrano_repo_host, :capistrano_production_host,
      :capistrano_staging_host, :exceptional_api_key, :hoptoad_api_key, :newrelic_api_key, :notifier_email_from, :default_url_options_host,        
-     :template_paths, :template_options, :controller_type
+     :template_paths, :template_options, :controller_type, :branches, :post_creation
   
     def add_template_path(path, placement = :prepend)
       if placement == :prepend
@@ -101,6 +101,9 @@ module Rails
       @notifier_email_from = template_options["notifier_email_from"]
       @default_url_options_host = template_options["default_url_options_host"]
 
+      @branches = template_options["git_branches"]
+    
+      @post_creation = template_options["post_creation"]
   end
 
 # File Management 
@@ -369,6 +372,28 @@ module Rails
         "stub('#{stub_name}')"
       end
     end
+  
+# Heroku management
+# Run a command with the Heroku gem.
+#
+# ==== Examples
+#
+#   heroku :create
+#   heroku :rake => "db:migrate"
+#
+def heroku(command = {})
+  in_root do
+    if command.is_a?(Symbol)
+      log 'running', "heroku #{command}"
+      run "heroku #{command}"
+    else
+      command.each do |command, options|
+        log 'running', "heroku #{command} #{options}"
+        run("heroku #{command} #{options}")
+      end
+    end
+  end
+end
   
   end
 end
