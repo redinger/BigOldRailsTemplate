@@ -33,10 +33,16 @@ require_activation: false
 mocking: mocha
 # controller_type: rails (default), inherited_resources
 controller_type: rails
-# post-creation options: pick one or more. At the moment, 'heroku' is the only supported option, to create the project on Heroku
+# post-creation options: pick one or more. 
+#   'heroku' to deploy the project to Heroku
+#   'github' to deploy the project to GitHub
 # default option is do-nothing
 post_creation:
   default:
+# GitHub options. These are only used if 'github' is set as one of the post_creation options
+github_username: your_user_name
+github_token: 123456 # found at https://github.com/account
+github_public: 1 # 1 to create a public repo, 0 to create a private repo
 #
 # These options can be omitted, and the template will default to sensible behavior
 #

@@ -24,7 +24,7 @@ module Rails
      :ie6_blocking, :javascript_library, :template_engine, :compass_css_framework, :design, :require_activation,
      :mocking, :smtp_address, :smtp_domain, :smtp_username, :smtp_password, :capistrano_user, :capistrano_repo_host, :capistrano_production_host,
      :capistrano_staging_host, :exceptional_api_key, :hoptoad_api_key, :newrelic_api_key, :notifier_email_from, :default_url_options_host,        
-     :template_paths, :template_options, :controller_type, :branches, :post_creation
+     :template_paths, :template_options, :controller_type, :branches, :post_creation, :github_username, :github_token, :github_public
   
     def add_template_path(path, placement = :prepend)
       if placement == :prepend
@@ -87,6 +87,9 @@ module Rails
       @controller_type = template_options["controller_type"].nil? ? ask("Which controller strategy? rails (default), inherited_resources").downcase : template_options["controller_type"]
       @controller_type = "default" if @controller_type.nil? || @controller_type == 'rails'
 
+      @github_username = template_options["github_username"]
+      @github_token = template_options["github_token"]
+      @github_public = template_options["github_public"]
       @smtp_address = template_options["smtp_address"]
       @smtp_domain = template_options["smtp_domain"]
       @smtp_username = template_options["smtp_username"]

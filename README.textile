@@ -66,7 +66,6 @@ h3. Deployment Tools
 * "fast_remote_cache":http://github.com/37signals/fast_remote_cache/tree/master strategy for deployment
 * "rubiadhstrano":http://github.com/rubaidh/rubaidhstrano/tree/master for deployment recipes; automatically uses multiple targets, so: cap production deploy for deployment to production
 * "superdeploy":http://github.com/saizai/superdeploy/tree/master for additional Capistrano tasks. cap -T for full list.
-* Automatic Heroku integration (see the @post_creation@ setting in @config.yml@ to activate this)
 
 h3. External Services
 
@@ -91,6 +90,13 @@ h3. Miscellaneous
 
 * Code to encourage IE6 users to get a real browser is included on the home page by default. You can adjust this in the configuration.
 * The generated application is localization-ready, with all strings in an English locale by default.
+
+h3. Post-creation Hooks
+
+By adding keys to the @post_creation@ section in @config.yml@ you can perform some operations with the finished application:
+
+* "heroku" deploys the application to "Heroku":http://heroku.com/. You should already have the @heroku@ gem installed, and have performed at least one Heroku creation so that the gem has your credentials installed.
+* "github" duplicates the repository to your GitHub account, and sets up the local branches to track the remote branches. You will need to supply your GitHub username and API token in @config.yml@. Private repository creation is allowed if your GitHub account supports private repositories.
 
 h2. Contributing
 

@@ -25,6 +25,7 @@ Design Tools
 #{' - Bluetrip CSS for visual design' if design == 'bluetrip'}
 #{' - Compass for visual design' if design == 'compass'}
 
+
 Coding Tools
 ============
 - Authlogic for user authentication, including password resets, 
@@ -59,6 +60,7 @@ Deployment Tools
 - rubiadhstrano for deployment recipes
     automatically uses multiple targets, so: cap production deploy for deployment to production
 - superdeploy for additional Capistrano tasks. cap -T for full list.
+
    
 External Services
 =================
