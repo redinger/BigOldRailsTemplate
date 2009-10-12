@@ -1,2 +1,2 @@
 set :host, "#{capistrano_production_host}"
-set :branch, "master"
+set :branch, "production"

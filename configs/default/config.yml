@@ -43,9 +43,9 @@ post_creation:
 # branches to create in the git repo. Default branch will be checked out.
 # if none specified, just leaves the single master branch.
 git_branches:
-  master:
-  development: default
+  master: default
   staging:
+  production:
 #
 # These options are plugged into the generated code. You can leave any of
 # them that you're not using set to their default values
