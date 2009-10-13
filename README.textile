@@ -52,6 +52,7 @@ h3. Coding Tools
 * "Stringex":http://github.com/rsl/stringex/tree/master for extra string functionality – @acts_as_url@, @String#to_ascii@, @String#to_html@, @String#to_url@, @String#remove_formatting@, @String.random@
 * US State application helpers
 * "will-paginate":http://wiki.github.com/mislav/will_paginate for pagination
+* "annotate":http://github.com/ctran/annotate_models to annotate models, exemplars, and routes
 
 h3. Database Tools
 

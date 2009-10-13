@@ -42,7 +42,7 @@ Coding Tools
 - US State application helpers
 - will-paginate for pagination
 #{'- jQuery and jQueryUI from Google APIs' if @javascript_library == 'jquery'}
-
+- Annotate for annotating model, exemplar, and route files
 
 Database Tools
 ==============
