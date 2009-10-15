@@ -61,6 +61,11 @@ bullet:
   :options:
     :source: http://gemcutter.org
     :env: development
+ctran-annotate:
+  :options:
+    :lib: annotate
+    :source: http://gems.github.com
+    :env: development
 
 # test only
 thoughtbot-shoulda:

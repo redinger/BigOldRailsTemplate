@@ -37,16 +37,7 @@ if @branch_management == "git"
 end
 
 # gems
-gems = load_template_config_file('gems.yml')  
-gems.each do |name, value|
-  if value[:if].nil? || eval(value[:if])
-    gem name, value[:options]
-  end
-end
-
-# assume gems are already on dev box, so don't install    
-# rake("gems:install", :sudo => true)
-
+install_gems
 commit_state "Added plugins and gems"
 
 # environment updates
@@ -137,6 +128,8 @@ file 'app/views/layouts/application.html.erb', load_pattern('app/views/layouts/a
 
 # rakefile for use with inaction_mailer
 rakefile 'mail.rake', load_pattern('lib/tasks/mail.rake')
+# rakefile for use with annotate
+rakefile 'annotate.rake', load_pattern('lib/tasks/annotate.rake')
 
 application_styles = load_snippet('application_styles', design)
 
@@ -475,6 +468,12 @@ rake('db:migrate')
 rake('parallel:prepare[4]')
 commit_state "databases set up"
 
+# annotations
+run 'annotate -i -p after'
+run 'annotate -r'
+
+commit_state "annotated models and routes"
+
 # rakefile for metric_fu
 rakefile 'metric_fu.rake', load_pattern('lib/tasks/metric_fu.rake')
 
@@ -498,33 +497,10 @@ if rails_strategy == "vendored" || rails_strategy == "symlinked"
 end
 
 # set up branches
-if !branches.nil?
-  default_branch = "master"
-  branches.each do |name, default|
-    if name != "master"
-      git :branch => name
-      default_branch = name if !default.nil?
-    end
-  end
-  git :checkout => default_branch if default_branch != "master"
-  log "set up branches #{branches.keys.join(', ')}"
-end
+git_branch_setup
 
 # post-creation work
-if !post_creation.nil?
-  post_creation.each do |name, options|
-    if name == 'heroku'
-      git :checkout => "master"
-      rake "gems:specify", :env => "production"
-      commit_state "added gem manifest"
-      heroku :create
-      git :push => "heroku master"
-      heroku :rake => "db:migrate"
-      heroku :restart
-      heroku :open
-    end
-  end
-end
+execute_post_creation_hooks
 
 # Success!
 puts "SUCCESS!"

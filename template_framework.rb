@@ -24,7 +24,7 @@ module Rails
      :ie6_blocking, :javascript_library, :template_engine, :compass_css_framework, :design, :require_activation,
      :mocking, :smtp_address, :smtp_domain, :smtp_username, :smtp_password, :capistrano_user, :capistrano_repo_host, :capistrano_production_host,
      :capistrano_staging_host, :exceptional_api_key, :hoptoad_api_key, :newrelic_api_key, :notifier_email_from, :default_url_options_host,        
-     :template_paths, :template_options, :controller_type, :branches, :post_creation
+     :template_paths, :template_options, :controller_type, :branches, :post_creation, :github_username, :github_token, :github_public
   
     def add_template_path(path, placement = :prepend)
       if placement == :prepend
@@ -87,6 +87,9 @@ module Rails
       @controller_type = template_options["controller_type"].nil? ? ask("Which controller strategy? rails (default), inherited_resources").downcase : template_options["controller_type"]
       @controller_type = "default" if @controller_type.nil? || @controller_type == 'rails'
 
+      @github_username = template_options["github_username"]
+      @github_token = template_options["github_token"]
+      @github_public = template_options["github_public"]
       @smtp_address = template_options["smtp_address"]
       @smtp_domain = template_options["smtp_domain"]
       @smtp_username = template_options["smtp_username"]
@@ -283,6 +286,21 @@ module Rails
       log "rails installed #{'and submoduled ' if options[:submodule]}from GitHub", options[:branch]
     end
 
+    # setup the specified branches in the git repo
+    def git_branch_setup
+      if !branches.nil?
+        default_branch = "master"
+        branches.each do |name, default|
+          if name != "master"
+            git :branch => name
+            default_branch = name if !default.nil?
+          end
+        end
+        git :checkout => default_branch if default_branch != "master"
+        log "set up branches #{branches.keys.join(', ')}"
+      end
+    end
+    
 # Rails Management
 
     # update rails bits in application after vendoring a new copy of rails
@@ -374,26 +392,110 @@ module Rails
     end
   
 # Heroku management
-# Run a command with the Heroku gem.
-#
-# ==== Examples
-#
-#   heroku :create
-#   heroku :rake => "db:migrate"
-#
-def heroku(command = {})
-  in_root do
-    if command.is_a?(Symbol)
-      log 'running', "heroku #{command}"
-      run "heroku #{command}"
-    else
-      command.each do |command, options|
-        log 'running', "heroku #{command} #{options}"
-        run("heroku #{command} #{options}")
+
+    # Run a command with the Heroku gem.
+    #
+    # ==== Examples
+    #
+    #   heroku :create
+    #   heroku :rake => "db:migrate"
+    #
+    def heroku(command = {})
+      in_root do
+        if command.is_a?(Symbol)
+          log 'running', "heroku #{command}"
+          run "heroku #{command}"
+        else
+          command.each do |command, options|
+            log 'running', "heroku #{command} #{options}"
+            run("heroku #{command} #{options}")
+          end
+        end
       end
     end
-  end
-end
-  
+
+# post-creation hooks
+    def execute_post_creation_hooks
+      if !post_creation.nil?
+        post_creation.each do |name, options|
+          if name == 'heroku'
+            git :checkout => "master"
+            rake "gems:specify", :env => "production"
+            commit_state "added gem manifest"
+            heroku :create
+            git :push => "heroku master"
+            heroku :rake => "db:migrate"
+            heroku :restart
+            heroku :open
+            log "set up application at Heroku"
+          end
+          if name == 'github'
+            run "curl -F 'login=#{github_username}' -F 'token=#{github_token}' -F 'name=#{current_app_name}' -F 'public=#{github_public}' http://github.com/api/v2/json/repos/create"
+            git :remote => "add origin git@github.com:#{github_username}/#{current_app_name}.git"
+            git :push => "origin master"
+            if !branches.nil?
+              default_branch = "master"
+              branches.each do |name, default|
+                if name != "master"
+                  git :push => "origin #{name}"
+                  default_branch = name if !default.nil?
+                end
+              end
+              git :checkout => default_branch if default_branch != "master"
+            end
+            log "set up application at GitHub"
+          end
+        end
+      end
+    end
+
+# Gem management
+    def install_gems
+      gems = load_template_config_file('gems.yml')  
+      install_on_current(gems)
+      add_to_project(gems)
+    end
+
+    # If the geminstaller gem is present, use to to bootstrap the other
+    # needed gems on to the dev box so that rake succeeds
+    def install_on_current(gems)
+      begin
+        require 'geminstaller'
+        # Transform the gem array to the form that geminstaller wants to see
+        gem_array = []
+        gems.each do |name, value|
+          if value[:if].nil? || eval(value[:if])
+            h = Hash.new
+            h["name"] = name
+            if value[:options] && value[:options][:version]
+              h["version"] = value[:options][:version]
+            end
+            gem_array.push h
+          end
+        end
+        
+        if !gem_array.empty? 
+          geminstaller_hash = {"defaults"=>{"install_options"=>"--no-ri --no-rdoc"}, "gems"=> gem_array}
+          in_root do
+            File.open( 'geminstaller.yml', 'w' ) do |out|
+              YAML.dump( geminstaller_hash, out )
+            end
+            run 'geminstaller'
+            log "installed gems on current machine"
+          end
+        end
+        
+      rescue LoadError
+      end
+    end
+      
+    def add_to_project(gems)
+      gems.each do |name, value|
+        if value[:if].nil? || eval(value[:if])
+          gem name, value[:options]
+        end
+      end
+    end
+    
   end
 end
