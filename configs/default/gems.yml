@@ -21,10 +21,9 @@ matthuhiggins-foreigner:
   :options:
     :lib: foreigner
     :source: http://gems.github.com
-justinfrench-formtastic:
+formtastic:
   :options:
-    :lib: formtastic
-    :source: http://gems.github.com
+    :source: http://gemcutter.org
 haml:
   :options:
     :version: ~> 2.2
