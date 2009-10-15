@@ -37,16 +37,7 @@ if @branch_management == "git"
 end
 
 # gems
-gems = load_template_config_file('gems.yml')  
-gems.each do |name, value|
-  if value[:if].nil? || eval(value[:if])
-    gem name, value[:options]
-  end
-end
-
-# assume gems are already on dev box, so don't install    
-# rake("gems:install", :sudo => true)
-
+install_gems
 commit_state "Added plugins and gems"
 
 # environment updates

@@ -448,6 +448,54 @@ module Rails
         end
       end
     end
+
+# Gem management
+    def install_gems
+      gems = load_template_config_file('gems.yml')  
+      install_on_current(gems)
+      add_to_project(gems)
+    end
+
+    # If the geminstaller gem is present, use to to bootstrap the other
+    # needed gems on to the dev box so that rake succeeds
+    def install_on_current(gems)
+      begin
+        require 'geminstaller'
+        # Transform the gem array to the form that geminstaller wants to see
+        gem_array = []
+        gems.each do |name, value|
+          if value[:if].nil? || eval(value[:if])
+            h = Hash.new
+            h["name"] = name
+            if value[:options] && value[:options][:version]
+              h["version"] = value[:options][:version]
+            end
+            gem_array.push h
+          end
+        end
+        
+        if !gem_array.empty? 
+          geminstaller_hash = {"defaults"=>{"install_options"=>"--no-ri --no-rdoc"}, "gems"=> gem_array}
+          in_root do
+            File.open( 'geminstaller.yml', 'w' ) do |out|
+              YAML.dump( geminstaller_hash, out )
+            end
+            run 'geminstaller'
+            log "installed gems on current machine"
+          end
+        end
+        
+      rescue LoadError
+      end
+    end
+      
+    def add_to_project(gems)
+      gems.each do |name, value|
+        if value[:if].nil? || eval(value[:if])
+          gem name, value[:options]
+        end
+      end
+    end
     
   end
 end
