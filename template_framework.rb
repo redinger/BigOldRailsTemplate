@@ -19,12 +19,15 @@ module Rails
       current_app_name = File.basename(File.expand_path(root))
     end
 
+    # generic accessors for any template
+    attr_accessor :template_paths, :template_options, :template_identifier
+    # specific accessors for current template
     # TODO: This list should be data driven
     attr_accessor :rails_branch, :database, :exception_handling, :monitoring, :branch_management, :rails_strategy, :link_rails_root,
      :ie6_blocking, :javascript_library, :template_engine, :compass_css_framework, :design, :require_activation,
      :mocking, :smtp_address, :smtp_domain, :smtp_username, :smtp_password, :capistrano_user, :capistrano_repo_host, :capistrano_production_host,
      :capistrano_staging_host, :exceptional_api_key, :hoptoad_api_key, :newrelic_api_key, :notifier_email_from, :default_url_options_host,        
-     :template_paths, :template_options, :controller_type, :branches, :post_creation, :github_username, :github_token, :github_public
+     :controller_type, :branches, :post_creation, :github_username, :github_token, :github_public
   
     def add_template_path(path, placement = :prepend)
       if placement == :prepend
@@ -37,8 +40,13 @@ module Rails
     # TODO: List of attributes should be data driven
     def init_template_framework(template, root)
       @template_paths = [File.expand_path(File.dirname(template), File.join(root,'..'))]
+      @template_identifier = 'default'
     end
 
+    def set_template_identifier(identifier)
+      @template_identifier = identifier
+    end
+    
     def load_options
       # Option set-up
       @template_options = load_template_config_file('config.yml')
@@ -170,7 +178,7 @@ module Rails
     end
 
     # YAML.load a configuration from a file
-    def load_template_config_file(config_file_name, config_file_group = "default")
+    def load_template_config_file(config_file_name, config_file_group = template_identifier)
       load_from_file_in_template(config_file_name, nil, config_file_group, :config )
     end
 
