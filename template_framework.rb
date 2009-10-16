@@ -496,6 +496,15 @@ module Rails
         end
       end
     end
-    
+
+#Plugin management
+    def install_plugins
+      plugins = load_template_config_file('plugins.yml')  
+      plugins.each do |name, value|
+        if value[:if].nil? || eval(value[:if])
+          install_plugin name, value[:options]
+        end
+      end
+    end
   end
 end

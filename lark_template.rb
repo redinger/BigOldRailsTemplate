@@ -25,12 +25,7 @@ end
 commit_state "base application"
 
 # plugins
-plugins = load_template_config_file('plugins.yml')  
-plugins.each do |name, value|
-  if value[:if].nil? || eval(value[:if])
-    install_plugin name, value[:options]
-  end
-end
+install_plugins
 
 if @branch_management == "git"
   rake("git:submodules:init")
