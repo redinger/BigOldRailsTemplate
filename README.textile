@@ -15,7 +15,7 @@ Two things you should take note of:
 
 h2. Configuration
 
-You can configure this template to control the application that it generates. See @configs/default/config.yml@ to set persistent configuration information. The template will use a configuration file located at @~/.big_old_rails_template/configs/default/config.yml@ if it finds one; otherwise, it will use the copy embedded in the template's @configs/default@ directory. If you don't have a @config.yml@, or it doesn't have an option that the template is looking for, you'll be prompted at runtime for some of the information, and reasonably sensible defaults will be used for the rest. You should review config.yml before you first run the template.
+You can configure this template to control the application that it generates. See @configs/default/config.yml@ to set persistent configuration information. The template will use a configuration file located at @~/.big_old_rails_template/configs/lark/config.yml@ if it finds one; otherwise, it will use the copy embedded in the template's @configs/default@ directory. If you don't have a @config.yml@, or it doesn't have an option that the template is looking for, you'll be prompted at runtime for some of the information, and reasonably sensible defaults will be used for the rest. You should review config.yml before you first run the template.
 
 h2. Gems
 

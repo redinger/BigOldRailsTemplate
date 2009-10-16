@@ -3,7 +3,8 @@ require File.join(File.expand_path(File.dirname(template), File.join(root,'..'))
 require File.join(File.expand_path(File.dirname(template), File.join(root,'..')), 'erb_to_haml')
 
 init_template_framework template, root
-add_template_path File.expand_path(File.join(ENV['HOME'],'.big_old_rails_template'))
+set_template_identifier 'lark'
+add_template_path File.expand_path(File.join(ENV['HOME'],'.big_old_rails_template')), :prepend
 load_options
 
 # Delete unnecessary files
