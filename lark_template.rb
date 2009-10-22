@@ -148,6 +148,7 @@ initializer 'mail.rb', load_pattern('config/initializers/mail.rb', 'default', bi
 initializer 'date_time_formats.rb', load_pattern('config/initializers/date_time_formats.rb')
 initializer 'query_trace.rb', load_pattern('config/initializers/query_trace.rb')
 initializer 'backtrace_silencers.rb', load_pattern('config/initializers/backtrace_silencers.rb')
+initializer 'erubis_options.rb', load_pattern('config/initializers/erubis_options.rb')
 
 if exception_handling == "hoptoad"
   initializer 'hoptoad.rb', load_pattern('config/initializers/hoptoad.rb')

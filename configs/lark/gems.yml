@@ -44,6 +44,10 @@ josevalim-inherited_resources:
     :source: http://gems.github.com
     :version: >= 0.9.0
   :if: controller_type == "inherited_resources"
+erubis:
+  :options:
+    :source: http://gemcutter.org
+    :version: >= 2.6.5
 
 # development only
 cwninja-inaction_mailer: 

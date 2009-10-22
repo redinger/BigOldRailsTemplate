@@ -13,6 +13,13 @@ Two things you should take note of:
 # It’s a pretty heavyweight template, sticking a lot of stuff into the new application. This suits me, because I have a lot of things I use in just about every application, but it may not suit you.
 # Rails templates are not one-size-fits-all; you should understand what the template does before blindly using it. Unlike most other Rails templates though, it allows you to configure the application that it builds.
 
+h2. Getting started:
+
+# Clone BigOldRailsTemplate to somewhere on your hard drive (let's say @/templates/BigOldRailsTemplate@ though of course you can put it anywhere).
+# Copy @/templates/BigOldRailsTemplate/configs/lark/config.yml@ to @~/.big_old_rails_template/configs/lark/config.yml@ - this gives you a copy of the config file that will override the defaults and not get replaced if you update the template. 
+# Edit the file you just copied to control the behavior of the template; it's pretty well commented.
+# @rails NewProjectName -m /rails/BigOldRailsTemplate/lark_template.rb@ will then use your installed copy of Rails to create NewProjectName based on the template.
+
 h2. Configuration
 
 You can configure this template to control the application that it generates. See @configs/default/config.yml@ to set persistent configuration information. The template will use a configuration file located at @~/.big_old_rails_template/configs/lark/config.yml@ if it finds one; otherwise, it will use the copy embedded in the template's @configs/default@ directory. If you don't have a @config.yml@, or it doesn't have an option that the template is looking for, you'll be prompted at runtime for some of the information, and reasonably sensible defaults will be used for the rest. You should review config.yml before you first run the template.
@@ -37,6 +44,7 @@ h3. Rails
 * Optionally uses "inherited resources":http://github.com/josevalim/inherited_resources/tree/master to DRY up controllers.
 * Optionally uses "Bluetrip":http://bluetrip.org/ CSS or "Compass":http://compass-style.org/ for design.
 * Choice of prototype or jQuery. Loading jQuery will include jRails for backwards compatibility.
+* Uses Erubis and the "rails_xss":http://github.com/NZKoz/rails_xss plugin to provide safe HTML
     
 h3. SCM
 

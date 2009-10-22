@@ -23,6 +23,11 @@ parallel_specs:
 rack-bug: 
   :options: 
     :git: :git://github.com/brynary/rack-bug.git
+# caution: rails_xss requires requires 2-3-stable or 2.3.5+
+# not suited for older versions of Rails or Rails 3.0
+rails_xss:
+  :options:
+    :git: :git://github.com/NZKoz/rails_xss.git
 rubaidhstrano: 
   :options: 
     :git: :git://github.com/rubaidh/rubaidhstrano.git
