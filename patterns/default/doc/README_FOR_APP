@@ -24,7 +24,7 @@ Design Tools
 #{' - Uses inherited_resources to DRY up controllers.' if controller_type == 'inherited_resources'}
 #{' - Bluetrip CSS for visual design' if design == 'bluetrip'}
 #{' - Compass for visual design' if design == 'compass'}
-
+- Uses Erubis and the rails_xs plugin to provide safe HTML
 
 Coding Tools
 ============

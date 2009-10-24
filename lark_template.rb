@@ -3,7 +3,8 @@ require File.join(File.expand_path(File.dirname(template), File.join(root,'..'))
 require File.join(File.expand_path(File.dirname(template), File.join(root,'..')), 'erb_to_haml')
 
 init_template_framework template, root
-add_template_path File.expand_path(File.join(ENV['HOME'],'.big_old_rails_template'))
+set_template_identifier 'lark'
+add_template_path File.expand_path(File.join(ENV['HOME'],'.big_old_rails_template')), :prepend
 load_options
 
 # Delete unnecessary files
@@ -25,12 +26,7 @@ end
 commit_state "base application"
 
 # plugins
-plugins = load_template_config_file('plugins.yml')  
-plugins.each do |name, value|
-  if value[:if].nil? || eval(value[:if])
-    install_plugin name, value[:options]
-  end
-end
+install_plugins
 
 if @branch_management == "git"
   rake("git:submodules:init")
@@ -152,6 +148,7 @@ initializer 'mail.rb', load_pattern('config/initializers/mail.rb', 'default', bi
 initializer 'date_time_formats.rb', load_pattern('config/initializers/date_time_formats.rb')
 initializer 'query_trace.rb', load_pattern('config/initializers/query_trace.rb')
 initializer 'backtrace_silencers.rb', load_pattern('config/initializers/backtrace_silencers.rb')
+initializer 'erubis_options.rb', load_pattern('config/initializers/erubis_options.rb')
 
 if exception_handling == "hoptoad"
   initializer 'hoptoad.rb', load_pattern('config/initializers/hoptoad.rb')
